@@ -45,10 +45,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contactName != null  and contactName != ''"> and contact_name like concat('%', #{contactName}, '%')</if>
             <if test="contactPhone != null  and contactPhone != ''"> and contact_phone = #{contactPhone}</if>
             <if test="contactEmail != null  and contactEmail != ''"> and contact_email = #{contactEmail}</if>
-            <choose>
-                <when test="enable != null "> and enable = #{enable}</when>
-                <otherwise> and enable = 1</otherwise>
-            </choose>
+            <if test="enable != null "> and enable = #{enable}</if>
         </where>
         order by id desc
     </select>

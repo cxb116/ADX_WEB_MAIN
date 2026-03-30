@@ -38,10 +38,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="accessType != null "> and a.access_type = #{accessType}</if>
             <if test="pkg != null  and pkg != ''"> and a.pkg = #{pkg}</if>
             <if test="downloadUrl != null  and downloadUrl != ''"> and a.download_url = #{downloadUrl}</if>
-            <choose>
-                <when test="enable != null "> and a.enable = #{enable}</when>
-                <otherwise> and a.enable = 1</otherwise>
-            </choose>
+            <if test="enable != null "> and a.enable = #{enable}</if>
             <if test="params.startTime != null and params.startTime != ''"> and a.create_time &gt;= #{params.startTime}</if>
             <if test="params.endTime != null and params.endTime != ''"> and a.create_time &lt;= #{params.endTime}</if>
         </where>
