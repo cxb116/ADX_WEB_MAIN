@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DspLaunchMapper">
+    
+    <resultMap type="DspLaunch" id="DspLaunchResult">
+        <result property="id"    column="id"    />
+        <result property="sspSlotId"    column="ssp_slot_id"    />
+        <result property="dspSlotId"    column="dsp_slot_id"    />
+        <result property="trafficWeight"    column="traffic_weight"    />
+        <result property="launchStrategy"    column="launch_strategy"    />
+        <result property="floorPrice"    column="floor_price"    />
+        <result property="ipLimit"    column="ip_limit"    />
+        <result property="logCaptureAt"    column="log_capture_at"    />
+        <result property="trackSchwarz"    column="track_schwarz"    />
+        <result property="req"    column="req"    />
+        <result property="ims"    column="ims"    />
+        <result property="clk"    column="clk"    />
+        <result property="launchTime"    column="launch_time"    />
+        <result property="regionDirection"    column="region_direction"    />
+        <result property="brandDirection"    column="brand_direction"    />
+        <result property="priceTransfer"    column="price_transfer"    />
+        <result property="pkgTransfer"    column="pkg_transfer"    />
+        <result property="crowdDirection"    column="crowd_direction"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <resultMap type="DspLaunchDTO" id="DspLaunchDTOResult">
+        <result property="id"    column="id"    />
+        <result property="sspSlotId"    column="ssp_slot_id"    />
+        <result property="dspSlotId"    column="dsp_slot_id"    />
+        <result property="trafficWeight"    column="traffic_weight"    />
+        <result property="launchStrategy"    column="launch_strategy"    />
+        <result property="floorPrice"    column="floor_price"    />
+        <result property="ipLimit"    column="ip_limit"    />
+        <result property="logCaptureAt"    column="log_capture_at"    />
+        <result property="trackSchwarz"    column="track_schwarz"    />
+        <result property="req"    column="req"    />
+        <result property="ims"    column="ims"    />
+        <result property="clk"    column="clk"    />
+        <result property="launchTime"    column="launch_time"    />
+        <result property="regionDirection"    column="region_direction"    />
+        <result property="brandDirection"    column="brand_direction"    />
+        <result property="priceTransfer"    column="price_transfer"    />
+        <result property="pkgTransfer"    column="pkg_transfer"    />
+        <association property="dspSlotInfo" javaType="DspSlotInfo">
+            <result property="id"    column="dsp_info_id"    />
+            <result property="name"    column="dsp_info_name"    />
+            <result property="osType"    column="dsp_info_os_type"    />
+            <result property="adSceneId"    column="dsp_info_ad_scene"    />
+            <result property="dspSlotCode"    column="dsp_info_dsp_slot_code"    />
+            <result property="dspAppKey"    column="dsp_info_dsp_app_key"    />
+            <result property="dspAppSecret"    column="dsp_info_dsp_app_secret"    />
+            <result property="dspAppId"    column="dsp_info_dsp_app_id"    />
+            <result property="dspAppPkg"    column="dsp_info_dsp_app_pkg"    />
+            <result property="dspAppVer"    column="dsp_info_dsp_app_ver"    />
+            <result property="dspAppStoreVer"    column="dsp_info_dsp_app_store_ver"    />
+            <result property="priceEncryptKey"    column="dsp_info_price_encrypt_key"    />
+            <result property="dspAppStoreLink"    column="dsp_info_dsp_app_store_link"    />
+            <result property="dspPayType"    column="dsp_info_dsp_pay_type"    />
+            <result property="dspDealRatio"    column="dsp_info_dsp_deal_ratio"    />
+            <result property="companyId"    column="dsp_info_company_id"    />
+            <result property="productId"    column="dsp_info_product_id"    />
+        </association>
+    </resultMap>
+
+    <sql id="selectDspLaunchVo">
+        select id, ssp_slot_id, dsp_slot_id, traffic_weight, launch_strategy, floor_price, ip_limit, log_capture_at, track_schwarz, req, ims, clk, launch_time, region_direction, brand_direction, price_transfer, pkg_transfer, crowd_direction, create_by, create_time, update_by, update_time, remark from dsp_launch
+    </sql>
+
+    <select id="selectDspLaunchList" parameterType="DspLaunch" resultMap="DspLaunchResult">
+        <include refid="selectDspLaunchVo"/>
+        <where>
+            <if test="sspSlotId != null "> and ssp_slot_id = #{sspSlotId}</if>
+            <if test="dspSlotId != null "> and dsp_slot_id = #{dspSlotId}</if>
+            <if test="trafficWeight != null "> and traffic_weight = #{trafficWeight}</if>
+            <if test="launchStrategy != null "> and launch_strategy = #{launchStrategy}</if>
+            <if test="floorPrice != null "> and floor_price = #{floorPrice}</if>
+            <if test="ipLimit != null "> and ip_limit = #{ipLimit}</if>
+            <if test="logCaptureAt != null "> and log_capture_at = #{logCaptureAt}</if>
+            <if test="trackSchwarz != null  and trackSchwarz != ''"> and track_schwarz = #{trackSchwarz}</if>
+            <if test="req != null "> and req = #{req}</if>
+            <if test="ims != null "> and ims = #{ims}</if>
+            <if test="clk != null "> and clk = #{clk}</if>
+            <if test="launchTime != null "> and launch_time = #{launchTime}</if>
+            <if test="regionDirection != null "> and region_direction = #{regionDirection}</if>
+            <if test="brandDirection != null "> and brand_direction = #{brandDirection}</if>
+            <if test="priceTransfer != null "> and price_transfer = #{priceTransfer}</if>
+            <if test="pkgTransfer != null "> and pkg_transfer = #{pkgTransfer}</if>
+            <if test="crowdDirection != null "> and crowd_direction = #{crowdDirection}</if>
+        </where>
+    </select>
+    
+    <select id="selectDspLaunchById" parameterType="Long" resultMap="DspLaunchResult">
+        <include refid="selectDspLaunchVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDspLaunch" parameterType="DspLaunch" useGeneratedKeys="true" keyProperty="id">
+        insert into dsp_launch
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="sspSlotId != null">ssp_slot_id,</if>
+            <if test="dspSlotId != null">dsp_slot_id,</if>
+            <if test="trafficWeight != null">traffic_weight,</if>
+            <if test="launchStrategy != null">launch_strategy,</if>
+            <if test="floorPrice != null">floor_price,</if>
+            <if test="ipLimit != null">ip_limit,</if>
+            <if test="logCaptureAt != null">log_capture_at,</if>
+            <if test="trackSchwarz != null">track_schwarz,</if>
+            <if test="req != null">req,</if>
+            <if test="ims != null">ims,</if>
+            <if test="clk != null">clk,</if>
+            <if test="launchTime != null">launch_time,</if>
+            <if test="regionDirection != null">region_direction,</if>
+            <if test="brandDirection != null">brand_direction,</if>
+            <if test="priceTransfer != null">price_transfer,</if>
+            <if test="pkgTransfer != null">pkg_transfer,</if>
+            <if test="crowdDirection != null">crowd_direction,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="sspSlotId != null">#{sspSlotId},</if>
+            <if test="dspSlotId != null">#{dspSlotId},</if>
+            <if test="trafficWeight != null">#{trafficWeight},</if>
+            <if test="launchStrategy != null">#{launchStrategy},</if>
+            <if test="floorPrice != null">#{floorPrice},</if>
+            <if test="ipLimit != null">#{ipLimit},</if>
+            <if test="logCaptureAt != null">#{logCaptureAt},</if>
+            <if test="trackSchwarz != null">#{trackSchwarz},</if>
+            <if test="req != null">#{req},</if>
+            <if test="ims != null">#{ims},</if>
+            <if test="clk != null">#{clk},</if>
+            <if test="launchTime != null">#{launchTime},</if>
+            <if test="regionDirection != null">#{regionDirection},</if>
+            <if test="brandDirection != null">#{brandDirection},</if>
+            <if test="priceTransfer != null">#{priceTransfer},</if>
+            <if test="pkgTransfer != null">#{pkgTransfer},</if>
+            <if test="crowdDirection != null">#{crowdDirection},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDspLaunch" parameterType="DspLaunch">
+        update dsp_launch
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="sspSlotId != null">ssp_slot_id = #{sspSlotId},</if>
+            <if test="dspSlotId != null">dsp_slot_id = #{dspSlotId},</if>
+            <if test="trafficWeight != null">traffic_weight = #{trafficWeight},</if>
+            <if test="launchStrategy != null">launch_strategy = #{launchStrategy},</if>
+            <if test="floorPrice != null">floor_price = #{floorPrice},</if>
+            <if test="ipLimit != null">ip_limit = #{ipLimit},</if>
+            <if test="logCaptureAt != null">log_capture_at = #{logCaptureAt},</if>
+            <if test="trackSchwarz != null">track_schwarz = #{trackSchwarz},</if>
+            <if test="req != null">req = #{req},</if>
+            <if test="ims != null">ims = #{ims},</if>
+            <if test="clk != null">clk = #{clk},</if>
+            <if test="launchTime != null">launch_time = #{launchTime},</if>
+            <if test="regionDirection != null">region_direction = #{regionDirection},</if>
+            <if test="brandDirection != null">brand_direction = #{brandDirection},</if>
+            <if test="priceTransfer != null">price_transfer = #{priceTransfer},</if>
+            <if test="pkgTransfer != null">pkg_transfer = #{pkgTransfer},</if>
+            <if test="crowdDirection != null">crowd_direction = #{crowdDirection},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDspLaunchById" parameterType="Long">
+        delete from dsp_launch where id = #{id}
+    </delete>
+
+    <delete id="deleteDspLaunchByIds" parameterType="String">
+        delete from dsp_launch where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="batchInsertDspLaunch" parameterType="java.util.List">
+        insert into dsp_launch (ssp_slot_id, dsp_slot_id, traffic_weight, launch_strategy, floor_price,
+                                ip_limit, log_capture_at, track_schwarz,
+                                req, ims, clk, launch_time, region_direction, brand_direction, price_transfer, pkg_transfer, crowd_direction,
+                                create_by, create_time, update_by, update_time, remark)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.sspSlotId}, #{item.dspSlotId}, #{item.trafficWeight}, #{item.launchStrategy}, #{item.floorPrice},
+             #{item.ipLimit}, #{item.logCaptureAt}, #{item.trackSchwarz},
+             #{item.req}, #{item.ims}, #{item.clk}, #{item.launchTime}, #{item.regionDirection}, #{item.brandDirection}, #{item.priceTransfer}, #{item.pkgTransfer}, #{item.crowdDirection},
+             #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+    <select id="selectDspLaunchBySspSlotId" parameterType="Long" resultMap="DspLaunchResult">
+        <include refid="selectDspLaunchVo"/>
+        where ssp_slot_id = #{sspSlotId}
+        order by id asc
+    </select>
+
+    <delete id="deleteDspLaunchBySspSlotId" parameterType="Long">
+        delete from dsp_launch where ssp_slot_id = #{sspSlotId}
+    </delete>
+
+    <!-- 根据媒体广告位ID查询投放配置DTO列表（包含预算方广告位信息） -->
+    <select id="selectDspLaunchDTOBySspSlotId" parameterType="Long" resultMap="DspLaunchDTOResult">
+        SELECT
+            dl.id,
+            dl.ssp_slot_id,
+            dl.dsp_slot_id,
+            dl.traffic_weight,
+            dl.launch_strategy,
+            dl.floor_price,
+            dl.ip_limit,
+            dl.log_capture_at,
+            dl.track_schwarz,
+            dl.req,
+            dl.ims,
+            dl.clk,
+            dl.launch_time,
+            dl.region_direction,
+            dl.brand_direction,
+            dl.price_transfer,
+            dl.pkg_transfer,
+            dsi.id as dsp_info_id,
+            dsi.name as dsp_info_name,
+            dsi.os_type as dsp_info_os_type,
+            dsi.ad_scene_id as dsp_info_ad_scene,
+            dsi.dsp_slot_code as dsp_info_dsp_slot_code,
+            dsi.dsp_app_key as dsp_info_dsp_app_key,
+            dsi.dsp_app_secret as dsp_info_dsp_app_secret,
+            dsi.dsp_app_id as dsp_info_dsp_app_id,
+            dsi.dsp_app_pkg as dsp_info_dsp_app_pkg,
+            dsi.dsp_app_ver as dsp_info_dsp_app_ver,
+            dsi.dsp_app_store_ver as dsp_info_dsp_app_store_ver,
+            dsi.price_encrypt_key as dsp_info_price_encrypt_key,
+            dsi.dsp_app_store_link as dsp_info_dsp_app_store_link,
+            dsi.dsp_pay_type as dsp_info_dsp_pay_type,
+            dsi.dsp_deal_ratio as dsp_info_dsp_deal_ratio,
+            dsi.company_id as dsp_info_company_id,
+            dsi.product_id as dsp_info_product_id
+        FROM dsp_launch dl
+        LEFT JOIN dsp_slot_info dsi ON dl.dsp_slot_id = dsi.id
+        WHERE dl.ssp_slot_id = #{sspSlotId}
+        ORDER BY dl.id ASC
+    </select>
+</mapper>

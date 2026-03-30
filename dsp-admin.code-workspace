@@ -1,0 +1,40 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "java",
+        "name": "Backend",
+        "request": "launch",
+        "mainClass": "com.ruoyi.RuoYiApplication",
+        "args": "",
+        // "vmArgs": "-Dspring.profiles.active=dev",
+        "console": "integratedTerminal",
+        "stopOnEntry": false
+      },
+         {
+        "type": "node",
+        "request": "launch",
+        "cwd": "${workspaceFolder}/RuoYi-Vue3",
+        "name": "Frontend",
+        "runtimeExecutable": "pnpm",
+        "runtimeArgs": ["run", "dev"]
+      }
+    ],
+    "compounds": [
+      {
+        "name": "Both (Backend & Frontend)",
+        "configurations": [
+          "Backend",
+          "Frontend"
+        ],
+        "stopAll": true
+      }
+    ]
+  }
+}

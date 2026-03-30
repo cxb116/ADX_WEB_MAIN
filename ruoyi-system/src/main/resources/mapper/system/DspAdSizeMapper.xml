@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DspAdSizeMapper">
+    
+    <resultMap type="DspAdSize" id="DspAdSizeResult">
+        <result property="id"    column="id"    />
+        <result property="size"    column="size"    />
+        <result property="typeId"    column="type_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectDspAdSizeVo">
+        select id, size, type_id, create_by, create_time, update_by, update_time, remark from dsp_ad_size
+    </sql>
+
+    <select id="selectDspAdSizeList" parameterType="DspAdSize" resultMap="DspAdSizeResult">
+        <include refid="selectDspAdSizeVo"/>
+        <where>  
+            <if test="typeId != null "> and type_id = #{typeId}</if>
+            <if test="createTime != null "> and create_time = #{createTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectDspAdSizeById" parameterType="Long" resultMap="DspAdSizeResult">
+        <include refid="selectDspAdSizeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDspAdSize" parameterType="DspAdSize" useGeneratedKeys="true" keyProperty="id">
+        insert into dsp_ad_size
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="size != null">size,</if>
+            <if test="typeId != null">type_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="size != null">#{size},</if>
+            <if test="typeId != null">#{typeId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDspAdSize" parameterType="DspAdSize">
+        update dsp_ad_size
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="size != null">size = #{size},</if>
+            <if test="typeId != null">type_id = #{typeId},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDspAdSizeById" parameterType="Long">
+        delete from dsp_ad_size where id = #{id}
+    </delete>
+
+    <delete id="deleteDspAdSizeByIds" parameterType="String">
+        delete from dsp_ad_size where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

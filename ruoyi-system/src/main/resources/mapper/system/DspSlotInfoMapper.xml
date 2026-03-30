@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DspSlotInfoMapper">
+    
+    <resultMap type="DspSlotInfo" id="DspSlotInfoResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="osType"    column="os_type"    />
+        <result property="adTypeId"    column="ad_type_id"    />
+        <result property="adSceneId"    column="ad_scene_id"    />
+        <result property="adSizeId"    column="ad_size_id"    />
+        <result property="dspSlotCode"    column="dsp_slot_code"    />
+        <result property="dspAppKey"    column="dsp_app_key"    />
+        <result property="dspAppSecret"    column="dsp_app_secret"    />
+        <result property="dspAppId"    column="dsp_app_id"    />
+        <result property="dspAppPkg"    column="dsp_app_pkg"    />
+        <result property="dspAppVer"    column="dsp_app_ver"    />
+        <result property="dspAppStoreVer"    column="dsp_app_store_ver"    />
+        <result property="priceEncryptKey"    column="price_encrypt_key"    />
+        <result property="dspAppStoreLink"    column="dsp_app_store_link"    />
+        <result property="dspPayType"    column="dsp_pay_type"    />
+        <result property="dspDealRatio"    column="dsp_deal_ratio"    />
+        <result property="companyId"    column="company_id"    />
+        <result property="productId"    column="product_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectDspSlotInfoVo">
+        select id, name, os_type, ad_type_id, ad_scene_id, ad_size_id, dsp_slot_code, dsp_app_key, dsp_app_secret, dsp_app_id, dsp_app_pkg, dsp_app_ver, dsp_app_store_ver, price_encrypt_key, dsp_app_store_link, dsp_pay_type, dsp_deal_ratio, company_id, product_id, create_by, create_time, update_by, update_time, remark from dsp_slot_info
+    </sql>
+
+    <select id="selectDspSlotInfoList" parameterType="DspSlotInfo" resultMap="DspSlotInfoResult">
+        <include refid="selectDspSlotInfoVo"/>
+        <where>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="osType != null "> and os_type = #{osType}</if>
+            <if test="adTypeId != null "> and ad_type_id = #{adTypeId}</if>
+            <if test="adSceneId != null "> and ad_scene_id = #{adSceneId}</if>
+            <if test="adSizeId != null "> and ad_size_id = #{adSizeId}</if>
+            <if test="dspSlotCode != null  and dspSlotCode != ''"> and dsp_slot_code = #{dspSlotCode}</if>
+            <if test="dspAppKey != null  and dspAppKey != ''"> and dsp_app_key = #{dspAppKey}</if>
+            <if test="dspAppSecret != null  and dspAppSecret != ''"> and dsp_app_secret = #{dspAppSecret}</if>
+            <if test="dspAppId != null  and dspAppId != ''"> and dsp_app_id = #{dspAppId}</if>
+            <if test="dspAppPkg != null  and dspAppPkg != ''"> and dsp_app_pkg = #{dspAppPkg}</if>
+            <if test="dspAppVer != null  and dspAppVer != ''"> and dsp_app_ver = #{dspAppVer}</if>
+            <if test="dspAppStoreVer != null  and dspAppStoreVer != ''"> and dsp_app_store_ver = #{dspAppStoreVer}</if>
+            <if test="priceEncryptKey != null  and priceEncryptKey != ''"> and price_encrypt_key = #{priceEncryptKey}</if>
+            <if test="dspAppStoreLink != null  and dspAppStoreLink != ''"> and dsp_app_store_link = #{dspAppStoreLink}</if>
+            <if test="dspPayType != null "> and dsp_pay_type = #{dspPayType}</if>
+            <if test="dspDealRatio != null "> and dsp_deal_ratio = #{dspDealRatio}</if>
+            <if test="companyId != null "> and company_id = #{companyId}</if>
+            <if test="productId != null "> and product_id = #{productId}</if>
+        </where>
+    </select>
+    
+    <select id="selectDspSlotInfoById" parameterType="Long" resultMap="DspSlotInfoResult">
+        <include refid="selectDspSlotInfoVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDspSlotInfo" parameterType="DspSlotInfo">
+        insert into dsp_slot_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="osType != null">os_type,</if>
+            <if test="adTypeId != null">ad_type_id,</if>
+            <if test="adSceneId != null">ad_scene_id,</if>
+            <if test="adSizeId != null">ad_size_id,</if>
+            <if test="dspSlotCode != null and dspSlotCode != ''">dsp_slot_code,</if>
+            <if test="dspAppKey != null">dsp_app_key,</if>
+            <if test="dspAppSecret != null">dsp_app_secret,</if>
+            <if test="dspAppId != null">dsp_app_id,</if>
+            <if test="dspAppPkg != null">dsp_app_pkg,</if>
+            <if test="dspAppVer != null">dsp_app_ver,</if>
+            <if test="dspAppStoreVer != null">dsp_app_store_ver,</if>
+            <if test="priceEncryptKey != null">price_encrypt_key,</if>
+            <if test="dspAppStoreLink != null">dsp_app_store_link,</if>
+            <if test="dspPayType != null">dsp_pay_type,</if>
+            <if test="dspDealRatio != null">dsp_deal_ratio,</if>
+            <if test="companyId != null">company_id,</if>
+            <if test="productId != null">product_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="osType != null">#{osType},</if>
+            <if test="adTypeId != null">#{adTypeId},</if>
+            <if test="adSceneId != null">#{adSceneId},</if>
+            <if test="adSizeId != null">#{adSizeId},</if>
+            <if test="dspSlotCode != null and dspSlotCode != ''">#{dspSlotCode},</if>
+            <if test="dspAppKey != null">#{dspAppKey},</if>
+            <if test="dspAppSecret != null">#{dspAppSecret},</if>
+            <if test="dspAppId != null">#{dspAppId},</if>
+            <if test="dspAppPkg != null">#{dspAppPkg},</if>
+            <if test="dspAppVer != null">#{dspAppVer},</if>
+            <if test="dspAppStoreVer != null">#{dspAppStoreVer},</if>
+            <if test="priceEncryptKey != null">#{priceEncryptKey},</if>
+            <if test="dspAppStoreLink != null">#{dspAppStoreLink},</if>
+            <if test="dspPayType != null">#{dspPayType},</if>
+            <if test="dspDealRatio != null">#{dspDealRatio},</if>
+            <if test="companyId != null">#{companyId},</if>
+            <if test="productId != null">#{productId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDspSlotInfo" parameterType="DspSlotInfo">
+        update dsp_slot_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="osType != null">os_type = #{osType},</if>
+            <if test="adTypeId != null">ad_type_id = #{adTypeId},</if>
+            <if test="adSceneId != null">ad_scene_id = #{adSceneId},</if>
+            <if test="adSizeId != null">ad_size_id = #{adSizeId},</if>
+            <if test="dspSlotCode != null and dspSlotCode != ''">dsp_slot_code = #{dspSlotCode},</if>
+            <if test="dspAppKey != null">dsp_app_key = #{dspAppKey},</if>
+            <if test="dspAppSecret != null">dsp_app_secret = #{dspAppSecret},</if>
+            <if test="dspAppId != null">dsp_app_id = #{dspAppId},</if>
+            <if test="dspAppPkg != null">dsp_app_pkg = #{dspAppPkg},</if>
+            <if test="dspAppVer != null">dsp_app_ver = #{dspAppVer},</if>
+            <if test="dspAppStoreVer != null">dsp_app_store_ver = #{dspAppStoreVer},</if>
+            <if test="priceEncryptKey != null">price_encrypt_key = #{priceEncryptKey},</if>
+            <if test="dspAppStoreLink != null">dsp_app_store_link = #{dspAppStoreLink},</if>
+            <if test="dspPayType != null">dsp_pay_type = #{dspPayType},</if>
+            <if test="dspDealRatio != null">dsp_deal_ratio = #{dspDealRatio},</if>
+            <if test="companyId != null">company_id = #{companyId},</if>
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDspSlotInfoById" parameterType="Long">
+        delete from dsp_slot_info where id = #{id}
+    </delete>
+
+    <delete id="deleteDspSlotInfoByIds" parameterType="String">
+        delete from dsp_slot_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

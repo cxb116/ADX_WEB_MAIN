@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DataSspSlotMapper">
+
+    <resultMap type="DataSspSlot" id="DataSspSlotResult">
+        <result property="id"    column="id"    />
+        <result property="mediaId"    column="media_id"    />
+        <result property="appId"    column="app_id"    />
+        <result property="sspSlotId"    column="ssp_slot_id"    />
+        <result property="dspSlotId"    column="dsp_slot_id"    />
+        <result property="dspSlotCode"    column="dsp_slot_code"    />
+        <result property="showPv"    column="show_pv"    />
+        <result property="showUv"    column="show_uv"    />
+        <result property="clickPv"    column="click_pv"    />
+        <result property="clickUv"    column="click_uv"    />
+        <result property="reqPv"    column="req_pv"    />
+        <result property="reqUv"    column="req_uv"    />
+        <result property="discard"    column="discard"    />
+        <result property="retPv"    column="ret_pv"    />
+        <result property="retUv"    column="ret_uv"    />
+        <result property="spend"    column="spend"    />
+        <result property="income"    column="income"    />
+        <result property="discountClickPv"    column="discount_click_pv"    />
+        <result property="discountShowPv"    column="discount_show_pv"    />
+        <result property="dplsuccPv"    column="dplsucc_pv"    />
+        <result property="completePv"    column="complete_pv"    />
+        <result property="installPv"    column="install_pv"    />
+        <result property="activatePv"    column="activate_pv"    />
+        <result property="date"    column="date"    />
+        <result property="createdAt"    column="created_at"    />
+        <result property="appName"    column="app_name"    />
+        <result property="sspSlotName"    column="ssp_slot_name"    />
+        <result property="dspSlotName"    column="dsp_slot_name"    />
+        <result property="mediaName"    column="media_name"    />
+    </resultMap>
+
+    <sql id="selectDataSspSlotVo">
+        select t.id, t.media_id, t.app_id, t.ssp_slot_id, t.dsp_slot_id, t.dsp_slot_code, t.show_pv, t.show_uv, t.click_pv, t.click_uv, t.req_pv, t.req_uv, t.discard, t.ret_pv, t.ret_uv, t.spend, t.income, t.discount_click_pv, t.discount_show_pv, t.dplsucc_pv, t.complete_pv, t.install_pv, t.activate_pv, t.date, t.created_at,
+        app.name as app_name,
+        ssp_slot.name as ssp_slot_name,
+        ssp_slot.media_id,
+        media.name as media_name,
+        dsp_slot.name as dsp_slot_name
+        from ${tableName} t
+        left join ssp_slot_info ssp_slot on t.ssp_slot_id = ssp_slot.id
+        left join ssp_media media on ssp_slot.media_id = media.id
+        left join ssp_app app on ssp_slot.app_id = app.id
+        left join dsp_slot_info dsp_slot on t.dsp_slot_id = dsp_slot.id
+    </sql>
+
+    <select id="selectDataSspSlotList" parameterType="DataSspSlot" resultMap="DataSspSlotResult">
+        <include refid="selectDataSspSlotVo"/>
+        <where>
+            <if test="mediaId != null "> and t.media_id = #{mediaId}</if>
+            <if test="appId != null "> and t.app_id = #{appId}</if>
+            <if test="sspSlotId != null "> and t.ssp_slot_id = #{sspSlotId}</if>
+            <if test="dspSlotId != null "> and t.dsp_slot_id = #{dspSlotId}</if>
+            <if test="dspSlotCode != null  and dspSlotCode != ''"> and t.dsp_slot_code = #{dspSlotCode}</if>
+            <if test="showPv != null "> and t.show_pv = #{showPv}</if>
+            <if test="showUv != null "> and t.show_uv = #{showUv}</if>
+            <if test="clickPv != null "> and t.click_pv = #{clickPv}</if>
+            <if test="clickUv != null "> and t.click_uv = #{clickUv}</if>
+            <if test="reqPv != null "> and t.req_pv = #{reqPv}</if>
+            <if test="reqUv != null "> and t.req_uv = #{reqUv}</if>
+            <if test="discard != null "> and t.discard = #{discard}</if>
+            <if test="retPv != null "> and t.ret_pv = #{retPv}</if>
+            <if test="retUv != null "> and t.ret_uv = #{retUv}</if>
+            <if test="spend != null "> and t.spend = #{spend}</if>
+            <if test="income != null "> and t.income = #{income}</if>
+            <if test="discountClickPv != null "> and t.discount_click_pv = #{discountClickPv}</if>
+            <if test="discountShowPv != null "> and t.discount_show_pv = #{discountShowPv}</if>
+            <if test="dplsuccPv != null "> and t.dplsucc_pv = #{dplsuccPv}</if>
+            <if test="completePv != null "> and t.complete_pv = #{completePv}</if>
+            <if test="installPv != null "> and t.install_pv = #{installPv}</if>
+            <if test="activatePv != null "> and t.activate_pv = #{activatePv}</if>
+            <if test="date != null "> and t.date = #{date}</if>
+            <if test="createdAt != null "> and t.created_at = #{createdAt}</if>
+        </where>
+    </select>
+
+    <select id="selectDataSspSlotById" parameterType="DataSspSlot" resultMap="DataSspSlotResult">
+        <include refid="selectDataSspSlotVo"/>
+        where t.id = #{id}
+    </select>
+
+    <!-- 根据 dsp_slot_id、dsp_slot_code 和 date 批量更新 spend -->
+    <update id="updateSpendByDspSlotInfo">
+        update ${tableName}
+        set spend = #{spend}
+        where dsp_slot_id = #{dspSlotId}
+          and dsp_slot_code = #{dspSlotCode}
+          and date = #{date}
+    </update>
+</mapper>

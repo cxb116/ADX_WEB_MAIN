@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DataDspSlotMapper">
+
+    <resultMap type="DataDspSlot" id="DataDspSlotResult">
+        <result property="id"    column="id"    />
+        <result property="dspSlotId"    column="dsp_slot_id"    />
+        <result property="dspSlotCode"    column="dsp_slot_code"    />
+        <result property="dspSlotName"    column="dsp_slot_name"    />
+        <result property="dspPayType"    column="dsp_pay_type"    />
+        <result property="showPv"    column="show_pv"    />
+        <result property="showUv"    column="show_uv"    />
+        <result property="clickPv"    column="click_pv"    />
+        <result property="clickUv"    column="click_uv"    />
+        <result property="reqPv"    column="req_pv"    />
+        <result property="reqUv"    column="req_uv"    />
+        <result property="discard"    column="discard"    />
+        <result property="retPv"    column="ret_pv"    />
+        <result property="retUv"    column="ret_uv"    />
+        <result property="spend"    column="spend"    />
+        <result property="income"    column="income"    />
+        <result property="discountClickPv"    column="discount_click_pv"    />
+        <result property="discountShowPv"    column="discount_show_pv"    />
+        <result property="dplsuccPv"    column="dplsucc_pv"    />
+        <result property="completePv"    column="complete_pv"    />
+        <result property="installPv"    column="install_pv"    />
+        <result property="activatePv"    column="activate_pv"    />
+        <result property="date"    column="date"    />
+        <result property="createdAt"    column="created_at"    />
+    </resultMap>
+
+    <sql id="selectDataDspSlotVo">
+        select t.id, t.dsp_slot_id, t.dsp_slot_code, t.show_pv, t.show_uv, t.click_pv, t.click_uv, t.req_pv, t.req_uv, t.discard, t.ret_pv, t.ret_uv, t.spend, t.income, t.discount_click_pv, t.discount_show_pv, t.dplsucc_pv, t.complete_pv, t.install_pv, t.activate_pv, t.date, t.created_at,
+        dsp_slot.name as dsp_slot_name,
+        dsp_slot.dsp_pay_type as dsp_pay_type
+        from ${tableName} t
+        left join dsp_slot_info dsp_slot on t.dsp_slot_id = dsp_slot.id
+    </sql>
+
+    <select id="selectDataDspSlotList" parameterType="DataDspSlot" resultMap="DataDspSlotResult">
+        <include refid="selectDataDspSlotVo"/>
+        <where>
+            <if test="dspSlotId != null">
+                AND t.dsp_slot_id = #{dspSlotId}
+            </if>
+            <if test="dspSlotCode != null and dspSlotCode != ''">
+                AND t.dsp_slot_code = #{dspSlotCode}
+            </if>
+            <if test="dspPayType != null">
+                AND dsp_slot.dsp_pay_type = #{dspPayType}
+            </if>
+            <if test="beginDate != null and beginDate != ''">
+                AND t.date &gt;= #{beginDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND t.date &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY t.date DESC
+    </select>
+
+    <select id="selectDataDspSlotById" parameterType="DataDspSlot" resultMap="DataDspSlotResult">
+        <include refid="selectDataDspSlotVo"/>
+        where t.id = #{id}
+    </select>
+
+    <!-- 修改预算报表 -->
+    <update id="updateDataDspSlot" parameterType="DataDspSlot">
+        update ${tableName}
+        <set>
+            <if test="spend != null">spend = #{spend},</if>
+            <if test="income != null">income = #{income},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 查询当月汇总统计数据 -->
+    <select id="selectMonthlySummary" parameterType="string" resultType="java.util.HashMap">
+        SELECT
+            IFNULL(SUM(show_pv), 0) as impressions,
+            IFNULL(SUM(click_pv), 0) as clicks,
+            IFNULL(SUM(spend), 0) as spend,
+            IFNULL(SUM(income), 0) as income
+        FROM ${tableName}
+    </select>
+
+    <!-- 查询日期范围内的趋势数据（跨表查询） -->
+    <select id="selectTrendData" resultType="java.util.HashMap">
+        <foreach collection="tableNames" item="tableName" separator="UNION ALL">
+            SELECT
+                date,
+                SUM(show_pv) as show_pv,
+                SUM(click_pv) as click_pv
+            FROM ${tableName}
+            WHERE date BETWEEN #{startDate} AND #{endDate}
+            GROUP BY date
+        </foreach>
+        ORDER BY date
+    </select>
+
+    <!-- 查询指定天数的收益数据（跨表查询） -->
+    <select id="selectRevenueData" resultType="java.util.HashMap">
+        <foreach collection="tableNames" item="tableName" separator="UNION ALL">
+            SELECT
+                date,
+                SUM(spend) as spend,
+                SUM(income) as income
+            FROM ${tableName}
+            WHERE date BETWEEN #{startDate} AND #{endDate}
+            GROUP BY date
+        </foreach>
+        ORDER BY date
+    </select>
+
+    <!-- 查询最近12小时填充率数据 -->
+    <select id="selectTodayFillRate" resultType="java.util.HashMap">
+        SELECT
+            FLOOR(date / 100) as hour_date,
+            SUM(ret_pv) as ret_pv,
+            SUM(show_pv) as show_pv
+        FROM ${tableName}
+        WHERE date >= CAST(DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 12 HOUR), '%Y%m%d%H') AS UNSIGNED)
+        GROUP BY FLOOR(date / 100)
+        ORDER BY hour_date
+    </select>
+
+    <!-- 查询近7天填充率数据（跨表查询） -->
+    <select id="selectFillRateData" resultType="java.util.HashMap">
+        <foreach collection="tableNames" item="tableName" separator="UNION ALL">
+            SELECT
+                date,
+                SUM(ret_pv) as ret_pv,
+                SUM(show_pv) as show_pv
+            FROM ${tableName}
+            WHERE date BETWEEN #{startDate} AND #{endDate}
+            GROUP BY date
+        </foreach>
+        ORDER BY date
+    </select>
+</mapper>

@@ -1,0 +1,929 @@
+<template>
+  <div class="app-container">
+    <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+      <el-tab-pane label="预算方列表" name="list">
+        <div class="app-container-list">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="广告位名称" prop="name" label-width="100">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入广告位名称"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="产品" prop="companyProductId">
+        <el-cascader
+          v-model="queryParams.companyProductId"
+          :options="cascaderOptions"
+          :props="{ expandTrigger: 'hover' }"
+          placeholder="请选择产品"
+          clearable
+          style="width: 240px"
+          @change="handleQueryCascaderChange"
+        />
+      </el-form-item>
+      <el-form-item label="广告类型" prop="adTypeId">
+        <el-select
+          v-model="queryParams.adTypeId"
+          placeholder="请选择广告类型"
+          clearable
+        >
+          <el-option
+            v-for="item in adTypeList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="广告场景" prop="adSceneId">
+        <el-select
+          v-model="queryParams.adSceneId"
+          placeholder="请选择广告场景"
+          clearable
+        >
+          <el-option
+            v-for="item in adSceneList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="预算方广告位" prop="dspSlotCode" label-width="100">
+        <el-input
+          v-model="queryParams.dspSlotCode"
+          placeholder="请输入预算方广告位"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+      </el-form-item>
+    </el-form>
+
+    <el-row :gutter="10" class="mb8">
+      <el-col :span="1.5">
+        <el-button
+          type="primary"
+          plain
+          icon="Plus"
+          @click="handleAdd"
+          v-hasPermi="['budget:info:add']"
+        >新增</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="success"
+          plain
+          icon="Edit"
+          :disabled="single"
+          @click="handleUpdate"
+          v-hasPermi="['budget:info:edit']"
+        >修改</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="multiple"
+          @click="handleDelete"
+          v-hasPermi="['budget:info:remove']"
+        >删除</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="Download"
+          @click="handleExport"
+          v-hasPermi="['budget:info:export']"
+        >导出</el-button>
+      </el-col>
+      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
+    </el-row>
+
+    <el-table
+      v-loading="loading"
+      :data="infoList"
+      @selection-change="handleSelectionChange"
+      class="budget-table"
+      style="width: 100%"
+      table-layout="auto"
+    >
+      <el-table-column type="selection" width="55" align="center" fixed />
+      <el-table-column label="广告位名称" align="center" prop="name" width="250" fixed>
+        <template #default="scope">
+          {{ scope.row.name }}({{ scope.row.id }})
+        </template>
+      </el-table-column>
+      <el-table-column label="产品" align="center" prop="dsp_product_id" width="200">
+        <template #default="scope">
+          {{ getProductName(scope.row.dsp_product_id) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="公司" align="center" prop="company_id" width="150">
+        <template #default="scope">
+          {{ getCompanyName(scope.row.company_id) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="操作系统" align="center" prop="osType" width="100">
+        <template #default="scope">
+          <dict-tag :options="os_type" :value="String(scope.row.osType)" />
+        </template>
+      </el-table-column>
+      <el-table-column label="广告类型" align="center" prop="adTypeId" width="120">
+        <template #default="scope">
+          {{ getAdTypeName(scope.row.adTypeId) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="广告场景" align="center" prop="adSceneId" width="120">
+        <template #default="scope">
+          {{ scope.row.adSceneId ? getAdSceneName(scope.row.adSceneId) : '-' }}
+        </template>
+      </el-table-column>
+      <el-table-column label="广告尺寸" align="center" prop="adSizeId" width="120">
+        <template #default="scope">
+          {{ scope.row.adSizeId ? getAdSizeName(scope.row.adSizeId) : '-' }}
+        </template>
+      </el-table-column>
+      <el-table-column label="预算方广告位" align="center" prop="dspSlotCode" width="150" />
+      <el-table-column label="预算方APPKEY" align="center" prop="dspAppKey" width="150" />
+      <el-table-column label="预算方AppId" align="center" prop="dspAppId" width="150" />
+      <el-table-column label="结算方式" align="center" prop="dsp_pay_type" width="100">
+        <template #default="scope">
+          <span v-if="scope.row.dsp_pay_type === 2 || scope.row.dsp_pay_type === '2'">RTB</span>
+          <span v-else-if="scope.row.dsp_pay_type === 1 || scope.row.dsp_pay_type === '1'">分成</span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="成交系数" align="center" prop="dsp_deal_ratio" width="100">
+        <template #default="scope">
+          <span v-if="scope.row.dsp_deal_ratio !== null && scope.row.dsp_deal_ratio !== undefined">{{ scope.row.dsp_deal_ratio }}%</span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="创建时间" align="center" prop="createTime" width="180" />
+      <el-table-column label="操作" align="center" width="150" fixed="right" class-name="small-padding fixed-width">
+        <template #default="scope">
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['budget:info:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['budget:info:remove']">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <pagination
+      v-show="total>0"
+      :total="total"
+      v-model:page="queryParams.pageNum"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+        </div>
+      </el-tab-pane>
+
+      <!-- 编辑 Tab -->
+      <el-tab-pane label="编辑预算方" name="edit">
+        <div class="app-container-edit" v-if="editInfo || activeTab === 'edit'">
+          <el-page-header @back="handleBackToList" :content="editInfo ? '编辑: ' + editInfo.name + '(' + editInfo.id + ')' : '新增预算方广告位'">
+            <template #extra>
+              <el-button type="primary" size="small" @click="handleEditSave">{{ editInfo ? '保存' : '创建' }}</el-button>
+            </template>
+          </el-page-header>
+
+          <el-divider />
+
+          <el-card class="edit-card">
+            <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="140px">
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="产品" prop="companyProductId">
+                    <el-cascader
+                      v-model="editForm.companyProductId"
+                      :options="cascaderOptions"
+                      :props="{ expandTrigger: 'hover' }"
+                      placeholder="请选择产品"
+                      clearable
+                      style="width: 100%"
+                      @change="handleCascaderChange"
+                    />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="广告位名称" prop="name">
+                    <el-input v-model="editForm.name" placeholder="请输入广告位名称" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="操作系统类型" prop="osType">
+                    <el-select v-model="editForm.osType" placeholder="请选择操作系统类型" style="width: 100%">
+                      <el-option
+                        v-for="dict in os_type"
+                        :key="dict.value"
+                        :label="dict.label"
+                        :value="dict.value"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="广告类型" prop="adTypeId">
+                    <el-select
+                      v-model="editForm.adTypeId"
+                      placeholder="请选择广告类型"
+                      clearable
+                      filterable
+                      style="width: 100%"
+                      @change="handleAdTypeChange"
+                    >
+                      <el-option
+                        v-for="item in adTypeList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="广告场景" prop="adSceneId">
+                    <el-select
+                      v-model="editForm.adSceneId"
+                      placeholder="请选择广告场景"
+                      clearable
+                      filterable
+                      style="width: 100%"
+                      :disabled="!editForm.adTypeId"
+                    >
+                      <el-option
+                        v-for="item in filteredAdSceneList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="样式尺寸" prop="adSizeId">
+                    <el-select
+                      v-model="editForm.adSizeId"
+                      placeholder="请选择样式尺寸"
+                      clearable
+                      filterable
+                      style="width: 100%"
+                      :disabled="!editForm.adTypeId"
+                    >
+                      <el-option
+                        v-for="item in filteredAdSizeList"
+                        :key="item.id"
+                        :label="item.size"
+                        :value="item.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="预算方广告位" prop="dspSlotCode">
+                    <el-input v-model="editForm.dspSlotCode" placeholder="请输入预算方广告位编码" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="预算方APPKEY" prop="dspAppKey">
+                    <el-input v-model="editForm.dspAppKey" placeholder="请输入预算方APPKEY" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="预算方APPSECRET" prop="dspAppSecret">
+                    <el-input v-model="editForm.dspAppSecret" placeholder="请输入预算方APPSECRET" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="预算方AppId" prop="dspAppId">
+                    <el-input v-model="editForm.dspAppId" placeholder="请输入预算方AppId" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="应用包名" prop="dspAppPkg">
+                    <el-input v-model="editForm.dspAppPkg" placeholder="请输入应用包名" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="应用版本号" prop="dspAppVer">
+                    <el-input v-model="editForm.dspAppVer" placeholder="请输入应用版本号" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="应用商店版本号" prop="dspAppStoreVer">
+                    <el-input v-model="editForm.dspAppStoreVer" placeholder="请输入应用商店版本号" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="价格加密Key" prop="priceEncryptKey">
+                    <el-input v-model="editForm.priceEncryptKey" placeholder="请输入价格加密Key" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="应用商店地址" prop="dspAppStoreLink">
+                    <el-input v-model="editForm.dspAppStoreLink" placeholder="请输入应用商店地址" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                  <el-form-item label="结算方式" prop="dspPayType">
+                    <el-select v-model="editForm.dspPayType" placeholder="请选择结算方式" style="width: 100%" @change="handleDspPayTypeChange">
+                      <el-option label="RTB" :value="2" />
+                      <el-option label="分成" :value="1" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                  <el-form-item label="RTB成交系数" prop="dspDealRatio">
+                    <el-input
+                        v-model="editForm.dspDealRatio"
+                        placeholder="请输入RTB成交系数"
+                        :disabled="editForm.dspPayType !== 2 && editForm.dspPayType !== '2'"
+                    >
+                      <template #append>%</template>
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="20">
+                <el-col :span="24">
+                  <el-form-item label="备注" prop="remark">
+                    <el-input v-model="editForm.remark" type="textarea" placeholder="请输入备注" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-form>
+          </el-card>
+        </div>
+        <div v-else class="empty-edit">
+          <el-empty description="请选择一个预算方进行编辑" />
+        </div>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
+</template>
+
+<script setup name="Info">
+import { listInfo, getInfo, delInfo, addInfo, updateInfo } from "@/api/budget/info"
+import { listCompany } from "@/api/budget/company"
+import { listProduct } from "@/api/budget/product"
+import { listType } from "@/api/ad/type"
+import { listScene } from "@/api/ad/scene"
+import { listSize } from "@/api/ad/size"
+import { useDict } from "@/utils/dict"
+import { ref, reactive, toRefs, computed, getCurrentInstance } from "vue"
+
+const { proxy } = getCurrentInstance()
+const { os_type, ssp_pay_type } = useDict('os_type', 'ssp_pay_type')
+
+const infoList = ref([])
+const companyList = ref([])
+const productList = ref([])
+const loading = ref(true)
+const showSearch = ref(true)
+const ids = ref([])
+const single = ref(true)
+const multiple = ref(true)
+const total = ref(0)
+
+// 广告类型、广告场景、样式尺寸列表
+const adTypeList = ref([])
+const adSceneList = ref([])
+const adSizeList = ref([])
+
+// Tab 相关状态
+const activeTab = ref('list')
+const editInfo = ref(null)
+
+const editForm = ref({
+  companyProductId: [],
+  name: null,
+  osType: null,
+  adTypeId: null,
+  adSceneId: null,
+  adSizeId: null,
+  dspSlotCode: null,
+  dspAppKey: null,
+  dspAppSecret: null,
+  dspAppId: null,
+  dspAppPkg: null,
+  dspAppVer: null,
+  dspAppStoreVer: null,
+  priceEncryptKey: null,
+  dspAppStoreLink: null,
+  dspPayType: null,
+  dspDealRatio: null,
+  remark: null
+})
+
+// 计算属性：筛选后的广告场景列表
+const filteredAdSceneList = computed(() => {
+  if (!editForm.value.adTypeId) {
+    return []
+  }
+  return adSceneList.value.filter(scene => scene.typeId === editForm.value.adTypeId)
+})
+
+// 计算属性：筛选后的样式尺寸列表
+const filteredAdSizeList = computed(() => {
+  if (!editForm.value.adTypeId) {
+    return []
+  }
+  return adSizeList.value.filter(size => size.typeId === editForm.value.adTypeId)
+})
+
+const data = reactive({
+  form: {},
+  queryParams: {
+    pageNum: 1,
+    pageSize: 10,
+    name: null,
+    adTypeId: null,
+    adSceneId: null,
+    dspSlotCode: null,
+    dspAppKey: null,
+    companyProductId: [],
+    companyId: null,
+    productId: null
+  },
+  rules: {
+    name: [
+      { required: true, message: "广告位名称不能为空", trigger: "blur" }
+    ],
+    companyProductId: [
+      { required: true, message: "产品不能为空", trigger: "change", type: 'array' }
+    ],
+    osType: [
+      { required: true, message: "操作系统类型不能为空", trigger: "change" }
+    ],
+    dspSlotCode: [
+      { required: true, message: "预算方广告位不能为空", trigger: "blur" }
+    ],
+    dspPayType: [
+      { required: true, message: "结算方式不能为空", trigger: "change" }
+    ],
+  }
+})
+
+// 编辑表单验证规则
+const editRules = {
+  companyProductId: [
+    { required: true, message: "产品不能为空", trigger: "change", type: 'array' }
+  ],
+  name: [
+    { required: true, message: "广告位名称不能为空", trigger: "blur" }
+  ],
+  osType: [
+    { required: true, message: "操作系统类型不能为空", trigger: "change" }
+  ],
+  adTypeId: [
+    { required: true, message: "广告类型不能为空", trigger: "change" }
+  ],
+  dspSlotCode: [
+    { required: true, message: "预算方广告位不能为空", trigger: "blur" }
+  ],
+  dspPayType: [
+    { required: true, message: "结算方式不能为空", trigger: "change" }
+  ],
+}
+
+const { queryParams, form, rules } = toRefs(data)
+
+/** 级联选择器选项 */
+const cascaderOptions = computed(() => {
+  return companyList.value.map(company => ({
+    value: company.id,
+    label: company.name,
+    children: productList.value
+      .filter(product => product.companyId === company.id)
+      .map(product => ({
+        value: product.id,
+        label: product.name
+      }))
+  }))
+})
+
+/** 查询公司列表 */
+function getCompanyList() {
+  listCompany().then(response => {
+    companyList.value = response.rows || []
+  })
+}
+
+/** 查询产品列表 */
+function getProductList() {
+  listProduct().then(response => {
+    productList.value = response.rows || []
+  })
+}
+
+/** 根据公司ID获取公司名称 */
+function getCompanyName(companyId) {
+  const company = companyList.value.find(item => item.id === companyId || item.company_id === companyId)
+  return company ? company.name : '-'
+}
+
+/** 根据产品ID获取产品名称 */
+function getProductName(productId) {
+  const product = productList.value.find(item => item.id === productId || item.product_id === productId)
+  return product ? product.name : '-'
+}
+
+/** 加载广告类型列表 */
+function loadAdTypeList() {
+  listType({ pageNum: 1, pageSize: 100 }).then(response => {
+    adTypeList.value = response.rows
+  })
+}
+
+/** 加载广告场景列表 */
+function loadAdSceneList() {
+  listScene({ pageNum: 1, pageSize: 100 }).then(response => {
+    adSceneList.value = response.rows
+  })
+}
+
+/** 加载样式尺寸列表 */
+function loadAdSizeList() {
+  listSize({ pageNum: 1, pageSize: 100 }).then(response => {
+    adSizeList.value = response.rows
+  })
+}
+
+/** 根据广告类型ID获取广告类型名称 */
+function getAdTypeName(typeId) {
+  const type = adTypeList.value.find(item => item.id === typeId)
+  return type ? type.name : typeId
+}
+
+/** 根据广告场景ID获取广告场景名称 */
+function getAdSceneName(sceneId) {
+  const scene = adSceneList.value.find(item => item.id === sceneId)
+  return scene ? scene.name : sceneId
+}
+
+/** 根据样式尺寸ID获取样式尺寸 */
+function getAdSizeName(sizeId) {
+  const size = adSizeList.value.find(item => item.id === sizeId)
+  return size ? size.size : sizeId
+}
+
+/** 级联选择器变化处理 */
+function handleCascaderChange(value) {
+  if (value && value.length === 2) {
+    editForm.value.companyId = value[0]
+    editForm.value.productId = value[1]
+  } else {
+    editForm.value.companyId = null
+    editForm.value.productId = null
+  }
+}
+
+/** 查询条件级联选择器变化处理 */
+function handleQueryCascaderChange(value) {
+  if (value && value.length === 2) {
+    queryParams.value.companyId = value[0]
+    queryParams.value.productId = value[1]
+  } else if (value && value.length === 1) {
+    queryParams.value.companyId = value[0]
+    queryParams.value.productId = null
+  } else {
+    queryParams.value.companyId = null
+    queryParams.value.productId = null
+  }
+}
+
+/** 结算方式改变时触发成交系数验证 */
+function handleDspPayTypeChange() {
+  // 分成模式（1）不需要成交系数，清空
+  if (editForm.value.dspPayType === 1 || editForm.value.dspPayType === '1') {
+    editForm.value.dspDealRatio = null
+  }
+  proxy.$refs["editFormRef"].validateField('dspDealRatio')
+}
+
+/** 广告类型改变时的处理 */
+function handleAdTypeChange() {
+  editForm.value.adSceneId = null
+  editForm.value.adSizeId = null
+}
+
+/** 查询预算广告位列表 */
+function getList() {
+  loading.value = true
+  listInfo(queryParams.value).then(response => {
+    infoList.value = response.rows
+    total.value = response.total
+    loading.value = false
+  })
+}
+
+/** 表单重置 */
+function reset() {
+  form.value = {
+    id: null,
+    name: null,
+    osType: null,
+    adTypeId: null,
+    adSceneId: null,
+    adSizeId: null,
+    dspSlotCode: null,
+    dspAppKey: null,
+    dspAppSecret: null,
+    dspAppId: null,
+    dspAppPkg: null,
+    dspAppVer: null,
+    dspAppStoreVer: null,
+    priceEncryptKey: null,
+    dspAppStoreLink: null,
+    dspPayType: null,
+    dspDealRatio: null,
+    companyId: null,
+    productId: null,
+    companyProductId: [],
+    remark: null
+  }
+  proxy.resetForm("infoRef")
+}
+
+/** 搜索按钮操作 */
+function handleQuery() {
+  queryParams.value.pageNum = 1
+  getList()
+}
+
+/** 重置按钮操作 */
+function resetQuery() {
+  proxy.resetForm("queryRef")
+  handleQuery()
+}
+
+// 多选框选中数据
+function handleSelectionChange(selection) {
+  ids.value = selection.map(item => item.id)
+  single.value = selection.length != 1
+  multiple.value = !selection.length
+}
+
+/** Tab 切换事件 */
+function handleTabChange(tabName) {
+  console.log('切换到 Tab:', tabName)
+}
+
+/** 新增按钮操作 */
+function handleAdd() {
+  editInfo.value = null
+  editForm.value = {
+    id: null,
+    companyProductId: [],
+    name: null,
+    osType: null,
+    adTypeId: null,
+    adSceneId: null,
+    adSizeId: null,
+    dspSlotCode: null,
+    dspAppKey: null,
+    dspAppSecret: null,
+    dspAppId: null,
+    dspAppPkg: null,
+    dspAppVer: null,
+    dspAppStoreVer: null,
+    priceEncryptKey: null,
+    dspAppStoreLink: null,
+    dspPayType: null,
+    dspDealRatio: null,
+    companyId: null,
+    productId: null,
+    remark: null
+  }
+  activeTab.value = 'edit'
+}
+
+/** 修改按钮操作 */
+function handleUpdate(row) {
+  const _id = row.id || ids.value
+  getInfo(_id).then(response => {
+    const data = response.data
+    editInfo.value = data
+
+    // 调试：打印后端返回的完整数据
+    console.log('后端返回的完整数据:', data)
+    console.log('dsp_pay_type:', data.dsp_pay_type, 'dspPayType:', data.dspPayType)
+
+    editForm.value = {
+      id: data.id,
+      companyProductId: data.companyId && data.productId ? [Number(data.companyId), Number(data.productId)] : [],
+      name: data.name,
+      osType: data.osType !== null ? String(data.osType) : null,
+      adTypeId: data.adTypeId,
+      adSceneId: data.adSceneId,
+      adSizeId: data.adSizeId,
+      dspSlotCode: data.dspSlotCode,
+      dspAppKey: data.dspAppKey,
+      dspAppSecret: data.dspAppSecret,
+      dspAppId: data.dspAppId,
+      dspAppPkg: data.dspAppPkg,
+      dspAppVer: data.dspAppVer,
+      dspAppStoreVer: data.dspAppStoreVer,
+      priceEncryptKey: data.priceEncryptKey,
+      dspAppStoreLink: data.dspAppStoreLink,
+      dspPayType: data.dsp_pay_type !== null && data.dsp_pay_type !== undefined ? Number(data.dsp_pay_type) : null,
+      dspDealRatio: data.dsp_deal_ratio !== null ? data.dsp_deal_ratio : null,
+      companyId: data.company_id,
+      productId: data.product_id,
+      remark: data.remark
+    }
+
+    ids.value = []
+    single.value = true
+    multiple.value = true
+
+    activeTab.value = 'edit'
+  })
+}
+
+/** 编辑页面保存按钮 */
+function handleEditSave() {
+  proxy.$refs["editFormRef"].validate(valid => {
+    if (valid) {
+      if (editForm.value.companyProductId && editForm.value.companyProductId.length === 2) {
+        editForm.value.companyId = editForm.value.companyProductId[0]
+        editForm.value.productId = editForm.value.companyProductId[1]
+      }
+
+      // 确保 dspPayType 不为 null，默认为分成模式（1）
+      if (!editForm.value.dspPayType) {
+        editForm.value.dspPayType = 1
+      }
+
+      // 分成模式（1）不需要成交系数，清空后再保存
+      if (editForm.value.dspPayType === 1 || editForm.value.dspPayType === '1') {
+        editForm.value.dspDealRatio = null
+      }
+
+      // 转换为下划线命名以匹配后端 @JSONField 注解
+      const submitData = {
+        ...editForm.value,
+        dsp_pay_type: editForm.value.dspPayType,
+        dsp_deal_ratio: editForm.value.dspDealRatio
+      }
+      // 删除驼峰命名的字段
+      delete submitData.dspPayType
+      delete submitData.dspDealRatio
+      // 删除 companyProductId（非数据库字段）
+      delete submitData.companyProductId
+
+      if (editForm.value.id) {
+        // 修改操作
+        updateInfo(submitData).then(() => {
+          proxy.$modal.msgSuccess("修改成功")
+          activeTab.value = 'list'
+          editInfo.value = null
+          getList()
+        })
+      } else {
+        // 新增操作：检查预算方广告位是否已存在
+        checkDspSlotCodeExists(submitData)
+      }
+    }
+  })
+}
+
+/** 检查预算方广告位编码是否已存在 */
+function checkDspSlotCodeExists(submitData) {
+  const queryParams = {
+    pageNum: 1,
+    pageSize: 1,
+    dspSlotCode: editForm.value.dspSlotCode
+  }
+
+  listInfo(queryParams).then(response => {
+    if (response.total > 0) {
+      // 预算方广告位已存在
+      proxy.$modal.msgWarning(`预算方广告位编码 "${editForm.value.dspSlotCode}" 已存在，请使用其他编码`)
+    } else {
+      // 不存在，可以添加
+      addInfo(submitData).then(() => {
+        proxy.$modal.msgSuccess("新增成功")
+        activeTab.value = 'list'
+        editInfo.value = null
+        getList()
+      })
+    }
+  }).catch(() => {
+    proxy.$modal.msgError("检查预算方广告位编码失败")
+  })
+}
+
+/** 返回列表 */
+function handleBackToList() {
+  activeTab.value = 'list'
+  editInfo.value = null
+  if (proxy.$refs["editFormRef"]) {
+    proxy.$refs["editFormRef"].clearValidate()
+  }
+}
+
+/** 删除按钮操作 */
+function handleDelete(row) {
+  const _ids = row.id || ids.value
+  proxy.$modal.confirm('是否确认删除预算方广告位编号为"' + _ids + '"的数据项？').then(function() {
+    return delInfo(_ids)
+  }).then(() => {
+    getList()
+    proxy.$modal.msgSuccess("删除成功")
+  }).catch(() => {})
+}
+
+/** 导出按钮操作 */
+function handleExport() {
+  proxy.download('budget/info/export', {
+    ...queryParams.value
+  }, `info_${new Date().getTime()}.xlsx`)
+}
+
+// 页面加载时获取数据
+getCompanyList()
+getProductList()
+loadAdTypeList()
+loadAdSceneList()
+loadAdSizeList()
+getList()
+</script>
+
+<style scoped>
+.app-container-list {
+  padding: 0;
+}
+
+/* 表格容器样式 */
+.budget-table {
+  width: 100%;
+}
+
+/* 表格内部包装器 */
+.budget-table :deep(.el-table__inner-wrapper) {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+}
+
+/* 表头和表格体也要横向滚动 */
+.budget-table :deep(.el-table__header-wrapper),
+.budget-table :deep(.el-table__body-wrapper) {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+}
+
+/* 固定列的样式 */
+.budget-table :deep(.el-table__fixed) {
+  height: 100% !important;
+}
+
+/* 确保表格列宽度不会被压缩 */
+.budget-table :deep(.el-table__header),
+.budget-table :deep(.el-table__body) {
+  width: max-content !important;
+}
+
+.budget-table :deep(table) {
+  width: 100%;
+  table-layout: auto;
+}
+
+.app-container-edit {
+  padding: 20px;
+}
+
+.edit-card {
+  margin-bottom: 20px;
+}
+
+.empty-edit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+</style>

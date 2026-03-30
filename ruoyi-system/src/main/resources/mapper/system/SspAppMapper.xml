@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SspAppMapper">
+    
+    <resultMap type="SspApp" id="SspAppResult">
+        <result property="id"    column="id"    />
+        <result property="mediaId"    column="media_id"    />
+        <result property="mediaName"    column="media_name"    />
+        <result property="name"    column="name"    />
+        <result property="osType"    column="os_type"    />
+        <result property="accessType"    column="access_type"    />
+        <result property="pkg"    column="pkg"    />
+        <result property="downloadUrl"    column="download_url"    />
+        <result property="enable"    column="enable"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectSspAppVo">
+        select a.id, a.media_id, a.name, a.os_type, a.access_type, a.pkg, a.download_url, a.enable, a.create_by, a.create_time, a.update_by, a.update_time, a.remark,
+               m.name as media_name
+        from ssp_app a
+        left join ssp_media m on a.media_id = m.id
+    </sql>
+
+    <select id="selectSspAppList" parameterType="SspApp" resultMap="SspAppResult">
+        <include refid="selectSspAppVo"/>
+        <where>
+            <if test="mediaId != null "> and a.media_id = #{mediaId}</if>
+            <if test="mediaName != null  and mediaName != ''"> and m.name like concat('%', #{mediaName}, '%')</if>
+            <if test="name != null  and name != ''"> and a.name like concat('%', #{name}, '%')</if>
+            <if test="osType != null "> and a.os_type = #{osType}</if>
+            <if test="accessType != null "> and a.access_type = #{accessType}</if>
+            <if test="pkg != null  and pkg != ''"> and a.pkg = #{pkg}</if>
+            <if test="downloadUrl != null  and downloadUrl != ''"> and a.download_url = #{downloadUrl}</if>
+            <choose>
+                <when test="enable != null "> and a.enable = #{enable}</when>
+                <otherwise> and a.enable = 1</otherwise>
+            </choose>
+            <if test="params.startTime != null and params.startTime != ''"> and a.create_time &gt;= #{params.startTime}</if>
+            <if test="params.endTime != null and params.endTime != ''"> and a.create_time &lt;= #{params.endTime}</if>
+        </where>
+        order by a.id desc
+    </select>
+    
+    <select id="selectSspAppById" parameterType="Long" resultMap="SspAppResult">
+        <include refid="selectSspAppVo"/>
+        where a.id = #{id}
+    </select>
+
+    <insert id="insertSspApp" parameterType="SspApp" useGeneratedKeys="true" keyProperty="id">
+        insert into ssp_app
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="mediaId != null">media_id,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="osType != null">os_type,</if>
+            <if test="accessType != null">access_type,</if>
+            <if test="pkg != null">pkg,</if>
+            <if test="downloadUrl != null">download_url,</if>
+            <if test="enable != null">enable,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="mediaId != null">#{mediaId},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="osType != null">#{osType},</if>
+            <if test="accessType != null">#{accessType},</if>
+            <if test="pkg != null">#{pkg},</if>
+            <if test="downloadUrl != null">#{downloadUrl},</if>
+            <if test="enable != null">#{enable},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSspApp" parameterType="SspApp">
+        update ssp_app
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="mediaId != null">media_id = #{mediaId},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="osType != null">os_type = #{osType},</if>
+            <if test="accessType != null">access_type = #{accessType},</if>
+            <if test="pkg != null">pkg = #{pkg},</if>
+            <if test="downloadUrl != null">download_url = #{downloadUrl},</if>
+            <if test="enable != null">enable = #{enable},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSspAppById" parameterType="Long">
+        delete from ssp_app where id = #{id}
+    </delete>
+
+    <delete id="deleteSspAppByIds" parameterType="String">
+        delete from ssp_app where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

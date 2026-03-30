@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SspMediaMapper">
+    
+    <resultMap type="SspMedia" id="SspMediaResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="account"    column="account"    />
+        <result property="password"    column="password"    />
+        <result property="mediaCompanyName"    column="media_company_name"    />
+        <result property="mediaCompanyShort"    column="media_company_short"    />
+        <result property="mediaCompanyCode"    column="media_company_code"    />
+        <result property="mediaCompanyLicense"    column="media_company_license"    />
+        <result property="mediaCompanyAddress"    column="media_company_address"    />
+        <result property="mediaOwnerName"    column="media_owner_name"    />
+        <result property="contactName"    column="contact_name"    />
+        <result property="contactPhone"    column="contact_phone"    />
+        <result property="contactEmail"    column="contact_email"    />
+        <result property="enable"    column="enable"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectSspMediaVo">
+        select id, name, account, password, media_company_name, media_company_short, media_company_code, media_company_license, media_company_address, media_owner_name, contact_name, contact_phone, contact_email, enable, create_by, create_time, update_by, update_time, remark from ssp_media
+    </sql>
+
+    <select id="selectSspMediaList" parameterType="SspMedia" resultMap="SspMediaResult">
+        <include refid="selectSspMediaVo"/>
+        <where>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="account != null  and account != ''"> and account = #{account}</if>
+            <if test="password != null  and password != ''"> and password = #{password}</if>
+            <if test="mediaCompanyName != null  and mediaCompanyName != ''"> and media_company_name like concat('%', #{mediaCompanyName}, '%')</if>
+            <if test="mediaCompanyShort != null  and mediaCompanyShort != ''"> and media_company_short = #{mediaCompanyShort}</if>
+            <if test="mediaCompanyCode != null  and mediaCompanyCode != ''"> and media_company_code = #{mediaCompanyCode}</if>
+            <if test="mediaCompanyLicense != null  and mediaCompanyLicense != ''"> and media_company_license = #{mediaCompanyLicense}</if>
+            <if test="mediaCompanyAddress != null  and mediaCompanyAddress != ''"> and media_company_address = #{mediaCompanyAddress}</if>
+            <if test="mediaOwnerName != null  and mediaOwnerName != ''"> and media_owner_name like concat('%', #{mediaOwnerName}, '%')</if>
+            <if test="contactName != null  and contactName != ''"> and contact_name like concat('%', #{contactName}, '%')</if>
+            <if test="contactPhone != null  and contactPhone != ''"> and contact_phone = #{contactPhone}</if>
+            <if test="contactEmail != null  and contactEmail != ''"> and contact_email = #{contactEmail}</if>
+            <choose>
+                <when test="enable != null "> and enable = #{enable}</when>
+                <otherwise> and enable = 1</otherwise>
+            </choose>
+        </where>
+        order by id desc
+    </select>
+    
+    <select id="selectSspMediaById" parameterType="Long" resultMap="SspMediaResult">
+        <include refid="selectSspMediaVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertSspMedia" parameterType="SspMedia" useGeneratedKeys="true" keyProperty="id">
+        insert into ssp_media
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="account != null and account != ''">account,</if>
+            <if test="password != null and password != ''">password,</if>
+            <if test="mediaCompanyName != null">media_company_name,</if>
+            <if test="mediaCompanyShort != null">media_company_short,</if>
+            <if test="mediaCompanyCode != null">media_company_code,</if>
+            <if test="mediaCompanyLicense != null">media_company_license,</if>
+            <if test="mediaCompanyAddress != null">media_company_address,</if>
+            <if test="mediaOwnerName != null">media_owner_name,</if>
+            <if test="contactName != null">contact_name,</if>
+            <if test="contactPhone != null">contact_phone,</if>
+            <if test="contactEmail != null">contact_email,</if>
+            <if test="enable != null">enable,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="account != null and account != ''">#{account},</if>
+            <if test="password != null and password != ''">#{password},</if>
+            <if test="mediaCompanyName != null">#{mediaCompanyName},</if>
+            <if test="mediaCompanyShort != null">#{mediaCompanyShort},</if>
+            <if test="mediaCompanyCode != null">#{mediaCompanyCode},</if>
+            <if test="mediaCompanyLicense != null">#{mediaCompanyLicense},</if>
+            <if test="mediaCompanyAddress != null">#{mediaCompanyAddress},</if>
+            <if test="mediaOwnerName != null">#{mediaOwnerName},</if>
+            <if test="contactName != null">#{contactName},</if>
+            <if test="contactPhone != null">#{contactPhone},</if>
+            <if test="contactEmail != null">#{contactEmail},</if>
+            <if test="enable != null">#{enable},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSspMedia" parameterType="SspMedia">
+        update ssp_media
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="account != null and account != ''">account = #{account},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="mediaCompanyName != null">media_company_name = #{mediaCompanyName},</if>
+            <if test="mediaCompanyShort != null">media_company_short = #{mediaCompanyShort},</if>
+            <if test="mediaCompanyCode != null">media_company_code = #{mediaCompanyCode},</if>
+            <if test="mediaCompanyLicense != null">media_company_license = #{mediaCompanyLicense},</if>
+            <if test="mediaCompanyAddress != null">media_company_address = #{mediaCompanyAddress},</if>
+            <if test="mediaOwnerName != null">media_owner_name = #{mediaOwnerName},</if>
+            <if test="contactName != null">contact_name = #{contactName},</if>
+            <if test="contactPhone != null">contact_phone = #{contactPhone},</if>
+            <if test="contactEmail != null">contact_email = #{contactEmail},</if>
+            <if test="enable != null">enable = #{enable},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSspMediaById" parameterType="Long">
+        delete from ssp_media where id = #{id}
+    </delete>
+
+    <delete id="deleteSspMediaByIds" parameterType="String">
+        delete from ssp_media where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

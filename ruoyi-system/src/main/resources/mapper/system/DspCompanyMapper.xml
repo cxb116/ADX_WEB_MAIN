@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DspCompanyMapper">
+    
+    <resultMap type="DspCompany" id="DspCompanyResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="dspCode"    column="dsp_code"    />
+        <result property="url"    column="url"    />
+        <result property="method"    column="method"    />
+        <result property="timeout"    column="timeout"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectDspCompanyVo">
+        select id, name, dsp_code, url, method, timeout, create_by, create_time, update_by, update_time, remark from dsp_company
+    </sql>
+
+    <select id="selectDspCompanyList" parameterType="DspCompany" resultMap="DspCompanyResult">
+        <include refid="selectDspCompanyVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="dspCode != null "> and dsp_code = #{dspCode}</if>
+            <if test="url != null  and url != ''"> and url = #{url}</if>
+            <if test="method != null "> and method = #{method}</if>
+            <if test="timeout != null "> and timeout = #{timeout}</if>
+        </where>
+    </select>
+    
+    <select id="selectDspCompanyById" parameterType="Long" resultMap="DspCompanyResult">
+        <include refid="selectDspCompanyVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDspCompany" parameterType="DspCompany" useGeneratedKeys="true" keyProperty="id">
+        insert into dsp_company
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="dspCode != null">dsp_code,</if>
+            <if test="url != null and url != ''">url,</if>
+            <if test="method != null">method,</if>
+            <if test="timeout != null">timeout,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="dspCode != null">#{dspCode},</if>
+            <if test="url != null and url != ''">#{url},</if>
+            <if test="method != null">#{method},</if>
+            <if test="timeout != null">#{timeout},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDspCompany" parameterType="DspCompany">
+        update dsp_company
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="dspCode != null">dsp_code = #{dspCode},</if>
+            <if test="url != null and url != ''">url = #{url},</if>
+            <if test="method != null">method = #{method},</if>
+            <if test="timeout != null">timeout = #{timeout},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDspCompanyById" parameterType="Long">
+        delete from dsp_company where id = #{id}
+    </delete>
+
+    <delete id="deleteDspCompanyByIds" parameterType="String">
+        delete from dsp_company where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
