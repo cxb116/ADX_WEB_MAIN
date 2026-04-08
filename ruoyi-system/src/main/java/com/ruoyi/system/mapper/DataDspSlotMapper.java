@@ -89,4 +89,28 @@ public interface DataDspSlotMapper
      * @return 成交系数（0-100）
      */
     public Integer selectDspDealRatio(@Param("id") Long id);
+    
+    /**
+     * 根据预算广告位ID查询媒体广告位ID
+     *
+     * @param dspSlotId 预算广告位ID
+     * @return 媒体广告位ID
+     */
+    public Long selectSspSlotIdByDspSlotId(@Param("dspSlotId") Long dspSlotId);
+    
+    /**
+     * 根据媒体广告位ID查询媒体ID
+     *
+     * @param sspSlotId 媒体广告位ID
+     * @return 媒体ID
+     */
+    public Long selectMediaIdBySspSlotId(@Param("sspSlotId") Long sspSlotId);
+    
+    /**
+     * 根据媒体ID查询媒体分成系数
+     *
+     * @param mediaId 媒体ID
+     * @return 媒体分成系数（0-100）
+     */
+    public Integer selectSspDealRatioByMediaId(@Param("mediaId") Long mediaId);
 }

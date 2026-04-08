@@ -146,4 +146,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dsp_slot_info
         where id = #{id}
     </select>
+    
+    <!-- 根据预算广告位ID查询媒体广告位ID -->
+    <select id="selectSspSlotIdByDspSlotId" parameterType="Long" resultType="java.lang.Long">
+        select ssp_slot_id
+        from dsp_launch
+        where dsp_slot_id = #{dspSlotId}
+        limit 1
+    </select>
+    
+    <!-- 根据媒体广告位ID查询媒体ID -->
+    <select id="selectMediaIdBySspSlotId" parameterType="Long" resultType="java.lang.Long">
+        select media_id
+        from ssp_slot_info
+        where id = #{sspSlotId}
+    </select>
+    
+    <!-- 根据媒体ID查询媒体分成系数 -->
+    <select id="selectSspDealRatioByMediaId" parameterType="Long" resultType="java.lang.Integer">
+        select ssp_deal_ratio
+        from ssp_slot_info
+        where media_id = #{mediaId}
+        limit 1
+    </select>
 </mapper>
