@@ -82,4 +82,11 @@ public interface DataDspSlotMapper
      * @return 按日期分组的填充率数据列表
      */
     public List<Map<String, Object>> selectFillRateData(@Param("tableNames") List<String> tableNames, @Param("startDate") String startDate, @Param("endDate") String endDate);
+    /**
+     * 查询成交系数（用于 RTB 模式）
+     *
+     * @param id 预算广告位ID
+     * @return 成交系数（0-100）
+     */
+    public Integer selectDspDealRatio(@Param("id") Long id);
 }

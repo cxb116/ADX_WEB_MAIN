@@ -93,4 +93,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and dsp_slot_code = #{dspSlotCode}
           and date = #{date}
     </update>
+
+    <!-- 根据 dsp_slot_id、dsp_slot_code 和 date 批量更新 income -->
+    <update id="updateIncomeByDspSlotInfo">
+        update ${tableName}
+        set income = #{income}
+        where dsp_slot_id = #{dspSlotId}
+          and dsp_slot_code = #{dspSlotCode}
+          and date = #{date}
+    </update>
+
+    <!-- 根据 dsp_slot_id、dsp_slot_code 和 date 查询 ssp_slot_id -->
+    <select id="selectSspSlotIdByDspInfo" resultType="java.lang.Long">
+        select ssp_slot_id
+        from ${tableName}
+        where dsp_slot_id = #{dspSlotId}
+          and dsp_slot_code = #{dspSlotCode}
+          and date = #{date}
+        limit 1
+    </select>
+
+    <!-- 根据 ssp_slot_id 查询分成系数 -->
+    <select id="selectSspDealRatio" resultType="java.lang.Integer">
+        select ssp_deal_ratio
+        from ssp_slot_info
+        where id = #{sspSlotId}
+          and enable = 1
+    </select>
 </mapper>

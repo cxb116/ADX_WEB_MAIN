@@ -139,4 +139,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
         ORDER BY date
     </select>
+
+    <!-- 查询成交系数（用于 RTB 模式） -->
+    <select id="selectDspDealRatio" parameterType="Long" resultType="java.lang.Integer">
+        select dsp_deal_ratio
+        from dsp_slot_info
+        where id = #{id}
+    </select>
 </mapper>

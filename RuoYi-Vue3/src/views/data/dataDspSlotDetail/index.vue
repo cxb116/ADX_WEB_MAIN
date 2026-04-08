@@ -202,6 +202,12 @@
       :close-on-click-modal="false"
     >
       <el-form :model="correctForm" :rules="correctRules" ref="correctFormRef" label-width="100px">
+        <el-form-item label="结算方式" prop="payType">
+          <el-radio-group v-model="correctForm.payType">
+            <el-radio :label="1">分成</el-radio>
+            <el-radio :label="2">RTB</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="当前成本" prop="currentSpend">
           <el-input v-model="correctForm.currentSpend" disabled>
             <template #append>元</template>
@@ -410,6 +416,7 @@ function handleCorrectSpend(row) {
   correctForm.id = row.id
   correctForm.currentSpend = row.spend ? (row.spend / 100).toFixed(2) : '0.00'
   correctForm.newSpend = row.spend ? (row.spend / 100) : 0
+  correctForm.payType = row.dspPayType || 1 // 默认分成
   correctForm.date = row.date ? formatDate(row.date) : ''
   correctForm.dspSlotName = row.dspSlotName || ''
   correctForm.dspSlotId = row.dspSlotId
@@ -423,12 +430,19 @@ function submitCorrectSpend() {
       // 将元转换为分
       const newSpendInCents = Math.round(correctForm.newSpend * 100)
 
-      // 调用更新接口
-      updateDataDspSlotDetail({
+      // 使用数据的日期生成表名
+      const tableName = generateTableName(correctForm.date)
+
+      // 准备提交数据：只传 id、payType、spend、tableName
+      const submitData = {
         id: correctForm.id,
+        payType: correctForm.payType,
         spend: newSpendInCents,
-        tableName: generateTableName()
-      }).then(response => {
+        tableName: tableName
+      }
+
+      // 调用更新接口
+      updateDataDspSlotDetail(submitData).then(response => {
         proxy.$modal.msgSuccess("修正成功")
         correctDialogVisible.value = false
         getList()

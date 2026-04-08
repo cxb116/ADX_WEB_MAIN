@@ -37,15 +37,23 @@ public interface DspSlotInfoMapper
 
     /**
      * 修改预算广告位
-     * 
+     *
      * @param dspSlotInfo 预算广告位
      * @return 结果
      */
     public int updateDspSlotInfo(DspSlotInfo dspSlotInfo);
 
     /**
+     * 查询成交系数
+     *
+     * @param id 预算广告位主键
+     * @return 成交系数（0-100）
+     */
+    public Integer selectDspDealRatio(Long id);
+
+    /**
      * 删除预算广告位
-     * 
+     *
      * @param id 预算广告位主键
      * @return 结果
      */

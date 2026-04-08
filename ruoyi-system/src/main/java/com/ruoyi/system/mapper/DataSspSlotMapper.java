@@ -43,4 +43,42 @@ public interface DataSspSlotMapper
                                         @Param("dspSlotCode") String dspSlotCode,
                                         @Param("date") Long date,
                                         @Param("spend") Long spend);
+
+    /**
+     * 根据 dsp_slot_id、dsp_slot_code 和 date 批量更新 income
+     *
+     * @param tableName 表名
+     * @param dspSlotId 预算广告位ID
+     * @param dspSlotCode 预算广告位编码
+     * @param date 日期
+     * @param income 收入（分）
+     * @return 结果
+     */
+    public int updateIncomeByDspSlotInfo(@Param("tableName") String tableName,
+                                        @Param("dspSlotId") Long dspSlotId,
+                                        @Param("dspSlotCode") String dspSlotCode,
+                                        @Param("date") Long date,
+                                        @Param("income") Long income);
+
+    /**
+     * 根据 dsp_slot_id、dsp_slot_code 和 date 查询 ssp_slot_id
+     *
+     * @param tableName 表名
+     * @param dspSlotId 预算广告位ID
+     * @param dspSlotCode 预算广告位编码
+     * @param date 日期
+     * @return SSP广告位ID
+     */
+    public Long selectSspSlotIdByDspInfo(@Param("tableName") String tableName,
+                                          @Param("dspSlotId") Long dspSlotId,
+                                          @Param("dspSlotCode") String dspSlotCode,
+                                          @Param("date") Long date);
+
+    /**
+     * 根据 ssp_slot_id 查询分成系数
+     *
+     * @param sspSlotId SSP广告位ID
+     * @return 分成系数（0-100）
+     */
+    public Integer selectSspDealRatio(@Param("sspSlotId") Long sspSlotId);
 }

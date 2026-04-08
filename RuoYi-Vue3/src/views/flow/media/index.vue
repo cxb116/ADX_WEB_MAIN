@@ -134,9 +134,9 @@
                 <el-form-item label="账号名" prop="account">
                     <el-input v-model="form.account" placeholder="请输入账号名" />
                 </el-form-item>
-<!--                <el-form-item label="密码" prop="password">-->
-<!--                    <el-input v-model="form.password" placeholder="请输入密码" />-->
-<!--                </el-form-item>-->
+                <el-form-item label="密码" prop="password">
+                    <el-input v-model="form.password" type="text" placeholder="请输入密码" />
+                </el-form-item>
                 <el-form-item label="公司名称" prop="mediaCompanyName">
                     <el-input v-model="form.mediaCompanyName" placeholder="请输入公司名称" />
                 </el-form-item>

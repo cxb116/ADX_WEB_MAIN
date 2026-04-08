@@ -112,6 +112,9 @@ public class DataDspSlot extends BaseEntity
     /** 结算方式（关联查询，不属于表字段）1=分成，2=RTB */
     private Integer dspPayType;
 
+    /** 结算方式（前端传递，不属于表字段，用于计算）1=分成，2=RTB */
+    private Integer payType;
+
     /** 查询开始日期（不属于表字段，用于查询） */
     private String beginDate;
 
@@ -381,6 +384,16 @@ public class DataDspSlot extends BaseEntity
     public Integer getDspPayType()
     {
         return dspPayType;
+    }
+
+    public void setPayType(Integer payType)
+    {
+        this.payType = payType;
+    }
+
+    public Integer getPayType()
+    {
+        return payType;
     }
 
     public void setBeginDate(String beginDate)
