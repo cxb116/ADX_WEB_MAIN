@@ -34,12 +34,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="sspSlotName"    column="ssp_slot_name"    />
         <result property="dspSlotName"    column="dsp_slot_name"    />
         <result property="mediaName"    column="media_name"    />
+        <result property="sspPayType"    column="ssp_pay_type"    />
+        <result property="sspDealRatio"    column="ssp_deal_ratio"    />
+        <result property="sspEcpm"    column="ssp_ecpm"    />
     </resultMap>
 
     <sql id="selectDataSspSlotVo">
         select t.id, t.media_id, t.app_id, t.ssp_slot_id, t.dsp_slot_id, t.dsp_slot_code, t.show_pv, t.show_uv, t.click_pv, t.click_uv, t.req_pv, t.req_uv, t.discard, t.ret_pv, t.ret_uv, t.spend, t.income, t.discount_click_pv, t.discount_show_pv, t.dplsucc_pv, t.complete_pv, t.install_pv, t.activate_pv, t.date, t.created_at,
         app.name as app_name,
         ssp_slot.name as ssp_slot_name,
+        ssp_slot.ssp_pay_type,
+        ssp_slot.ssp_deal_ratio,
+        ssp_slot.ssp_ecpm,
         ssp_slot.media_id,
         media.name as media_name,
         dsp_slot.name as dsp_slot_name
@@ -120,4 +126,69 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{sspSlotId}
           and enable = 1
     </select>
+
+    <!-- 修改媒体数据报表（修正用） -->
+    <update id="updateDataSspSlot" parameterType="DataSspSlot">
+        update ${tableName}
+        <set>
+            <if test="spend != null">spend = #{spend},</if>
+            <if test="income != null">income = #{income},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 查询当前月需要计算的分成模式数据（用于定时任务） -->
+    <select id="selectCurrentMonthDataForCalculation" resultMap="DataSspSlotResult">
+        SELECT t.id, t.ssp_slot_id, t.dsp_slot_id, t.show_pv,
+               ssp_slot.ssp_pay_type, ssp_slot.ssp_deal_ratio, ssp_slot.ssp_ecpm
+        FROM ${tableName} t
+        INNER JOIN ssp_slot_info ssp_slot ON t.ssp_slot_id = ssp_slot.id
+        WHERE ssp_slot.ssp_pay_type = 1
+          AND ssp_slot.enable = 1
+          AND t.show_pv > 0
+          AND ssp_slot.ssp_ecpm > 0
+          AND (t.spend IS NULL OR t.spend = 0 OR t.income IS NULL OR t.income = 0)
+    </select>
+
+    <!-- 批量更新分成模式的预算流水和收入（用于定时任务） -->
+    <update id="batchUpdateSpendAndIncome" parameterType="map">
+        UPDATE ${params.tableName}
+        <trim prefix="SET" suffixOverrides=",">
+            spend = CASE id
+        <foreach collection="params.list" item="item" separator=" ">
+            WHEN #{item.id} THEN #{item.spend}
+        </foreach>
+        ELSE spend END,
+            income = CASE id
+        <foreach collection="params.list" item="item" separator=" ">
+            WHEN #{item.id} THEN #{item.income}
+        </foreach>
+        ELSE income END
+        </trim>
+        WHERE id IN
+        <foreach collection="params.list" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </update>
+
+    <!-- 定时任务专用：批量更新分成模式的预算流水和收入 -->
+    <update id="batchUpdateForSchedule">
+        UPDATE ${tableName}
+        <trim prefix="SET" suffixOverrides=",">
+            spend = CASE id
+        <foreach collection="list" item="item" separator=" ">
+            WHEN #{item.id} THEN #{item.spend}
+        </foreach>
+        ELSE spend END,
+            income = CASE id
+        <foreach collection="list" item="item" separator=" ">
+            WHEN #{item.id} THEN #{item.income}
+        </foreach>
+        ELSE income END
+        </trim>
+        WHERE id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </update>
 </mapper>

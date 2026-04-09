@@ -6,6 +6,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
@@ -69,5 +71,26 @@ public class DataSspSlotController extends BaseController
     {
         dataSspSlot.setId(id);
         return success(dataSspSlotService.selectDataSspSlotById(dataSspSlot));
+    }
+
+    /**
+     * 修改媒体数据报表
+     */
+    @PreAuthorize("@ss.hasPermi('data:data_ssp_slot:edit')")
+    @Log(title = "修改媒体数据报表", businessType = BusinessType.UPDATE)
+    @PutMapping
+    public AjaxResult edit(@RequestBody DataSspSlot dataSspSlot)
+    {
+        return toAjax(dataSspSlotService.updateDataSspSlot(dataSspSlot));
+    }
+
+    /**
+     * 手动执行分成模式数据计算（测试用）
+     */
+    @GetMapping("/calculate")
+    public AjaxResult calculate()
+    {
+        int count = dataSspSlotService.calculateCurrentMonthData();
+        return success("分成模式数据计算完成，共计算 " + count + " 条记录");
     }
 }

@@ -130,6 +130,12 @@ public class DataSspSlot extends BaseEntity
     /** 预算广告位名称（关联查询，不属于表字段） */
     private String dspSlotName;
 
+    /** 结算方式（关联查询，不属于表字段） */
+    private Long sspPayType;
+
+    /** 分成系数（关联查询，不属于表字段） */
+    private Long sspDealRatio;
+
     /** 填充率（计算字段，不属于表字段） */
     private Double fillRate;
 
@@ -142,7 +148,10 @@ public class DataSspSlot extends BaseEntity
     /** 点击率（计算字段，不属于表字段） */
     private Double clickRate;
 
-    /** eCPM（计算字段，不属于表字段） */
+    /** SSP千次收益（关联查询，不属于表字段，单位分） */
+    private Long sspEcpm;
+
+    /** eCPM（计算字段，不属于表字段，单位元） */
     private Double ecpm;
 
     public void setId(Long id) 
@@ -445,6 +454,36 @@ public class DataSspSlot extends BaseEntity
         return dspSlotName;
     }
 
+    public void setSspPayType(Long sspPayType)
+    {
+        this.sspPayType = sspPayType;
+    }
+
+    public Long getSspPayType()
+    {
+        return sspPayType;
+    }
+
+    public void setSspDealRatio(Long sspDealRatio)
+    {
+        this.sspDealRatio = sspDealRatio;
+    }
+
+    public Long getSspDealRatio()
+    {
+        return sspDealRatio;
+    }
+
+    public void setSspEcpm(Long sspEcpm)
+    {
+        this.sspEcpm = sspEcpm;
+    }
+
+    public Long getSspEcpm()
+    {
+        return sspEcpm;
+    }
+
     public void setFillRate(Double fillRate)
     {
         this.fillRate = fillRate;
@@ -522,6 +561,10 @@ public class DataSspSlot extends BaseEntity
             .append("installPv", getInstallPv())
             .append("activatePv", getActivatePv())
             .append("date", getDate())
+            .append("sspPayType", getSspPayType())
+            .append("sspDealRatio", getSspDealRatio())
+            .append("sspEcpm", getSspEcpm())
+            .append("ecpm", getEcpm())
             .append("createdAt", getCreatedAt())
             .toString();
     }

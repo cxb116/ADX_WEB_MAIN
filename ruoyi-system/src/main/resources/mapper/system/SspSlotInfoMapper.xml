@@ -3,7 +3,7 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.system.mapper.SspSlotInfoMapper">
-    
+
     <resultMap type="SspSlotInfo" id="SspSlotInfoResult">
         <result property="id"    column="id"    />
         <result property="mediaId"    column="media_id"    />
@@ -17,6 +17,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="accessType"    column="access_type"    />
         <result property="sspPayType"    column="ssp_pay_type"    />
         <result property="sspDealRatio"    column="ssp_deal_ratio"    />
+        <result property="sspEcpm"    column="ssp_ecpm"    />
         <result property="width"    column="width"    />
         <result property="height"    column="height"    />
         <result property="adImage"    column="ad_image"    />
@@ -31,7 +32,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <sql id="selectSspSlotInfoVo">
         select ssi.id, ssi.media_id, ssi.app_id, ssi.name, ssi.name_alise, ssi.ad_type_id, ssi.ad_scene_id, ssi.ad_size_id,
-        sa.os_type, sa.access_type,
+        sa.os_type, sa.access_type, ssi.ssp_ecpm,
         ssi.ssp_pay_type, ssi.ssp_deal_ratio, ssi.width, ssi.height, ssi.ad_image, ssi.interaction_type, ssi.enable,ssi.create_time
         from ssp_slot_info ssi
         left join ssp_app sa on ssi.app_id = sa.id
@@ -42,8 +43,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <where>
             <if test="mediaId != null "> and ssi.media_id = #{mediaId}</if>
             <if test="appId != null "> and ssi.app_id = #{appId}</if>
-            <if test="name != null  and name != ''"> and ssi.name like concat('%', #{name}, '%')</if>
-            <if test="nameAlise != null  and nameAlise != ''"> and ssi.name_alise = #{nameAlise}</if>
+            <if test="name != null and name != ''"> and ssi.name like concat('%', #{name}, '%')</if>
+            <if test="nameAlise != null and nameAlise != ''"> and ssi.name_alise = #{nameAlise}</if>
             <if test="adTypeId != null "> and ssi.ad_type_id = #{adTypeId}</if>
             <if test="adSceneId != null "> and ssi.ad_scene_id = #{adSceneId}</if>
             <if test="adSizeId != null "> and ssi.ad_size_id = #{adSizeId}</if>
@@ -51,16 +52,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="accessType != null "> and sa.access_type = #{accessType}</if>
             <if test="sspPayType != null "> and ssi.ssp_pay_type = #{sspPayType}</if>
             <if test="sspDealRatio != null "> and ssi.ssp_deal_ratio = #{sspDealRatio}</if>
+            <if test="sspEcpm != null "> and ssi.ssp_ecpm = #{sspEcpm}</if>
             <if test="width != null "> and ssi.width = #{width}</if>
             <if test="height != null "> and ssi.height = #{height}</if>
-            <if test="adImage != null  and adImage != ''"> and ssi.ad_image = #{adImage}</if>
+            <if test="adImage != null and adImage != ''"> and ssi.ad_image = #{adImage}</if>
             <if test="interactionType != null "> and ssi.interaction_type = #{interactionType}</if>
             <if test="enable != null "> and ssi.enable = #{enable}</if>
-            <if test="params.startTime != null and params.startTime != ''"> and ssi.create_time &gt;= #{params.startTime}</if>
-            <if test="params.endTime != null and params.endTime != ''"> and ssi.create_time &lt;= #{params.endTime}</if>
+            <if test="createBy != null "> and ssi.create_by = #{createBy}</if>
+            <if test="createTime != null "> and ssi.create_time = #{createTime}</if>
+            <if test="updateBy != null "> and ssi.update_by = #{updateBy}</if>
+            <if test="updateTime != null "> and ssi.update_time = #{updateTime}</if>
+            <if test="remark != null "> and ssi.remark = #{remark}</if>
         </where>
     </select>
-    
+
     <select id="selectSspSlotInfoById" parameterType="Long" resultMap="SspSlotInfoResult">
         <include refid="selectSspSlotInfoVo"/>
         where ssi.id = #{id}
@@ -78,6 +83,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="adSizeId != null">ad_size_id,</if>
             <if test="sspPayType != null">ssp_pay_type,</if>
             <if test="sspDealRatio != null">ssp_deal_ratio,</if>
+            <if test="sspEcpm != null">ssp_ecpm,</if>
             <if test="width != null">width,</if>
             <if test="height != null">height,</if>
             <if test="adImage != null">ad_image,</if>
@@ -88,27 +94,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
             <if test="remark != null">remark,</if>
-         </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="mediaId != null">#{mediaId},</if>
-            <if test="appId != null">#{appId},</if>
-            <if test="name != null and name != ''">#{name},</if>
-            <if test="nameAlise != null">#{nameAlise},</if>
-            <if test="adTypeId != null">#{adTypeId},</if>
-            <if test="adSceneId != null">#{adSceneId},</if>
-            <if test="adSizeId != null">#{adSizeId},</if>
-            <if test="sspPayType != null">#{sspPayType},</if>
-            <if test="sspDealRatio != null">#{sspDealRatio},</if>
-            <if test="width != null">#{width},</if>
-            <if test="height != null">#{height},</if>
-            <if test="adImage != null">#{adImage},</if>
-            <if test="interactionType != null">#{interactionType},</if>
-            <if test="enable != null">#{enable},</if>
-            <if test="createBy != null">#{createBy},</if>
-            <if test="createTime != null">#{createTime},</if>
-            <if test="updateBy != null">#{updateBy},</if>
-            <if test="updateTime != null">#{updateTime},</if>
-            <if test="remark != null">#{remark},</if>
          </trim>
     </insert>
 
@@ -123,14 +108,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="adSceneId != null">ad_scene_id = #{adSceneId},</if>
             <if test="adSizeId != null">ad_size_id = #{adSizeId},</if>
             <if test="sspPayType != null">ssp_pay_type = #{sspPayType},</if>
-            <choose>
-                <when test="sspPayType != null and sspPayType == 2">
-                    ssp_deal_ratio = null,
-                </when>
-                <when test="sspDealRatio != null">
-                    ssp_deal_ratio = #{sspDealRatio},
-                </when>
-            </choose>
+            <if test="sspDealRatio != null">ssp_deal_ratio = #{sspDealRatio},</if>
+            <if test="sspEcpm != null">ssp_ecpm = #{sspEcpm},</if>
             <if test="width != null">width = #{width},</if>
             <if test="height != null">height = #{height},</if>
             <if test="adImage != null">ad_image = #{adImage},</if>
@@ -141,7 +120,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="remark != null">remark = #{remark},</if>
-        </trim>
+         </trim>
         where id = #{id}
     </update>
 
@@ -158,18 +137,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!-- 根据ssp广告位id查询匹配的预算方广告位列表 -->
     <select id="selectMatchedDspSlotInfo" parameterType="Long" resultMap="com.ruoyi.system.mapper.DspSlotInfoMapper.DspSlotInfoResult">
-        SELECT dsi.*
+        SELECT dsi.id,
+            dsi.name,
+            dsi.os_type,
+            dsi.dsp_slot_code,
+            dsi.dsp_app_id,
+            dsi.dsp_app_pkg,
+            dsi.dsp_app_ver,
+            dsi.dsp_app_store_ver,
+            dsi.price_encrypt_key,
+            dsi.dsp_app_store_link,
+            dsi.dsp_pay_type,
+            dsi.dsp_deal_ratio
         FROM dsp_slot_info dsi
         WHERE dsi.id NOT IN (
             SELECT dl.dsp_slot_id
             FROM dsp_launch dl
-            WHERE dl.ssp_slot_id = #{sspSlotId}
-        )
-        AND dsi.os_type = (SELECT sa.os_type FROM ssp_slot_info ssi LEFT JOIN ssp_app sa ON ssi.app_id = sa.id WHERE ssi.id = #{sspSlotId})
-        AND dsi.ad_type_id = (SELECT ad_type_id FROM ssp_slot_info WHERE id = #{sspSlotId})
-        AND (dsi.ad_scene_id = (SELECT ad_scene_id FROM ssp_slot_info WHERE id = #{sspSlotId})
-             OR dsi.ad_scene_id IS NULL
-             OR (SELECT ad_scene_id FROM ssp_slot_info WHERE id = #{sspSlotId}) IS NULL)
-        ORDER BY dsi.id
+            WHERE dl.ssp_slot_id = #{sspSlotId})
     </select>
-</mapper>
+
+    </mapper>

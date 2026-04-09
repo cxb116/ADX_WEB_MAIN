@@ -81,4 +81,38 @@ public interface DataSspSlotMapper
      * @return 分成系数（0-100）
      */
     public Integer selectSspDealRatio(@Param("sspSlotId") Long sspSlotId);
+
+    /**
+     * 修改媒体数据报表（修正用）
+     *
+     * @param dataSspSlot 包含 id、tableName、spend、income
+     * @return 结果
+     */
+    public int updateDataSspSlot(DataSspSlot dataSspSlot);
+
+    /**
+     * 查询当前月需要计算的分成模式数据（用于定时任务）
+     *
+     * @param tableName 表名（格式：data_ssp_slot_day_YYYYMM）
+     * @return 需要计算的数据列表
+     */
+    public List<DataSspSlot> selectCurrentMonthDataForCalculation(@Param("tableName") String tableName);
+
+    /**
+     * 批量更新分成模式的预算流水和收入（用于定时任务）
+     *
+     * @param params 包含tableName和list的Map
+     * @return 更新的记录数
+     */
+    public int batchUpdateSpendAndIncome(@Param("params") java.util.Map<String, Object> params);
+
+    /**
+     * 定时任务专用：批量更新分成模式的预算流水和收入
+     *
+     * @param tableName 表名
+     * @param updateList 更新数据列表
+     * @return 更新的记录数
+     */
+    public int batchUpdateForSchedule(@Param("tableName") String tableName,
+                                    @Param("list") java.util.List<java.util.Map<String, Object>> updateList);
 }

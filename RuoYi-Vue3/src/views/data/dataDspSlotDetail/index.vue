@@ -187,11 +187,11 @@
     </span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="100" fixed="right">
-        <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleCorrectSpend(scope.row)">修正</el-button>
-        </template>
-      </el-table-column>
+<!--      <el-table-column label="操作" align="center" width="100" fixed="right">-->
+<!--        <template #default="scope">-->
+<!--          <el-button link type="primary" icon="Edit" @click="handleCorrectSpend(scope.row)">修正</el-button>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
     </el-table>
 
     <!-- 修正成本对话框 -->

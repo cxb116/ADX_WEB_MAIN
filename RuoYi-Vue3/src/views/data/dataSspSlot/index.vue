@@ -170,6 +170,27 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
+      <el-table-column label="结算方式" align="center" width="100" prop="sspPayType">
+        <template #default="scope">
+          <dict-tag :options="ssp_pay_type" :value="String(scope.row.sspPayType)" />
+        </template>
+      </el-table-column>
+      <el-table-column label="分成系数(%)" align="center" width="120" prop="sspDealRatio">
+        <template #default="scope">
+          <span v-if="scope.row.sspPayType === 1 && scope.row.sspDealRatio !== null && scope.row.sspDealRatio !== undefined">
+            {{ scope.row.sspDealRatio }}%
+          </span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="千次收益(分)" align="center" width="120" prop="sspEcpm">
+        <template #default="scope">
+          <span v-if="scope.row.sspPayType === 1 && scope.row.sspEcpm !== null && scope.row.sspEcpm !== undefined">
+            {{ scope.row.sspEcpm }}
+          </span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column label="预算流水(元)" align="center" width="120" prop="spend">
         <template #default="scope">
           <span v-if="scope.row.spend !== null && scope.row.spend !== undefined">
@@ -210,6 +231,13 @@
 <!--          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['data:data_ssp_slot:remove']">删除</el-button>-->
 <!--        </template>-->
 <!--      </el-table-column>-->
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200">
+        <template #default="scope">
+<!--          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['data:data_ssp_slot:edit']">修改</el-button>-->
+          <el-button link type="warning" icon="Correct" @click="handleCorrect(scope.row)">修正</el-button>
+<!--          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['data:data_ssp_slot:remove']">删除</el-button>-->
+        </template>
+      </el-table-column>
     </el-table>
     
     <pagination
@@ -219,6 +247,69 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
+
+    <!-- 修正对话框 -->
+    <el-dialog
+      v-model="correctDialogVisible"
+      title="修正流水"
+      width="600px"
+      :close-on-click-modal="false"
+    >
+      <el-form :model="correctForm" :rules="correctRules" ref="correctFormRef" label-width="120px">
+        <el-form-item label="日期">
+          <el-input v-model="correctForm.date" disabled />
+        </el-form-item>
+        <el-form-item label="媒体广告位">
+          <el-input v-model="correctForm.sspSlotName" disabled />
+        </el-form-item>
+        <el-form-item label="预算广告位编号">
+          <el-input v-model="correctForm.dspSlotCode" disabled />
+        </el-form-item>
+        <el-form-item label="结算方式" prop="sspPayType">
+          <el-radio-group v-model="correctForm.sspPayType">
+            <el-radio :label="1">分成</el-radio>
+            <el-radio :label="2">RTB</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="分成系数(%)" prop="sspDealRatio">
+          <el-input-number
+            v-model="correctForm.sspDealRatio"
+            :min="0"
+            :max="100"
+            :precision="2"
+            placeholder="请输入分成系数"
+            :disabled="correctForm.sspPayType !== 1"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="千次收益(分)" prop="sspEcpm">
+          <el-input-number
+            v-model="correctForm.sspEcpm"
+            :min="0"
+            :precision="0"
+            placeholder="请输入千次收益"
+            :disabled="correctForm.sspPayType !== 1"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-divider>计算结果</el-divider>
+        <el-form-item label="展示PV">
+          <el-input v-model="correctForm.showPv" disabled />
+        </el-form-item>
+        <el-form-item label="预算流水(分)">
+          <el-input v-model="correctForm.spend" disabled />
+        </el-form-item>
+        <el-form-item label="利润收入(分)">
+          <el-input v-model="correctForm.income" disabled />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="cancelCorrect">取消</el-button>
+          <el-button type="primary" @click="submitCorrect">确定</el-button>
+        </div>
+      </template>
+    </el-dialog>
 
     <!-- 图表对话框 -->
     <el-dialog
@@ -239,9 +330,11 @@
 import { listData_ssp_slot, getData_ssp_slot, delData_ssp_slot, addData_ssp_slot, updateData_ssp_slot } from "@/api/data/dataSspSlot.js"
 import { listMedia } from "@/api/flow/media.js"
 import { listApp } from "@/api/flow/app.js"
+import { useDict } from "@/utils/dict"
 import * as echarts from 'echarts'
 
 const { proxy } = getCurrentInstance()
+const { ssp_pay_type } = useDict('ssp_pay_type')
 const chartRef = ref(null)
 let chartInstance = null
 
@@ -259,6 +352,53 @@ const tableType = ref('day') // 表类型: 'day' 或 'hour'
 const mediaList = ref([]) // 媒体列表
 const appList = ref([]) // 应用列表
 const chartDialogVisible = ref(false) // 图表对话框显示状态
+const correctDialogVisible = ref(false) // 修正对话框显示状态
+// 修正表单
+const correctForm = ref({
+  id: null,
+  tableName: '',
+  date: '',
+  sspSlotName: '',
+  dspSlotCode: '',
+  sspPayType: 1,
+  sspDealRatio: null,
+  sspEcpm: null,
+  showPv: 0,
+  spend: 0,
+  income: 0
+})
+// 修正表单验证规则
+const correctRules = {
+  sspPayType: [
+    { required: true, message: '结算方式不能为空', trigger: 'change' }
+  ],
+  sspDealRatio: [
+    {
+      validator: (_rule, value, callback) => {
+        // 如果结算方式选择分成，则分成系数必填
+        if (correctForm.value.sspPayType === 1 && !value) {
+          callback(new Error('分成系数不能为空'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ],
+  sspEcpm: [
+    {
+      validator: (_rule, value, callback) => {
+        // 如果结算方式选择分成，则千次收益必填
+        if (correctForm.value.sspPayType === 1 && !value) {
+          callback(new Error('千次收益不能为空'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ]
+}
 
 const data = reactive({
   form: {},
@@ -380,7 +520,18 @@ function getList() {
   params.tableName = generateTableName()
 
   listData_ssp_slot(params).then(response => {
-    data_ssp_slotList.value = response.rows
+    data_ssp_slotList.value = response.rows.map(item => {
+      // 如果是分成模式，自动计算预算流水和利润收入
+      if (item.sspPayType === 1 && item.showPv && item.sspEcpm) {
+        // 预算流水（分）= 展示PV × 千次收益（分） / 1000
+        const spend = Math.floor(item.sspEcpm * item.showPv / 1000)
+        item.spend = spend
+        // 利润收入（分）= 预算流水（分）× 分成系数（%） / 100
+        const income = item.sspDealRatio ? Math.floor(spend * item.sspDealRatio / 100) : 0
+        item.income = income
+      }
+      return item
+    })
     total.value = response.total
     loading.value = false
   })
@@ -459,6 +610,63 @@ function handleUpdate(row) {
     form.value = response.data
     open.value = true
     title.value = "修改媒体数据报表"
+  })
+}
+
+/** 修正按钮操作 */
+function handleCorrect(row) {
+  // 重置修正表单
+  correctForm.value = {
+    id: row.id,
+    tableName: generateTableName(),
+    date: row.date,
+    sspSlotName: row.sspSlotName || `${row.sspSlotId}`,
+    dspSlotCode: row.dspSlotCode || '',
+    sspPayType: row.sspPayType || 1,
+    sspDealRatio: row.sspDealRatio || null,
+    sspEcpm: row.sspEcpm || null,
+    showPv: row.showPv || 0,
+    spend: row.spend || 0,
+    income: row.income || 0
+  }
+  // 清除验证状态
+  if (proxy.$refs["correctFormRef"]) {
+    proxy.$refs["correctFormRef"].clearValidate()
+  }
+  correctDialogVisible.value = true
+}
+
+/** 取消修正 */
+function cancelCorrect() {
+  correctDialogVisible.value = false
+}
+
+/** 提交修正 */
+function submitCorrect() {
+  proxy.$refs["correctFormRef"].validate(valid => {
+    if (valid) {
+      // 如果是分成模式，重新计算成本和收入
+      if (correctForm.value.sspPayType === 1) {
+        // 预算流水（分）= 展示PV × 千次收益（分） / 1000
+        const newSpend = Math.floor(correctForm.value.sspEcpm * (correctForm.value.showPv || 0) / 1000)
+        correctForm.value.spend = newSpend
+        // 利润收入（分）= 预算流水（分）× 分成系数（%） / 100
+        const newIncome = Math.floor(newSpend * (correctForm.value.sspDealRatio || 0) / 100)
+        correctForm.value.income = newIncome
+      }
+
+      // 调用更新接口
+      updateData_ssp_slot({
+        id: correctForm.value.id,
+        tableName: correctForm.value.tableName,
+        spend: correctForm.value.spend,
+        income: correctForm.value.income
+      }).then(() => {
+        proxy.$modal.msgSuccess("修正成功")
+        correctDialogVisible.value = false
+        getList()
+      })
+    }
   })
 }
 

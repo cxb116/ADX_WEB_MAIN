@@ -63,6 +63,10 @@ public class SspSlotInfo extends BaseEntity
     @Excel(name = "下游媒体分成系数 ", readConverterExp = "0=到100，单位%,只=有分成有的系数")
     private Long sspDealRatio;
 
+    /** 千次收益（单位分，在分成时使用） */
+    @Excel(name = "千次收益（分）")
+    private Long sspEcpm;
+
     /** 广告宽度 */
     @Excel(name = "广告宽度")
     private Long width;
@@ -233,6 +237,7 @@ public class SspSlotInfo extends BaseEntity
             .append("accessType", getAccessType())
             .append("sspPayType", getSspPayType())
             .append("sspDealRatio", getSspDealRatio())
+            .append("sspEcpm", getSspEcpm())
             .append("width", getWidth())
             .append("height", getHeight())
             .append("adImage", getAdImage())
@@ -287,5 +292,22 @@ public class SspSlotInfo extends BaseEntity
 
     public void setAccessType(Long accessType) {
         this.accessType = accessType;
+    }
+
+    public Long getSspEcpm() {
+        return sspEcpm;
+    }
+
+    public void setSspEcpm(Long sspEcpm) {
+        this.sspEcpm = sspEcpm;
+    }
+
+    @JSONField(name = "ssp_ecpm")
+    public Long getEcpm() {
+        return sspEcpm;
+    }
+
+    public void setEcpm(Long ecpm) {
+        this.sspEcpm = ecpm;
     }
 }

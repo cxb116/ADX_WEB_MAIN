@@ -375,6 +375,16 @@
                     />
                   </el-form-item>
                 </el-col>
+                <el-col :span="6" v-if="editForm.sspPayType === '1'">
+                  <el-form-item label="千次收益(分)" prop="sspEcpm">
+                    <el-input-number
+                      v-model="editForm.sspEcpm"
+                      :min="0"
+                      placeholder="请输入千次收益"
+                      style="width: 100%"
+                    />
+                  </el-form-item>
+                </el-col>
                 <el-col :span="6">
                   <el-form-item label="广告宽度" prop="width">
                     <el-input v-model="editForm.width" placeholder="请输入广告宽度" />
@@ -949,6 +959,7 @@ const editForm = ref({
   accessType: null,
   sspPayType: null,
   sspDealRatio: null,
+  sspEcpm: null,
   width: null,
   height: null,
   adImage: null,
@@ -1128,6 +1139,19 @@ const editRules = {
       trigger: 'blur'
     }
   ],
+  sspEcpm: [
+    {
+      validator: (_rule, value, callback) => {
+        // 如果结算方式选择分成，则千次收益必填
+        if (editForm.value.sspPayType === '1' && !value) {
+          callback(new Error('千次收益不能为空'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ],
   enable: [
     { required: true, message: "状态不能为空", trigger: "change" }
   ],
@@ -1252,6 +1276,7 @@ function reset() {
     accessType: null,
     sspPayType: null,
     sspDealRatio: null,
+    sspEcpm: null,
     width: null,
     height: null,
     adImage: null,
@@ -1306,14 +1331,16 @@ function handleSspPayTypeChange() {
   proxy.$refs["mediaAdRef"].validateField('sspDealRatio')
 }
 
-/** 编辑页面结算方式改变时触发分成系数验证 */
+/** 编辑页面结算方式改变时触发分成系数和千次收益验证 */
 function handleEditSspPayTypeChange() {
-  // 如果结算方式切换为RTB，清空分成系数
+  // 如果结算方式切换为RTB，清空分成系数和千次收益
   if (editForm.value.sspPayType === '2') {
     editForm.value.sspDealRatio = null
+    editForm.value.sspEcpm = null
   }
-  // 触发分成系数字段的验证
+  // 触发分成系数和千次收益字段的验证
   proxy.$refs["editFormRef"].validateField('sspDealRatio')
+  proxy.$refs["editFormRef"].validateField('sspEcpm')
 }
 
 /** 检查某个交互类型是否被选中 */
@@ -1428,6 +1455,7 @@ function handleAdd() {
     accessType: null,
     sspPayType: null,
     sspDealRatio: null,
+    sspEcpm: null,
     width: null,
     height: null,
     adImage: null,
@@ -1481,6 +1509,7 @@ function handleUpdate(row) {
       accessType: data.accessType,
       sspPayType: data.sspPayType,
       sspDealRatio: data.sspDealRatio,
+      sspEcpm: data.sspEcpm,
       width: data.width,
       height: data.height,
       adImage: data.adImage,
@@ -1936,6 +1965,7 @@ function handleEditSave() {
         adSizeId: editForm.value.adSizeId,
         sspPayType: editForm.value.sspPayType,
         sspDealRatio: editForm.value.sspDealRatio,
+        sspEcpm: editForm.value.sspEcpm,
         width: editForm.value.width,
         height: editForm.value.height,
         adImage: editForm.value.adImage,
