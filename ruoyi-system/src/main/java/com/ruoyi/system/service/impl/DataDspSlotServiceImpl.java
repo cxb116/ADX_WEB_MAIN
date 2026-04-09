@@ -353,55 +353,80 @@ public class DataDspSlotServiceImpl implements IDataDspSlotService
         }
 
         // 计算需要更新到两个表的数值
-        Long dspSpend = dataDspSlot.getSpend(); // 默认平台成本等于传入的支出
-        Long sspIncome = dataDspSlot.getSpend(); // 默认媒体收入等于传入的支出
+        Long dspSpend = dataDspSlot.getSpend(); // 预算流水（用户输入的原始值）
+        Long sspIncome = 0L; // 收入（根据系数计算）
+        Long sspSlotIncome = 0L; // 下游媒体收入（RTB模式：输入值 * RTB系数/100，分成模式：输入值 * 分成系数/100）
 
-        // 如果是 RTB 模式（payType == 2），需要查询 dsp_deal_ratio 并计算分成
-        if (dataDspSlot.getPayType() != null && dataDspSlot.getPayType() == 2)
+        // 先查询完整的数据以获取 dsp_slot_id
+        DataDspSlot fullData = dataDspSlotMapper.selectDataDspSlotById(dataDspSlot);
+
+        if (fullData != null && fullData.getDspSlotId() != null)
         {
-            // 先查询完整的数据以获取 dsp_slot_id
-            DataDspSlot fullData = dataDspSlotMapper.selectDataDspSlotById(dataDspSlot);
-
-            if (fullData != null && fullData.getDspSlotId() != null)
+            // 如果是 RTB 模式（payType == 2），需要查询 dsp_deal_ratio 并计算分成
+            if (dataDspSlot.getPayType() != null && dataDspSlot.getPayType() == 2)
             {
                 // 从 dsp_slot_info 表查询成交系数
                 Integer dspDealRatio = dataDspSlotMapper.selectDspDealRatio(fullData.getDspSlotId());
 
                 if (dspDealRatio != null && dspDealRatio > 0)
                 {
-                    // 计算媒体分成：sspIncome = spend × 成交系数 / 100
-                    sspIncome = dataDspSlot.getSpend() * dspDealRatio / 100;
-                    // 计算平台成本：dspSpend = spend - sspIncome
-                    dspSpend = dataDspSlot.getSpend() - sspIncome;
+                    // 计算收入：sspIncome = 输入值 * (1 - RTB系数/100)
+                    sspIncome = dataDspSlot.getSpend() * (100 - dspDealRatio) / 100;
+                    // 下游媒体收入：sspSlotIncome = 输入值 * RTB系数/100
+                    sspSlotIncome = dataDspSlot.getSpend() * dspDealRatio / 100;
+                }
+            }
+            // 如果是分成模式（payType == 1），需要查询媒体分成系数并计算
+            else if (dataDspSlot.getPayType() != null && dataDspSlot.getPayType() == 1)
+            {
+                // 从 dsp_launch 表查询媒体广告位ID
+                Long sspSlotId = dataDspSlotMapper.selectSspSlotIdByDspSlotId(fullData.getDspSlotId());
+
+                if (sspSlotId != null)
+                {
+                    // 从 ssp_slot_info 表查询媒体ID
+                    Long mediaId = dataDspSlotMapper.selectMediaIdBySspSlotId(sspSlotId);
+
+                    if (mediaId != null)
+                    {
+                        // 从 ssp_slot_info 表查询媒体分成系数
+                        Integer sspDealRatio = dataDspSlotMapper.selectSspDealRatioByMediaId(mediaId);
+
+                        if (sspDealRatio != null && sspDealRatio > 0)
+                        {
+                            // dsp表收入 = 输入值 * 媒体分成系数/100
+                            sspIncome = dataDspSlot.getSpend() * sspDealRatio / 100;
+                            // 下游媒体收入 = 输入值 * (1 - 媒体分成系数/100)
+                            sspSlotIncome = dataDspSlot.getSpend() * (100 - sspDealRatio) / 100;
+                        }
+                    }
                 }
             }
         }
 
-        // 更新 data_dsp_slot_day 表（只更新 spend，用于平台成本）
+        // 更新 data_dsp_slot_day 表（更新 spend 和 income）
         DataDspSlot updateDsp = new DataDspSlot();
         updateDsp.setId(dataDspSlot.getId());
         updateDsp.setTableName(dataDspSlot.getTableName());
-        updateDsp.setSpend(dspSpend);
+        updateDsp.setSpend(dspSpend); // 预算流水使用用户输入的原始值
+        updateDsp.setIncome(sspIncome); // 收入使用计算后的值
         int rows = dataDspSlotMapper.updateDataDspSlot(updateDsp);
 
-        // 如果更新成功，则同步更新 data_ssp_slot_day 表
-        if (rows > 0 && sspIncome != null && dataDspSlot.getId() != null)
+        // 如果更新成功，则同步更新 data_ssp_slot_day 表（给下游看的数据）
+        if (rows > 0 && sspSlotIncome != null && dataDspSlot.getId() != null)
         {
-            // 先查询完整的数据（需要获取 date、dsp_slot_id、dsp_slot_code）
-            DataDspSlot fullData = dataDspSlotMapper.selectDataDspSlotById(dataDspSlot);
-
             if (fullData != null && fullData.getDate() != null)
             {
                 // 生成对应的 SSP 表名（data_ssp_slot_day_YYYYMM）
                 String sspTableName = dataDspSlot.getTableName().replace("data_dsp_slot_day_", "data_ssp_slot_day_");
 
-                // 同步更新 data_ssp_slot_day 表中的 income 字段（媒体收入）
+                // 同步更新 data_ssp_slot_day 表中的 income 字段（下游媒体收入）
                 dataSspSlotMapper.updateIncomeByDspSlotInfo(
                     sspTableName,
                     fullData.getDspSlotId(),
                     fullData.getDspSlotCode(),
                     fullData.getDate(),
-                    sspIncome
+                    sspSlotIncome
                 );
             }
         }
