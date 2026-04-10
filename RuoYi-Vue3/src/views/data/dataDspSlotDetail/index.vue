@@ -164,7 +164,7 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="预算流水(元)" align="center" width="120" prop="spend">
+      <el-table-column label="成本(元)" align="center" width="120" prop="spend">
         <template #default="scope">
           <span v-if="scope.row.spend !== null && scope.row.spend !== undefined">
             {{ (scope.row.spend / 100).toFixed(2) }}
