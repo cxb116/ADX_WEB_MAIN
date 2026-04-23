@@ -11,12 +11,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: 'Inter', -apple-system;
+  color: #000; /* 最黑 */
 
   &.dark {
     background-color: #1a1a1a;
-    color: #e0e0e0;
+    color: #f1efef;
   }
 }
 
@@ -112,6 +112,7 @@ aside {
   line-height: 32px;
   font-size: 16px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  //font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
   color: #2c3e50;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -203,3 +204,4 @@ aside {
     margin-bottom: 10px;
   }
 }
+

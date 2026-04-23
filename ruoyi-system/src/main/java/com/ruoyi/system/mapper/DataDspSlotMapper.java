@@ -21,6 +21,8 @@ public interface DataDspSlotMapper
      */
     public DataDspSlot selectDataDspSlotById(DataDspSlot dataDspSlot);
 
+
+    public DataDspSlot selectDataDspSlotOne(DataDspSlot dataDspSlot);
     /**
      * 查询预算报表列表
      *
@@ -113,4 +115,7 @@ public interface DataDspSlotMapper
      * @return 媒体分成系数（0-100）
      */
     public Integer selectSspDealRatioByMediaId(@Param("mediaId") Long mediaId);
+
+
+    // 修改数据
 }

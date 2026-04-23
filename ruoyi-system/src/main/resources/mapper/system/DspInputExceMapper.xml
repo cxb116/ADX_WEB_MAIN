@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DspInputExceMapper">
+    
+    <resultMap type="DspInputExce" id="DspInputExceResult">
+        <result property="id"    column="id"    />
+        <result property="dspSlotId"    column="dsp_slot_id"    />
+        <result property="table"    column="table"    />
+        <result property="inputTime"    column="input_time"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectDspInputExceVo">
+        select id, dsp_slot_id, table, input_time, create_time, update_by, update_time, remark from dsp_input_exce
+    </sql>
+
+    <select id="selectDspInputExceList" parameterType="DspInputExce" resultMap="DspInputExceResult">
+        <include refid="selectDspInputExceVo"/>
+        <where>  
+            <if test="dspSlotId != null "> and dsp_slot_id = #{dspSlotId}</if>
+            <if test="table != null "> and table = #{table}</if>
+            <if test="inputTime != null "> and input_time = #{inputTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectDspInputExceById" parameterType="Long" resultMap="DspInputExceResult">
+        <include refid="selectDspInputExceVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDspInputExce" parameterType="DspInputExce">
+        insert into dsp_input_exce
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="dspSlotId != null">dsp_slot_id,</if>
+            <if test="table != null">table,</if>
+            <if test="inputTime != null">input_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="dspSlotId != null">#{dspSlotId},</if>
+            <if test="table != null">#{table},</if>
+            <if test="inputTime != null">#{inputTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDspInputExce" parameterType="DspInputExce">
+        update dsp_input_exce
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="dspSlotId != null">dsp_slot_id = #{dspSlotId},</if>
+            <if test="table != null">table = #{table},</if>
+            <if test="inputTime != null">input_time = #{inputTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDspInputExceById" parameterType="Long">
+        delete from dsp_input_exce where id = #{id}
+    </delete>
+
+    <delete id="deleteDspInputExceByIds" parameterType="String">
+        delete from dsp_input_exce where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

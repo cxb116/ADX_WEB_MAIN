@@ -36,26 +36,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </sql>
 
     <select id="selectDspSlotInfoList" parameterType="DspSlotInfo" resultMap="DspSlotInfoResult">
-        <include refid="selectDspSlotInfoVo"/>
+        select
+        s.id, s.name, s.os_type, s.ad_type_id, s.ad_scene_id, s.ad_size_id,
+        s.dsp_slot_code, s.dsp_app_key, s.dsp_app_secret, s.dsp_app_id,
+        s.dsp_app_pkg, s.dsp_app_ver, s.dsp_app_store_ver, s.price_encrypt_key,
+        s.dsp_app_store_link, s.dsp_pay_type, s.dsp_deal_ratio,
+        s.company_id, s.product_id,
+        s.create_by, s.create_time, s.update_by, s.update_time, s.remark, c.name as companyName,p.name as productName
+        from dsp_slot_info as s
+        left join dsp_product as p
+        on p.id = s.product_id
+        left join dsp_company as c
+        on c.id = s.company_id
         <where>
-            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
-            <if test="osType != null "> and os_type = #{osType}</if>
-            <if test="adTypeId != null "> and ad_type_id = #{adTypeId}</if>
-            <if test="adSceneId != null "> and ad_scene_id = #{adSceneId}</if>
-            <if test="adSizeId != null "> and ad_size_id = #{adSizeId}</if>
-            <if test="dspSlotCode != null  and dspSlotCode != ''"> and dsp_slot_code = #{dspSlotCode}</if>
-            <if test="dspAppKey != null  and dspAppKey != ''"> and dsp_app_key = #{dspAppKey}</if>
-            <if test="dspAppSecret != null  and dspAppSecret != ''"> and dsp_app_secret = #{dspAppSecret}</if>
-            <if test="dspAppId != null  and dspAppId != ''"> and dsp_app_id = #{dspAppId}</if>
-            <if test="dspAppPkg != null  and dspAppPkg != ''"> and dsp_app_pkg = #{dspAppPkg}</if>
-            <if test="dspAppVer != null  and dspAppVer != ''"> and dsp_app_ver = #{dspAppVer}</if>
-            <if test="dspAppStoreVer != null  and dspAppStoreVer != ''"> and dsp_app_store_ver = #{dspAppStoreVer}</if>
-            <if test="priceEncryptKey != null  and priceEncryptKey != ''"> and price_encrypt_key = #{priceEncryptKey}</if>
-            <if test="dspAppStoreLink != null  and dspAppStoreLink != ''"> and dsp_app_store_link = #{dspAppStoreLink}</if>
-            <if test="dspPayType != null "> and dsp_pay_type = #{dspPayType}</if>
-            <if test="dspDealRatio != null "> and dsp_deal_ratio = #{dspDealRatio}</if>
-            <if test="companyId != null "> and company_id = #{companyId}</if>
-            <if test="productId != null "> and product_id = #{productId}</if>
+            <if test="name != null  and name != ''"> and s.name like concat('%', #{name}, '%')</if>
+            <if test="osType != null "> and s.os_type = #{osType}</if>
+            <if test="adTypeId != null "> and s.ad_type_id = #{adTypeId}</if>
+            <if test="adSceneId != null "> and s.ad_scene_id = #{adSceneId}</if>
+            <if test="adSizeId != null "> and s.ad_size_id = #{adSizeId}</if>
+            <if test="dspSlotCode != null  and dspSlotCode != ''"> and s.dsp_slot_code = #{dspSlotCode}</if>
+            <if test="dspAppKey != null  and dspAppKey != ''"> and s.dsp_app_key = #{dspAppKey}</if>
+            <if test="dspAppSecret != null  and dspAppSecret != ''"> and s.dsp_app_secret = #{dspAppSecret}</if>
+            <if test="dspAppId != null  and dspAppId != ''"> and s.dsp_app_id = #{dspAppId}</if>
+            <if test="dspAppPkg != null  and dspAppPkg != ''"> and s.dsp_app_pkg = #{dspAppPkg}</if>
+            <if test="dspAppVer != null  and dspAppVer != ''"> and s.dsp_app_ver = #{dspAppVer}</if>
+            <if test="dspAppStoreVer != null  and dspAppStoreVer != ''"> and s.dsp_app_store_ver = #{dspAppStoreVer}</if>
+            <if test="priceEncryptKey != null  and priceEncryptKey != ''"> and s.price_encrypt_key = #{priceEncryptKey}</if>
+            <if test="dspAppStoreLink != null  and dspAppStoreLink != ''"> and s.dsp_app_store_link = #{dspAppStoreLink}</if>
+            <if test="dspPayType != null "> and s.dsp_pay_type = #{dspPayType}</if>
+            <if test="dspDealRatio != null "> and s.dsp_deal_ratio = #{dspDealRatio}</if>
+            <if test="companyId != null "> and s.company_id = #{companyId}</if>
+            <if test="productId != null "> and s.product_id = #{productId}</if>
         </where>
     </select>
     

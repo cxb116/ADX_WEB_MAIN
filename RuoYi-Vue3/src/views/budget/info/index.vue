@@ -3,31 +3,26 @@
     <el-tabs v-model="activeTab" @tab-change="handleTabChange">
       <el-tab-pane label="预算方列表" name="list">
         <div class="app-container-list">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="广告位名称" prop="name" label-width="100">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch"
+             label-width="68px"
+             :label-style="{ color: '#000' }"
+    >
+      <el-form-item  prop="name" label-width="100">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入广告位名称"
           clearable
           @keyup.enter="handleQuery"
+          style="width: 150px;"
         />
       </el-form-item>
-      <el-form-item label="产品" prop="companyProductId">
-        <el-cascader
-          v-model="queryParams.companyProductId"
-          :options="cascaderOptions"
-          :props="{ expandTrigger: 'hover' }"
-          placeholder="请选择产品"
-          clearable
-          style="width: 240px"
-          @change="handleQueryCascaderChange"
-        />
-      </el-form-item>
-      <el-form-item label="广告类型" prop="adTypeId">
+
+      <el-form-item  prop="adTypeId">
         <el-select
           v-model="queryParams.adTypeId"
           placeholder="请选择广告类型"
           clearable
+          style="width: 150px;"
         >
           <el-option
             v-for="item in adTypeList"
@@ -37,11 +32,12 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="广告场景" prop="adSceneId">
+      <el-form-item  prop="adSceneId">
         <el-select
           v-model="queryParams.adSceneId"
           placeholder="请选择广告场景"
           clearable
+          style="width: 150px;"
         >
           <el-option
             v-for="item in adSceneList"
@@ -51,23 +47,50 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="预算方广告位" prop="dspSlotCode" label-width="100">
+      <el-form-item  prop="dspSlotCode" label-width="100">
         <el-input
           v-model="queryParams.dspSlotCode"
           placeholder="请输入预算方广告位"
           clearable
           @keyup.enter="handleQuery"
+          style="width: 150px;"
         />
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+
+      <el-form-item  prop="createTimeRange">
+        <el-date-picker
+            v-model="createTimeRange"
+            type="daterange"
+            range-separator="-"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="YYYY-MM-DD"
+            style="width: 250px"
+        />
+      </el-form-item>
+
+      <el-form-item  prop="companyProductId">
+        <el-cascader
+            v-model="queryParams.companyProductId"
+            :options="cascaderOptions"
+            :props="{ expandTrigger: 'hover' }"
+            placeholder="请选择产品"
+            clearable
+            @change="handleQueryCascaderChange"
+            style="width: 150px;"
+        />
+      </el-form-item>
+
+      <el-form-item class="left-button">
+        <el-button class="btn-blue" type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+        <el-button class="btn-blue" icon="Refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
+            class="btn-blue"
           type="primary"
           plain
           icon="Plus"
@@ -77,26 +100,7 @@
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['budget:info:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['budget:info:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
+            class="btn-regge"
           type="warning"
           plain
           icon="Download"
@@ -113,7 +117,11 @@
       @selection-change="handleSelectionChange"
       class="budget-table"
       style="width: 100%"
+      :header-cell-style="{ background: '#F5F7FA', color: '#000' }"
+      :cell-style="{ color: '#000' }"
+      border
       table-layout="auto"
+      highlight-current-row="true"
     >
       <el-table-column type="selection" width="55" align="center" fixed />
       <el-table-column label="广告位名称" align="center" prop="name" width="250" fixed>
@@ -121,14 +129,14 @@
           {{ scope.row.name }}({{ scope.row.id }})
         </template>
       </el-table-column>
-      <el-table-column label="产品" align="center" prop="dsp_product_id" width="200">
+      <el-table-column label="产品" align="center" prop="productName" width="200">
         <template #default="scope">
-          {{ getProductName(scope.row.dsp_product_id) }}
+          {{ scope.row.productName}}
         </template>
       </el-table-column>
-      <el-table-column label="公司" align="center" prop="company_id" width="150">
+      <el-table-column label="公司" align="center" prop="companyName" width="150">
         <template #default="scope">
-          {{ getCompanyName(scope.row.company_id) }}
+          {{ scope.row.companyName }}
         </template>
       </el-table-column>
       <el-table-column label="操作系统" align="center" prop="osType" width="100">
@@ -539,17 +547,17 @@ function getProductList() {
   })
 }
 
-/** 根据公司ID获取公司名称 */
-function getCompanyName(companyId) {
-  const company = companyList.value.find(item => item.id === companyId || item.company_id === companyId)
-  return company ? company.name : '-'
-}
-
-/** 根据产品ID获取产品名称 */
-function getProductName(productId) {
-  const product = productList.value.find(item => item.id === productId || item.product_id === productId)
-  return product ? product.name : '-'
-}
+// /** 根据公司ID获取公司名称 */
+// function getCompanyName(companyId) {
+//   const company = companyList.value.find(item => item.id === companyId || item.company_id === companyId)
+//   return company ? company.name : '-'
+// }
+//
+// /** 根据产品ID获取产品名称 */
+// function getProductName(productId) {
+//   const product = productList.value.find(item => item.id === productId || item.product_id === productId)
+//   return product ? product.name : '-'
+// }
 
 /** 加载广告类型列表 */
 function loadAdTypeList() {
@@ -634,6 +642,7 @@ function handleAdTypeChange() {
 function getList() {
   loading.value = true
   listInfo(queryParams.value).then(response => {
+    console.log("InfoList::",response)
     infoList.value = response.rows
     total.value = response.total
     loading.value = false
@@ -925,5 +934,75 @@ getList()
   justify-content: center;
   align-items: center;
   min-height: 400px;
+}
+
+.btn-blue {
+  background-color: #2A5FB7 !important;
+  border-color: #2A5FB7 !important;
+  color: #fff !important;
+}
+
+.btn-blue:hover {
+  background-color: #1f4f96 !important;
+  border-color: #1f4f96 !important;
+}
+
+:deep(.el-form--inline .el-form-item) {
+  margin-right: 8px;   /* 👈 调小间距 */
+  margin-bottom: 8px;  /* 👈 行间距也可以顺便优化 */
+}
+
+.btn-regge {
+  background-color: #DCA550 !important;
+  border-color: #f1b965 !important;
+  color: #fff !important;
+}
+
+.btn-regge:hover {
+  background-color: #df9318 !important;
+  border-color: #df9318 !important;
+}
+
+
+/* 绿色（正常） */
+.dot-success {
+  background-color: #67c23a;
+}
+
+/* 红色（禁用/拒绝） */
+.dot-danger {
+  background-color: #f56c6c;
+}
+
+/* 黄色（审核中） */
+.dot-warning {
+  background-color: #e6a23c;
+}
+
+.el-form--inline .el-form-item {
+  margin-right: 8px;  /* 默认一般是 18px+ */
+  margin-bottom: 8px;
+}
+
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-wrap {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap; /* 关键：禁止换行 */
+}
+
+.status-dot {
+  margin-right: 6px;
+}
+.left-button {
+  margin-left: 55px;
 }
 </style>

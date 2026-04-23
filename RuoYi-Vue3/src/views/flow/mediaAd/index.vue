@@ -3,22 +3,16 @@
     <el-tabs v-model="activeTab" @tab-change="handleTabChange">
       <el-tab-pane label="广告位列表" name="list">
         <div class="app-container-list">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="媒体应用" prop="mediaAppCascade">
-        <el-cascader
-          v-model="queryParams.mediaAppCascade"
-          :options="cascaderData"
-          :props="{ expandTrigger: 'hover' }"
-          placeholder="请选择媒体/应用"
-          clearable
-          style="width: 240px"
-        />
-      </el-form-item>
-      <el-form-item label="广告类型" prop="adTypeId">
+    <el-form :model="queryParams"
+             ref="queryRef" :inline="true"
+             v-show="showSearch" label-width="68px">
+
+      <el-form-item label="" prop="adTypeId">
         <el-select
           v-model="queryParams.adTypeId"
           placeholder="请选择广告类型"
           clearable
+          style="width: 150px;"
         >
           <el-option
             v-for="item in adTypeList"
@@ -28,27 +22,30 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="广告位名称" label-width="110px" prop="name">
+      <el-form-item label="" label-width="110px" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入广告位名称"
           clearable
           @keyup.enter="handleQuery"
+          style="width: 150px;"
         />
       </el-form-item>
-      <el-form-item label="内部广告位名称" label-width="110px" prop="nameAlise">
+      <el-form-item label="" label-width="110px" prop="nameAlise">
         <el-input
           v-model="queryParams.nameAlise"
           placeholder="请输入内部广告位名称"
           clearable
           @keyup.enter="handleQuery"
+          style="width: 150px;"
         />
       </el-form-item>
-      <el-form-item label="操作系统" prop="osType">
+      <el-form-item label="" prop="osType">
         <el-select
           v-model="queryParams.osType"
           placeholder="请选择操作系统"
           clearable
+          style="width: 150px;"
         >
           <el-option
             v-for="dict in os_type"
@@ -58,11 +55,12 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="接入方式" prop="accessType">
+      <el-form-item label="" prop="accessType">
         <el-select
           v-model="queryParams.accessType"
           placeholder="请选择接入方式"
           clearable
+          style="width: 150px;"
         >
           <el-option
             v-for="dict in access_type"
@@ -72,7 +70,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="创建时间" prop="createTimeRange">
+      <el-form-item label="" prop="createTimeRange">
         <el-date-picker
             v-model="createTimeRange"
             type="daterange"
@@ -80,14 +78,16 @@
             start-placeholder="开始日期"
             end-placeholder="结束日期"
             value-format="YYYY-MM-DD"
-            style="width: 240px"
+            style="width: 250px"
+
         />
       </el-form-item>
-      <el-form-item label="状态" prop="enable">
+      <el-form-item label="" prop="enable">
         <el-select
           v-model="queryParams.enable"
           placeholder="请选择状态"
           clearable
+          style="width: 150px"
         >
           <el-option
             v-for="dict in audit_status"
@@ -98,41 +98,33 @@
         </el-select>
       </el-form-item>
 
+            <el-form-item label="" prop="mediaAppCascade" >
+              <el-cascader
+                v-model="queryParams.mediaAppCascade"
+                :options="cascaderData"
+                :props="{ expandTrigger: 'hover' }"
+                placeholder="请选择媒体"
+                clearable
+              />
+            </el-form-item>
+
       <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button class="btn-blue" icon="Search" @click="handleQuery">搜索</el-button>
+        <el-button class="btn-blue" icon="Refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['flow:mediaAd:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['flow:mediaAd:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['flow:mediaAd:remove']"
-        >删除</el-button>
+            plain
+            icon="Plus"
+            class="btn-blue"
+            @click="handleAdd"
+            v-hasPermi="['flow:media:add']"
+        >
+          新增
+        </el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -141,20 +133,25 @@
           icon="Download"
           @click="handleExport"
           v-hasPermi="['flow:mediaAd:export']"
+          class="btn-regge"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table
-      v-loading="loading"
-      :data="mediaAdList"
-      @selection-change="handleSelectionChange"
-      class="media-ad-table"
-      style="width: 100%"
-      table-layout="auto"
-    >
-      <el-table-column type="selection" width="55" align="center" fixed />
+          <el-table
+              v-loading="loading"
+              :data="mediaAdList"
+              @selection-change="handleSelectionChange"
+              class="media-ad-table my-table"
+              style="width: 100%"
+              :header-cell-style="{ background: '#F5F7FA', color: '#000' }"
+              :cell-style="{ color: '#000' }"
+              border
+              table-layout="auto"
+              highlight-current-row="true"
+          >
+      <el-table-column label="广告位ID" align="center" prop="id" width="100" fixed />
       <el-table-column label="广告位名称" align="center" prop="name" width="250" fixed>
         <template #default="scope">
           {{ scope.row.name }}({{ scope.row.id }})
@@ -184,6 +181,34 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
+
+<!--            <el-table-column label="状态" align="center" width="120" prop="enable">-->
+<!--              <template #default="scope">-->
+<!--                <dict-tag :options="audit_status" :value="String(scope.row.enable)" />-->
+<!--              </template>-->
+<!--            </el-table-column>-->
+            <el-table-column
+                label="状态"
+                align="center"
+                prop="enable"
+                min-width="160"
+            >
+              <template #default="scope">
+                <div class="status-wrap">
+      <span
+          class="status-dot"
+          :class="getStatusClass(scope.row.enable)"></span>
+                  <dict-tag
+                      :options="media_status"
+                      :value="scope.row.enable"/>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="结算方式" align="center" width="120" prop="sspPayType">
+              <template #default="scope">
+                <dict-tag :options="ssp_pay_type" :value="String(scope.row.sspPayType)" />
+              </template>
+            </el-table-column>
       <el-table-column label="接入方式" align="center" prop="accessType" width="120">
         <template #default="scope">
           <span v-if="scope.row.accessType && scope.row.accessType != '0'">
@@ -198,18 +223,10 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="结算方式" align="center" width="120" prop="sspPayType">
-        <template #default="scope">
-          <dict-tag :options="ssp_pay_type" :value="String(scope.row.sspPayType)" />
-        </template>
-      </el-table-column>
       <el-table-column label="交互类型" align="center" width="120" prop="interactionType" />
-      <el-table-column label="状态" align="center" width="120" prop="enable">
-        <template #default="scope">
-          <dict-tag :options="audit_status" :value="String(scope.row.enable)" />
-        </template>
-      </el-table-column>
+
       <el-table-column label="创建时间" align="center" width="200" prop="createTime"/>
+      <el-table-column label="修改时间" align="center" width="200" prop="updateTime"/>
       <el-table-column label="操作" align="center" width="200" fixed="right" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['flow:mediaAd:edit']">修改</el-button>
@@ -372,16 +389,6 @@
                       v-model="editForm.sspDealRatio"
                       placeholder="请输入分成系数"
                       :disabled="editForm.sspPayType === '2'"
-                    />
-                  </el-form-item>
-                </el-col>
-                <el-col :span="6" v-if="editForm.sspPayType === '1'">
-                  <el-form-item label="千次收益(分)" prop="sspEcpm">
-                    <el-input-number
-                      v-model="editForm.sspEcpm"
-                      :min="0"
-                      placeholder="请输入千次收益"
-                      style="width: 100%"
                     />
                   </el-form-item>
                 </el-col>
@@ -918,6 +925,9 @@ import { ref, reactive, toRefs, computed, getCurrentInstance, watch } from "vue"
 import { InfoFilled, Link, Setting, Operation } from '@element-plus/icons-vue'
 
 const { proxy } = getCurrentInstance()
+// 使用 proxy.useDict 获取字典数据，参考菜单管理页面的实现
+const { media_status } = proxy.useDict("media_status")
+
 const { audit_status, ssp_pay_type, ad_scene, os_type, access_type } = useDict('audit_status', 'ssp_pay_type', 'ad_scene', 'os_type', 'access_type')
 
 const mediaAdList = ref([])
@@ -1669,6 +1679,23 @@ function loadSlotList(mediaAdId) {
     slotList.value = []
   })
 }
+
+// 状态颜色
+const getStatusClass = (status) => {
+  switch (status) {
+    case 1:
+      return 'dot-success'
+    case 0:
+      return 'dot-danger'
+    case 2:
+      return 'dot-warning'
+    case 3:
+      return 'dot-danger'
+    default:
+      return ''
+  }
+}
+
 
 /** 添加DSP广告位绑定 */
 async function handleAddSlot() {
@@ -2564,4 +2591,75 @@ getList()
 .launch-config-form :deep(.el-select) {
   width: 100%;
 }
+.my-table tbody tr:hover > td {
+  background-color: #e6f7ff !important;
+}
+
+
+.btn-blue {
+  background-color: #2A5FB7 !important;
+  border-color: #2A5FB7 !important;
+  color: #fff !important;
+}
+
+.btn-blue:hover {
+  background-color: #1f4f96 !important;
+  border-color: #1f4f96 !important;
+}
+.btn-regge {
+  background-color: #DCA550 !important;
+  border-color: #f1b965 !important;
+  color: #fff !important;
+}
+
+.btn-regge:hover {
+  background-color: #df9318 !important;
+  border-color: #df9318 !important;
+}
+
+.el-form--inline .el-form-item {
+  margin-right: 20px;  /* 默认一般是 18px+ */
+  margin-bottom: 20px;
+}
+
+:deep(.el-form--inline .el-form-item) {
+  margin-right: 8px;   /* 👈 调小间距 */
+  margin-bottom: 8px;  /* 👈 行间距也可以顺便优化 */
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+/* 绿色（正常） */
+.dot-success {
+  background-color: #67c23a;
+}
+
+/* 红色（禁用/拒绝） */
+.dot-danger {
+  background-color: #f56c6c;
+}
+
+/* 黄色（审核中） */
+.dot-warning {
+  background-color: #e6a23c;
+}
+
+
+.status-wrap {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap; /* 关键：禁止换行 */
+}
+
+.status-dot {
+  margin-right: 6px;
+}
+
+
 </style>

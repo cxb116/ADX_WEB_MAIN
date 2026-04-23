@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DspIncomeMapper">
+    
+    <resultMap type="DspIncome" id="DspIncomeResult">
+        <result property="id"    column="id"    />
+        <result property="dspSlotId"    column="dsp_slot_id"    />
+        <result property="dspSlotCode"    column="dsp_slot_code"    />
+        <result property="income"    column="income"    />
+        <result property="sspSlotId"    column="ssp_slot_id"    />
+        <result property="dspPayType"    column="dsp_pay_type"    />
+        <result property="companyId"    column="company_id"    />
+        <result property="tables"    column="tables"    />
+        <result property="inputTime"    column="input_time"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectDspIncomeVo">
+        select id, dsp_slot_id, dsp_slot_code, income, ssp_slot_id, dsp_pay_type, company_id, tables, input_time, create_time, update_by, update_time, remark from dsp_income
+    </sql>
+
+    <select id="selectDspIncomeList" parameterType="DspIncome" resultMap="DspIncomeResult">
+        <include refid="selectDspIncomeVo"/>
+        <where>  
+            <if test="dspSlotId != null "> and dsp_slot_id = #{dspSlotId}</if>
+            <if test="dspSlotCode != null  and dspSlotCode != ''"> and dsp_slot_code = #{dspSlotCode}</if>
+            <if test="income != null "> and income = #{income}</if>
+            <if test="sspSlotId != null "> and ssp_slot_id = #{sspSlotId}</if>
+            <if test="dspPayType != null "> and dsp_pay_type = #{dspPayType}</if>
+            <if test="companyId != null "> and company_id = #{companyId}</if>
+            <if test="tables != null "> and tables = #{tables}</if>
+            <if test="inputTime != null "> and input_time = #{inputTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectDspIncomeById" parameterType="Long" resultMap="DspIncomeResult">
+        <include refid="selectDspIncomeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDspIncome" parameterType="DspIncome">
+        insert into dsp_income
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="dspSlotId != null">dsp_slot_id,</if>
+            <if test="dspSlotCode != null and dspSlotCode != ''">dsp_slot_code,</if>
+            <if test="income != null">income,</if>
+            <if test="sspSlotId != null">ssp_slot_id,</if>
+            <if test="dspPayType != null">dsp_pay_type,</if>
+            <if test="companyId != null">company_id,</if>
+            <if test="tables != null">tables,</if>
+            <if test="inputTime != null">input_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="dspSlotId != null">#{dspSlotId},</if>
+            <if test="dspSlotCode != null and dspSlotCode != ''">#{dspSlotCode},</if>
+            <if test="income != null">#{income},</if>
+            <if test="sspSlotId != null">#{sspSlotId},</if>
+            <if test="dspPayType != null">#{dspPayType},</if>
+            <if test="companyId != null">#{companyId},</if>
+            <if test="tables != null">#{tables},</if>
+            <if test="inputTime != null">#{inputTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDspIncome" parameterType="DspIncome">
+        update dsp_income
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="dspSlotId != null">dsp_slot_id = #{dspSlotId},</if>
+            <if test="dspSlotCode != null and dspSlotCode != ''">dsp_slot_code = #{dspSlotCode},</if>
+            <if test="income != null">income = #{income},</if>
+            <if test="sspSlotId != null">ssp_slot_id = #{sspSlotId},</if>
+            <if test="dspPayType != null">dsp_pay_type = #{dspPayType},</if>
+            <if test="companyId != null">company_id = #{companyId},</if>
+            <if test="tables != null">tables = #{tables},</if>
+            <if test="inputTime != null">input_time = #{inputTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDspIncomeById" parameterType="Long">
+        delete from dsp_income where id = #{id}
+    </delete>
+
+    <delete id="deleteDspIncomeByIds" parameterType="String">
+        delete from dsp_income where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

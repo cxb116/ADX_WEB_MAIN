@@ -83,7 +83,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="adSizeId != null">ad_size_id,</if>
             <if test="sspPayType != null">ssp_pay_type,</if>
             <if test="sspDealRatio != null">ssp_deal_ratio,</if>
-            <if test="sspEcpm != null">ssp_ecpm,</if>
             <if test="width != null">width,</if>
             <if test="height != null">height,</if>
             <if test="adImage != null">ad_image,</if>
@@ -94,7 +93,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
             <if test="remark != null">remark,</if>
-         </trim>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="mediaId != null">#{mediaId},</if>
+            <if test="appId != null">#{appId},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="nameAlise != null">#{nameAlise},</if>
+            <if test="adTypeId != null">#{adTypeId},</if>
+            <if test="adSceneId != null">#{adSceneId},</if>
+            <if test="adSizeId != null">#{adSizeId},</if>
+            <if test="sspPayType != null">#{sspPayType},</if>
+            <if test="sspDealRatio != null">#{sspDealRatio},</if>
+            <if test="width != null">#{width},</if>
+            <if test="height != null">#{height},</if>
+            <if test="adImage != null">#{adImage},</if>
+            <if test="interactionType != null">#{interactionType},</if>
+            <if test="enable != null">#{enable},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
     </insert>
 
     <update id="updateSspSlotInfo" parameterType="SspSlotInfo">

@@ -98,6 +98,8 @@ public class DspSlotInfo extends BaseEntity
     /** 产品名称（用于 etcd 同步，不映射到数据库） */
     private String productName;
 
+    private String companyName;
+
     public void setProductName(String productName)
     {
         this.productName = productName;
@@ -361,5 +363,13 @@ public class DspSlotInfo extends BaseEntity
     public Map<String, Object> getParams()
     {
         return super.getParams();
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 }

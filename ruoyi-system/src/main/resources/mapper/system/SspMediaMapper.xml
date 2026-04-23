@@ -37,7 +37,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="account != null  and account != ''"> and account = #{account}</if>
             <if test="password != null  and password != ''"> and password = #{password}</if>
             <if test="mediaCompanyName != null  and mediaCompanyName != ''"> and media_company_name like concat('%', #{mediaCompanyName}, '%')</if>
-            <if test="mediaCompanyShort != null  and mediaCompanyShort != ''"> and media_company_short = #{mediaCompanyShort}</if>
+            <if test="mediaCompanyShort != null  and mediaCompanyShort != ''"> and media_company_short like concat('%', #{mediaCompanyShort}, '%')</if>
             <if test="mediaCompanyCode != null  and mediaCompanyCode != ''"> and media_company_code = #{mediaCompanyCode}</if>
             <if test="mediaCompanyLicense != null  and mediaCompanyLicense != ''"> and media_company_license = #{mediaCompanyLicense}</if>
             <if test="mediaCompanyAddress != null  and mediaCompanyAddress != ''"> and media_company_address = #{mediaCompanyAddress}</if>

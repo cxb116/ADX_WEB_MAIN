@@ -20,6 +20,10 @@ public interface DataSspSlotMapper
      */
     public DataSspSlot selectDataSspSlotById(DataSspSlot dataSspSlot);
 
+    // 查询导入收益后的表表数据
+    List<DataSspSlot> selectDataSspSlotListInputExce(DataSspSlot query);
+
+
     /**
      * 查询媒体数据报表列表
      *
@@ -115,4 +119,6 @@ public interface DataSspSlotMapper
      */
     public int batchUpdateForSchedule(@Param("tableName") String tableName,
                                     @Param("list") java.util.List<java.util.Map<String, Object>> updateList);
+
+
 }

@@ -1,12 +1,17 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="媒体用户" prop="mediaId">
+    <el-form :model="queryParams" ref="queryRef" :inline="true"
+             v-show="showSearch"
+             label-width="68px"
+             :label-style="{ color: '#000' }"
+    >
+      <el-form-item  prop="mediaId">
         <el-select
           v-model="queryParams.mediaId"
           placeholder="请选择媒体用户"
           clearable
           filterable
+          style="width: 120px;"
         >
           <el-option
             v-for="item in mediaList"
@@ -16,12 +21,13 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="应用" prop="appId">
+      <el-form-item prop="appId">
         <el-select
           v-model="queryParams.appId"
           placeholder="请选择应用"
           clearable
           filterable
+          style="width: 120px;"
         >
           <el-option
             v-for="item in appList"
@@ -31,31 +37,34 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="媒体广告位" label-width="90" prop="sspSlotId">
+      <el-form-item label-width="90" prop="sspSlotId">
         <el-input
           v-model="queryParams.sspSlotId"
           placeholder="请输入媒体广告位"
           clearable
           @keyup.enter="handleQuery"
+          style="width: 120px;"
         />
       </el-form-item>
-      <el-form-item label="预算广告位" label-width="90" prop="dspSlotId">
+      <el-form-item label-width="90" prop="dspSlotId">
         <el-input
           v-model="queryParams.dspSlotId"
           placeholder="请输入预算广告位"
           clearable
           @keyup.enter="handleQuery"
+          style="width: 120px;"
         />
       </el-form-item>
-      <el-form-item label="预算广告位编号" label-width="110" prop="dspSlotCode">
+      <el-form-item label-width="110" prop="dspSlotCode">
         <el-input
           v-model="queryParams.dspSlotCode"
           placeholder="请输入预算广告位编号"
           clearable
           @keyup.enter="handleQuery"
+          style="width: 120px;"
         />
       </el-form-item>
-      <el-form-item :label="tableType === 'day' ? '日期' : '时间'" label-width="90">
+      <el-form-item label-width="90">
         <el-date-picker
           v-model="dateRange"
           :value-format="tableType === 'day' ? 'YYYYMMDD' : 'YYYYMMDDHH'"
@@ -64,19 +73,20 @@
           :start-placeholder="tableType === 'day' ? '开始日期' : '开始时间'"
           :end-placeholder="tableType === 'day' ? '结束日期' : '结束时间'"
           :format="tableType === 'day' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:00'"
+          style="width: 200px"
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button class="btn-blue"  type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+        <el-button class="btn-blue"  icon="Refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-radio-group v-model="tableType" @change="handleTableTypeChange">
-          <el-radio-button label="day">天表</el-radio-button>
-          <el-radio-button label="hour">小时表</el-radio-button>
+          <el-radio-button  class="btn-blue" label="day">天表</el-radio-button>
+          <el-radio-button  class="btn-blue" label="hour">小时表</el-radio-button>
         </el-radio-group>
       </el-col>
       <el-col :span="1.5">
@@ -85,6 +95,7 @@
           plain
           icon="TrendCharts"
           @click="handleShowChart"
+          class="btn-blue"
         >图表</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -94,13 +105,21 @@
           icon="Download"
           @click="handleExport"
           v-hasPermi="['data:data_ssp_slot:export']"
+          class="btn-regge"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="data_ssp_slotList" @selection-change="handleSelectionChange">
-      <el-table-column label="日期" align="center" width="180" prop="date">
+    <el-table v-loading="loading" :data="data_ssp_slotList" @selection-change="handleSelectionChange"
+
+              style="width: 100%"
+              :header-cell-style="{ background: '#F5F7FA', color: '#000' }"
+              :cell-style="{ color: '#000' }"
+              border
+              table-layout="auto"
+              highlight-current-row="true">
+      <el-table-column label="日期" align="center" width="150" prop="date">
         <template #default="scope">
           <span v-if="scope.row.date">{{ formatDate(scope.row.date) }}</span>
           <span v-else>-</span>
@@ -108,34 +127,35 @@
       </el-table-column>
 <!--      <el-table-column label="主键" align="center" prop="id" />-->
 <!--      <el-table-column label="媒体用户" align="center" width="55" prop="mediaId" />-->
-      <el-table-column label="媒体" align="center" width="150" prop="mediaName">
+      <el-table-column label="媒体" align="center" width="150" show-overflow-tooltip  prop="mediaName">
         <template #default="scope">
           <span v-if="scope.row.mediaName">{{ scope.row.mediaName }}</span>
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="应用" align="center" width="150" prop="appName">
+      <el-table-column label="应用" align="center" width="150" show-overflow-tooltip  prop="appName">
         <template #default="scope">
           <span v-if="scope.row.appName">{{ scope.row.appName }}（{{ scope.row.appId }}）</span>
           <span v-else>{{ scope.row.appId }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="媒体广告位" align="center" width="200" prop="sspSlotName">
+      <el-table-column label="媒体广告位" align="center" width="250" show-overflow-tooltip  prop="sspSlotName">
         <template #default="scope">
           <span v-if="scope.row.sspSlotName">{{ scope.row.sspSlotName }}（{{ scope.row.sspSlotId }}）</span>
           <span v-else>{{ scope.row.sspSlotId }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预算广告位" align="center" width="200" prop="dspSlotName">
+      <el-table-column label="预算广告位" align="center" width="280" show-overflow-tooltip  prop="dspSlotName">
         <template #default="scope">
           <span v-if="scope.row.dspSlotName">{{ scope.row.dspSlotName }}（{{ scope.row.dspSlotId }}）</span>
           <span v-else>{{ scope.row.dspSlotId }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预算广告位编号" align="center" width="270" prop="dspSlotCode" />
+      <el-table-column label="媒体广告位ID" align="center" width="150" show-overflow-tooltip  prop="sspSlotId" />
+      <el-table-column label="请求PV" align="center" width="100" prop="reqPv" />
+      <el-table-column label="返回PV" align="center" width="100" prop="retPv" />
       <el-table-column label="展示PV" align="center" width="100" prop="showPv" />
       <el-table-column label="点击PV" align="center" width="100" prop="clickPv" />
-      <el-table-column label="请求PV" align="center" width="100" prop="reqPv" />
       <el-table-column label="丢弃请求" align="center" width="100" prop="discard" />
       <el-table-column label="请求丢失率(%)" align="center" width="130" prop="requestLossRate">
         <template #default="scope">
@@ -145,7 +165,7 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="返回PV" align="center" width="100" prop="retPv" />
+
       <el-table-column label="展现率(%)" align="center" width="120" prop="showRate">
         <template #default="scope">
           <span v-if="scope.row.showRate !== null && scope.row.showRate !== undefined">
@@ -183,15 +203,15 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="千次收益(分)" align="center" width="120" prop="sspEcpm">
-        <template #default="scope">
-          <span v-if="scope.row.sspPayType === 1 && scope.row.sspEcpm !== null && scope.row.sspEcpm !== undefined">
-            {{ scope.row.sspEcpm }}
-          </span>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="预算流水(元)" align="center" width="120" prop="spend">
+<!--      <el-table-column label="千次收益(分)" align="center" width="120" prop="sspEcpm">-->
+<!--        <template #default="scope">-->
+<!--          <span v-if="scope.row.sspPayType === 1 && scope.row.sspEcpm !== null && scope.row.sspEcpm !== undefined">-->
+<!--            {{ scope.row.sspEcpm }}-->
+<!--          </span>-->
+<!--          <span v-else>-</span>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+      <el-table-column label="成本(元)" align="center" width="120" prop="spend">
         <template #default="scope">
           <span v-if="scope.row.spend !== null && scope.row.spend !== undefined">
             {{ (scope.row.spend / 100).toFixed(2) }}
@@ -231,13 +251,13 @@
 <!--          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['data:data_ssp_slot:remove']">删除</el-button>-->
 <!--        </template>-->
 <!--      </el-table-column>-->
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200">
-        <template #default="scope">
-<!--          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['data:data_ssp_slot:edit']">修改</el-button>-->
-          <el-button link type="warning" icon="Correct" @click="handleCorrect(scope.row)">修正</el-button>
-<!--          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['data:data_ssp_slot:remove']">删除</el-button>-->
-        </template>
-      </el-table-column>
+<!--      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200">-->
+<!--        <template #default="scope">-->
+<!--&lt;!&ndash;          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['data:data_ssp_slot:edit']">修改</el-button>&ndash;&gt;-->
+<!--          <el-button link type="warning" icon="Correct" @click="handleCorrect(scope.row)">修正</el-button>-->
+<!--&lt;!&ndash;          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['data:data_ssp_slot:remove']">删除</el-button>&ndash;&gt;-->
+<!--        </template>-->
+<!--      </el-table-column>-->
     </el-table>
     
     <pagination
@@ -613,28 +633,28 @@ function handleUpdate(row) {
   })
 }
 
-/** 修正按钮操作 */
-function handleCorrect(row) {
-  // 重置修正表单
-  correctForm.value = {
-    id: row.id,
-    tableName: generateTableName(),
-    date: row.date,
-    sspSlotName: row.sspSlotName || `${row.sspSlotId}`,
-    dspSlotCode: row.dspSlotCode || '',
-    sspPayType: row.sspPayType || 1,
-    sspDealRatio: row.sspDealRatio || null,
-    sspEcpm: row.sspEcpm || null,
-    showPv: row.showPv || 0,
-    spend: row.spend || 0,
-    income: row.income || 0
-  }
-  // 清除验证状态
-  if (proxy.$refs["correctFormRef"]) {
-    proxy.$refs["correctFormRef"].clearValidate()
-  }
-  correctDialogVisible.value = true
-}
+// /** 修正按钮操作 */
+// function handleCorrect(row) {
+//   // 重置修正表单
+//   correctForm.value = {
+//     id: row.id,
+//     tableName: generateTableName(),
+//     date: row.date,
+//     sspSlotName: row.sspSlotName || `${row.sspSlotId}`,
+//     dspSlotCode: row.dspSlotCode || '',
+//     sspPayType: row.sspPayType || 1,
+//     sspDealRatio: row.sspDealRatio || null,
+//     sspEcpm: row.sspEcpm || null,
+//     showPv: row.showPv || 0,
+//     spend: row.spend || 0,
+//     income: row.income || 0
+//   }
+//   // 清除验证状态
+//   if (proxy.$refs["correctFormRef"]) {
+//     proxy.$refs["correctFormRef"].clearValidate()
+//   }
+//   correctDialogVisible.value = true
+// }
 
 /** 取消修正 */
 function cancelCorrect() {
@@ -856,3 +876,114 @@ getList()
 getMediaList()
 getAppList()
 </script>
+<style scoped>
+.btn-blue {
+  background-color: #2A5FB7 !important;
+  border-color: #2A5FB7 !important;
+  color: #fff !important;
+}
+
+.btn-blue:hover {
+  background-color: #1f4f96 !important;
+  border-color: #1f4f96 !important;
+}
+
+.btn-regge {
+  background-color: #DCA550 !important;
+  border-color: #f1b965 !important;
+  color: #fff !important;
+}
+
+.btn-regge:hover {
+  background-color: #df9318 !important;
+  border-color: #df9318 !important;
+}
+
+.el-form--inline .el-form-item {
+  margin-right: 8px;  /* 默认一般是 18px+ */
+  margin-bottom: 8px;
+}
+
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+/* 绿色（正常） */
+.dot-success {
+  background-color: #67c23a;
+}
+
+/* 红色（禁用/拒绝） */
+.dot-danger {
+  background-color: #f56c6c;
+}
+
+/* 黄色（审核中） */
+.dot-warning {
+  background-color: #e6a23c;
+}
+
+
+.status-wrap {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap; /* 关键：禁止换行 */
+}
+
+.status-dot {
+  margin-right: 6px;
+}
+
+/* Drawer 头部样式 */
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  background: #fff;
+}
+
+
+.drawer-header {
+  display: flex;
+  flex-direction: column;   /* 👈 改成纵向 */
+  align-items: flex-start;
+  background: #fff;
+}
+
+/* 标题 */
+.drawer-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #303133;
+  margin: 15px 15px 8px;
+}
+
+/* 按钮区域 */
+.drawer-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 15px 10px;
+}
+
+/* 确保 Drawer 头部使用白色背景 */
+:deep(.el-drawer__header) {
+  margin-bottom: 0;
+  padding: 0;
+  background: #fff;
+}
+
+/* 确保 Drawer body 有正确的背景色 */
+:deep(.el-drawer__body) {
+  padding: 16px;
+  background: #f2f5f7;
+}
+
+
+</style>

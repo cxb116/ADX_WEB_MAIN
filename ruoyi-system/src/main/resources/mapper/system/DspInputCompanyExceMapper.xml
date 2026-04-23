@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DspInputCompanyExceMapper">
+    
+    <resultMap type="DspInputCompanyExce" id="DspInputCompanyExceResult">
+        <result property="id"    column="id"    />
+        <result property="companyId"    column="company_id"    />
+        <result property="tables"    column="tables"    />
+        <result property="inputTime"    column="input_time"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectDspInputCompanyExceVo">
+        select id, company_id, tables, input_time, create_time, update_by, update_time, remark from dsp_input_company_exce
+    </sql>
+
+    <select id="selectDspInputCompanyExceList" parameterType="DspInputCompanyExce" resultMap="DspInputCompanyExceResult">
+        select d.id, d.company_id, d.tables, d.input_time, d.create_time, d.update_by, d.update_time, d.remark,
+        c.name as companyName
+        from dsp_input_company_exce as d
+        left join dsp_company as c on d.company_id = c.id
+        <where>
+            <if test="companyId != null"> and d.company_id = #{companyId}</if>
+            <if test="inputTime != null"> and d.input_time = #{inputTime}</if>
+            <if test="createTime != null"> and d.create_time = #{createTime}</if>
+        </where>
+        order by d.update_time desc
+    </select>
+    
+    <select id="selectDspInputCompanyExceById" parameterType="Long" resultMap="DspInputCompanyExceResult">
+        <include refid="selectDspInputCompanyExceVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDspInputCompanyExce" parameterType="DspInputCompanyExce">
+        insert into dsp_input_company_exce
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="companyId != null">company_id,</if>
+            <if test="tables != null">tables,</if>
+            <if test="inputTime != null">input_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="companyId != null">#{companyId},</if>
+            <if test="tables != null">#{tables},</if>
+            <if test="inputTime != null">#{inputTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDspInputCompanyExce" parameterType="DspInputCompanyExce">
+        update dsp_input_company_exce
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="companyId != null">company_id = #{companyId},</if>
+            <if test="tables != null">tables = #{tables},</if>
+            <if test="inputTime != null">input_time = #{inputTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDspInputCompanyExceById" parameterType="Long">
+        delete from dsp_input_company_exce where id = #{id}
+    </delete>
+
+    <delete id="deleteDspInputCompanyExceByIds" parameterType="String">
+        delete from dsp_input_company_exce where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -99,7 +99,7 @@ public class DataDspSlot extends BaseEntity
     private Long activatePv;
 
     /** 时间(yyyyMMdd / yyyyMMddHH) */
-    @Excel(name = "时间(yyyyMMdd / yyyyMMddHH)")
+    @Excel(name = "时间(yyyyMMdd)")
     private Long date;
 
     /** 创建时间戳 */

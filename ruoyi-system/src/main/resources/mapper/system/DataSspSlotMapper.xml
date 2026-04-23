@@ -91,6 +91,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where t.id = #{id}
     </select>
 
+    <select id="selectDataSspSlotListInputExce" parameterType="DataSspSlot" resultMap="DataSspSlotResult">
+       select * from ${tableName}  where dsp_slot_code = #{dspSlotCode} and dsp_slot_id = #{dspSlotId} and date = #{date}
+    </select>
+
+
+
     <!-- 根据 dsp_slot_id、dsp_slot_code 和 date 批量更新 spend -->
     <update id="updateSpendByDspSlotInfo">
         update ${tableName}

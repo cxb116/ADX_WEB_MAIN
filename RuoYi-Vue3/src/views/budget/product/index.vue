@@ -1,19 +1,24 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="产品名称" prop="name">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch"
+             label-width="68px"
+             :label-style="{ color: '#000' }"
+    >
+      <el-form-item  prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入产品名称"
           clearable
           @keyup.enter="handleQuery"
+          style="width: 150px;"
         />
       </el-form-item>
-      <el-form-item label="公司" prop="companyId">
+      <el-form-item  prop="companyId">
         <el-select
           v-model="queryParams.companyId"
           placeholder="请选择公司"
           clearable
+          style="width: 150px;"
         >
           <el-option
             v-for="company in companyList"
@@ -24,14 +29,15 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button class="btn-blue" type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+        <el-button class="btn-blue" icon="Refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
+            class="btn-blue"
           type="primary"
           plain
           icon="Plus"
@@ -41,26 +47,7 @@
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['budget:product:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['budget:product:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
+            class="btn-regge"
           type="warning"
           plain
           icon="Download"
@@ -71,20 +58,28 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="productList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="预算公司" align="center" width="150" prop="companyId">
+    <el-table v-loading="loading" :data="productList" @selection-change="handleSelectionChange"
+              style="width: 100%"
+              :header-cell-style="{ background: '#F5F7FA', color: '#000' }"
+              :cell-style="{ color: '#000' }"
+              border
+              table-layout="auto"
+              highlight-current-row="true"
+    >
+      <el-table-column label="ID" width="66" align="center" prop="id"/>
+      <el-table-column label="预算公司" align="center"  prop="companyId">
         <template #default="scope">
           {{ getCompanyName(scope.row.companyId) }}
         </template>
       </el-table-column>
-      <el-table-column label="产品名称" width="150" align="center" prop="name">
+      <el-table-column label="产品名称" align="center" prop="name">
         <template #default="scope">
           {{ formatProductName(scope.row) }}
         </template>
       </el-table-column>
 
       <el-table-column label="创建时间" width="200" align="center" prop="createTime"/>
+      <el-table-column label="修改时间" width="200" align="center" prop="updateTime"/>
       <el-table-column label="操作" align="center" width="150" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['budget:product:edit']">修改</el-button>
@@ -300,3 +295,72 @@ function handleExport() {
 getCompanyList()
 getList()
 </script>
+<style scoped>
+.btn-blue {
+  background-color: #2A5FB7 !important;
+  border-color: #2A5FB7 !important;
+  color: #fff !important;
+}
+
+.btn-blue:hover {
+  background-color: #1f4f96 !important;
+  border-color: #1f4f96 !important;
+}
+
+:deep(.el-form--inline .el-form-item) {
+  margin-right: 8px;   /* 👈 调小间距 */
+  margin-bottom: 8px;  /* 👈 行间距也可以顺便优化 */
+}
+
+.btn-regge {
+  background-color: #DCA550 !important;
+  border-color: #f1b965 !important;
+  color: #fff !important;
+}
+
+.btn-regge:hover {
+  background-color: #df9318 !important;
+  border-color: #df9318 !important;
+}
+
+
+/* 绿色（正常） */
+.dot-success {
+  background-color: #67c23a;
+}
+
+/* 红色（禁用/拒绝） */
+.dot-danger {
+  background-color: #f56c6c;
+}
+
+/* 黄色（审核中） */
+.dot-warning {
+  background-color: #e6a23c;
+}
+
+.el-form--inline .el-form-item {
+  margin-right: 8px;  /* 默认一般是 18px+ */
+  margin-bottom: 8px;
+}
+
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-wrap {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap; /* 关键：禁止换行 */
+}
+
+.status-dot {
+  margin-right: 6px;
+}
+
+</style>

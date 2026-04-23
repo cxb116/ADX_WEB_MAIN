@@ -1,7 +1,7 @@
 <template>
     <div class="app-container">
         <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="100px">
-            <el-form-item label="公司名称" prop="name">
+            <el-form-item  prop="name">
                 <el-input
                         v-model="queryParams.name"
                         placeholder="请输入公司名称"
@@ -9,7 +9,7 @@
                         @keyup.enter="handleQuery"
                 />
             </el-form-item>
-            <el-form-item label="预算映射值" prop="dspCode">
+            <el-form-item  prop="dspCode">
                 <el-input
                         v-model="queryParams.dspCode"
                         placeholder="请输入预算映射值"
@@ -17,15 +17,7 @@
                         @keyup.enter="handleQuery"
                 />
             </el-form-item>
-            <el-form-item label="请求地址" prop="url">
-                <el-input
-                        v-model="queryParams.url"
-                        placeholder="请输入请求地址"
-                        clearable
-                        @keyup.enter="handleQuery"
-                />
-            </el-form-item>
-            <el-form-item label="请求方法" prop="method">
+            <el-form-item  prop="method">
                 <el-select
                         v-model="queryParams.method"
                         placeholder="请选择请求方法"
@@ -40,23 +32,17 @@
                     />
                 </el-select>
             </el-form-item>
-            <el-form-item label="超时时间" prop="timeout">
-                <el-input
-                        v-model="queryParams.timeout"
-                        placeholder="请输入超时时间(单位:ms)"
-                        clearable
-                        @keyup.enter="handleQuery"
-                />
-            </el-form-item>
+
             <el-form-item>
-                <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-                <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+                <el-button class="btn-blue" type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+                <el-button class="btn-blue" icon="Refresh" @click="resetQuery">重置</el-button>
             </el-form-item>
         </el-form>
 
         <el-row :gutter="10" class="mb8">
             <el-col :span="1.5">
                 <el-button
+                    class="btn-blue"
                         type="primary"
                         plain
                         icon="Plus"
@@ -66,26 +52,7 @@
             </el-col>
             <el-col :span="1.5">
                 <el-button
-                        type="success"
-                        plain
-                        icon="Edit"
-                        :disabled="single"
-                        @click="handleUpdate"
-                        v-hasPermi="['budget:company:edit']"
-                >修改</el-button>
-            </el-col>
-            <el-col :span="1.5">
-                <el-button
-                        type="danger"
-                        plain
-                        icon="Delete"
-                        :disabled="multiple"
-                        @click="handleDelete"
-                        v-hasPermi="['budget:company:remove']"
-                >删除</el-button>
-            </el-col>
-            <el-col :span="1.5">
-                <el-button
+                    class="btn-regge"
                         type="warning"
                         plain
                         icon="Download"
@@ -96,21 +63,29 @@
             <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
         </el-row>
 
-        <el-table v-loading="loading" :data="companyList" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="55" align="center" />
-            <el-table-column label="公司名称" align="center" width="120" prop="name">
+        <el-table v-loading="loading" :data="companyList" @selection-change="handleSelectionChange"
+                  style="width: 100%"
+                  :header-cell-style="{ background: '#F5F7FA', color: '#000' }"
+                  :cell-style="{ color: '#000' }"
+                  border
+                  table-layout="auto"
+                  highlight-current-row="true"
+        >
+            <el-table-column label="ID" align="center" width="66" prop="id" />
+            <el-table-column label="公司名称" align="center" width="180" prop="name">
               <template #default="scope">
                 {{ formatCompanyName(scope.row) }}
               </template>
             </el-table-column>
-            <el-table-column label="映射" align="center" width="60" prop="dspCode" />
-            <el-table-column label="请求地址" align="center" width="320"  prop="url" />
-            <el-table-column label="请求方法" align="center" width="80" prop="method">
+            <el-table-column label="预算映射值" align="center" width="100" prop="dspCode" />
+            <el-table-column label="请求地址" align="center"   prop="url" />
+            <el-table-column label="请求方法" align="center" width="100" prop="method">
                 <template #default="scope">
                     <dict-tag :options="request_method" :value="scope.row.method" />
                 </template>
             </el-table-column>
           <el-table-column label="创建时间" width="180" align="center" prop="createTime"/>
+          <el-table-column label="修改时间" width="180" align="center" prop="updateTime"/>
             <el-table-column label="操作" align="center" width="150" class-name="small-padding fixed-width">
                 <template #default="scope">
                     <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['budget:company:edit']">修改</el-button>
@@ -334,3 +309,31 @@ function handleExport() {
 
 getList()
 </script>
+<style scoped>
+.btn-blue {
+  background-color: #2A5FB7 !important;
+  border-color: #2A5FB7 !important;
+  color: #fff !important;
+}
+
+.btn-blue:hover {
+  background-color: #1f4f96 !important;
+  border-color: #1f4f96 !important;
+}
+
+:deep(.el-form--inline .el-form-item) {
+  margin-right: 8px;   /* 👈 调小间距 */
+  margin-bottom: 8px;  /* 👈 行间距也可以顺便优化 */
+}
+
+.btn-regge {
+  background-color: #DCA550 !important;
+  border-color: #f1b965 !important;
+  color: #fff !important;
+}
+
+.btn-regge:hover {
+  background-color: #df9318 !important;
+  border-color: #df9318 !important;
+}
+</style>

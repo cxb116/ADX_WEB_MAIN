@@ -66,6 +66,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where t.id = #{id}
     </select>
 
+
+    <select id="selectDataDspSlotOne" parameterType="DataDspSlot" resultMap="DataDspSlotResult">
+        <include refid="selectDataDspSlotVo"/>
+    </select>
+
     <!-- 修改预算报表 -->
     <update id="updateDataDspSlot" parameterType="DataDspSlot">
         update ${tableName}

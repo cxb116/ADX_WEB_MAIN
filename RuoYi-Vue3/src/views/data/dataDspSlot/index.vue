@@ -1,13 +1,15 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="公司" prop="companyId">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch"  label-width="68px"
+             :label-style="{ color: '#000' }">
+      <el-form-item  prop="companyId">
         <el-select
           v-model="queryParams.companyId"
           placeholder="请选择公司"
           clearable
           filterable
           @change="handleCompanyChange"
+          style="width: 160px;"
         >
           <el-option
             v-for="item in companyList"
@@ -17,13 +19,14 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="预算广告位" label-width="100" prop="dspSlotId">
+      <el-form-item label-width="100" prop="dspSlotId">
         <el-select
           v-model="queryParams.dspSlotId"
           placeholder="请选择预算广告位"
           clearable
           filterable
           :disabled="!queryParams.companyId"
+          style="width: 160px;"
         >
           <el-option
             v-for="item in filteredDspSlotList"
@@ -33,38 +36,29 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="预算广告位编码" label-width="120" prop="dspSlotCode">
+      <el-form-item   prop="dspSlotCode">
         <el-input
           v-model="queryParams.dspSlotCode"
           placeholder="请输入预算广告位编码"
           clearable
           @keyup.enter="handleQuery"
+          style="width: 160px;"
         />
       </el-form-item>
-      <el-form-item label="结算方式" prop="dspPayType">
+      <el-form-item prop="dspPayType">
         <el-select
           v-model="queryParams.dspPayType"
           placeholder="请选择结算方式"
           clearable
+          style="width: 160px;"
         >
           <el-option label="分成" :value="1" />
           <el-option label="RTB" :value="2" />
         </el-select>
       </el-form-item>
-      <el-form-item :label="tableType === 'day' ? '日期' : '时间'" label-width="90">
-        <el-date-picker
-          v-model="dateRange"
-          :value-format="tableType === 'day' ? 'YYYYMMDD' : 'YYYYMMDDHH'"
-          :type="tableType === 'day' ? 'daterange' : 'datetimerange'"
-          range-separator="-"
-          :start-placeholder="tableType === 'day' ? '开始日期' : '开始时间'"
-          :end-placeholder="tableType === 'day' ? '结束日期' : '结束时间'"
-          :format="tableType === 'day' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:00'"
-        />
-      </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button class="btn-blue" type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+        <el-button class="btn-blue" icon="Refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -77,6 +71,7 @@
       </el-col>
       <el-col :span="1.5">
         <el-button
+            class="btn-blue"
           type="success"
           plain
           icon="TrendCharts"
@@ -85,6 +80,7 @@
       </el-col>
       <el-col :span="1.5">
         <el-button
+            class="btn-regge"
           type="warning"
           plain
           icon="Download"
@@ -95,20 +91,27 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="dataDspSlotList" @selection-change="handleSelectionChange">
-      <el-table-column label="日期" align="center" width="150" prop="date">
+    <el-table v-loading="loading" :data="dataDspSlotList" @selection-change="handleSelectionChange"
+              style="width: 100%"
+              :header-cell-style="{ background: '#F5F7FA', color: '#000' }"
+              :cell-style="{ color: '#000' }"
+              border
+              table-layout="auto"
+              highlight-current-row="true"
+    >
+      <el-table-column label="日期" align="center" width="150"  prop="date">
         <template #default="scope">
           <span v-if="scope.row.date">{{ formatDate(scope.row.date) }}</span>
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="预算广告位" align="center" width="200" prop="dspSlotName">
+      <el-table-column label="预算广告位" align="center" width="300" show-overflow-tooltip prop="dspSlotName">
         <template #default="scope">
           <span v-if="scope.row.dspSlotName">{{ scope.row.dspSlotName }}（{{ scope.row.dspSlotId }}）</span>
           <span v-else>{{ scope.row.dspSlotId }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预算广告位编号" align="center" width="270" prop="dspSlotCode" />
+      <el-table-column label="预算广告位编号" align="center" width="250" show-overflow-tooltip prop="dspSlotCode" />
       <el-table-column label="结算方式" align="center" width="100" prop="dspPayType">
         <template #default="scope">
           <span v-if="scope.row.dspPayType === 1">分成</span>
@@ -116,10 +119,12 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="展示PV" align="center" width="100" prop="showPv" />
-      <el-table-column label="点击PV" align="center" width="100" prop="clickPv" />
-      <el-table-column label="请求PV" align="center" width="100" prop="reqPv" />
-      <el-table-column label="丢弃请求" align="center" width="100" prop="discard" />
+      <el-table-column label="请求PV" align="center" width="120" prop="reqPv" />
+      <el-table-column label="返回PV" align="center" width="120" prop="retPv" />
+      <el-table-column label="展示PV" align="center" width="120" prop="showPv" />
+      <el-table-column label="点击PV" align="center" width="120" prop="clickPv" />
+
+      <el-table-column label="丢弃请求" align="center" width="120" prop="discard" />
       <el-table-column label="请求丢失率(%)" align="center" width="130" prop="requestLossRate">
         <template #default="scope">
           <span v-if="scope.row.requestLossRate !== null && scope.row.requestLossRate !== undefined">
@@ -128,7 +133,6 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="返回PV" align="center" width="100" prop="retPv" />
       <el-table-column label="展现率(%)" align="center" width="120" prop="showRate">
         <template #default="scope">
           <span v-if="scope.row.showRate !== null && scope.row.showRate !== undefined">
@@ -153,22 +157,7 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="预算流水(元)" align="center" width="120" prop="spend">
-        <template #default="scope">
-          <span v-if="scope.row.spend !== null && scope.row.spend !== undefined">
-            {{ (scope.row.spend / 100).toFixed(2) }}
-          </span>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="收入(元)" align="center" width="100" prop="income">
-        <template #default="scope">
-          <span v-if="scope.row.income !== null && scope.row.income !== undefined">
-            {{ (scope.row.income / 100).toFixed(2) }}
-          </span>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
+
       <el-table-column label="eCPM(元)" align="center" width="120" prop="ecpm">
         <template #default="scope">
           <span v-if="scope.row.ecpm !== null && scope.row.ecpm !== undefined">
@@ -177,8 +166,25 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="折后点击" align="center" width="100" prop="discountClickPv" />
-      <el-table-column label="折后展示" align="center" width="100" prop="discountShowPv" />
+
+      <el-table-column label="成本(元)" align="center" width="120" prop="spend">
+        <template #default="scope">
+          <span v-if="scope.row.spend !== null && scope.row.spend !== undefined">
+            {{ (scope.row.spend / 100).toFixed(2) }}
+          </span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="收入(元)" align="center" width="120" prop="income">
+        <template #default="scope">
+          <span v-if="scope.row.income !== null && scope.row.income !== undefined">
+            {{ (scope.row.income / 100).toFixed(2) }}
+          </span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+<!--      <el-table-column label="折后点击" align="center" width="100" prop="discountClickPv" />-->
+<!--      <el-table-column label="折后展示" align="center" width="100" prop="discountShowPv" />-->
 <!--      <el-table-column label="调起成功" align="center" prop="dplsuccPv" />-->
 <!--      <el-table-column label="完成量" align="center" prop="completePv" />-->
 <!--      <el-table-column label="安装量" align="center" prop="installPv" />-->
@@ -799,3 +805,100 @@ getList()
 getCompanyList()
 getDspSlotList()
 </script>
+<style scoped>
+.btn-blue {
+  background-color: #2A5FB7 !important;
+  border-color: #2A5FB7 !important;
+  color: #fff !important;
+}
+
+.btn-blue:hover {
+  background-color: #1f4f96 !important;
+  border-color: #1f4f96 !important;
+}
+
+.btn-regge {
+  background-color: #DCA550 !important;
+  border-color: #f1b965 !important;
+  color: #fff !important;
+}
+
+.btn-regge:hover {
+  background-color: #df9318 !important;
+  border-color: #df9318 !important;
+}
+
+.el-form--inline .el-form-item {
+  margin-right: 8px;  /* 默认一般是 18px+ */
+  margin-bottom: 8px;
+}
+
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+
+
+.status-wrap {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap; /* 关键：禁止换行 */
+}
+
+.status-dot {
+  margin-right: 6px;
+}
+
+/* Drawer 头部样式 */
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  background: #fff;
+}
+
+
+.drawer-header {
+  display: flex;
+  flex-direction: column;   /* 👈 改成纵向 */
+  align-items: flex-start;
+  background: #fff;
+}
+
+/* 标题 */
+.drawer-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #303133;
+  margin: 15px 15px 8px;
+}
+
+/* 按钮区域 */
+.drawer-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 15px 10px;
+}
+
+/* 确保 Drawer 头部使用白色背景 */
+:deep(.el-drawer__header) {
+  margin-bottom: 0;
+  padding: 0;
+  background: #fff;
+}
+
+/* 确保 Drawer body 有正确的背景色 */
+:deep(.el-drawer__body) {
+  padding: 16px;
+  background: #f2f5f7;
+}
+
+
+</style>
