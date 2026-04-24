@@ -26,7 +26,7 @@
             <el-form-item  prop="name">
                 <el-select
                         v-model="queryParams.name"
-                        placeholder="应用名称"
+                        placeholder="请选择应用名称"
                         clearable
                         filterable
                         style="width: 150px"
@@ -42,7 +42,7 @@
             <el-form-item prop="enable">
                 <el-select
                         v-model="queryParams.enable"
-                        placeholder="状 态"
+                        placeholder="请选择状态"
                         clearable
                         @keyup.enter="handleQuery"
                         style="width: 150px">
@@ -356,6 +356,12 @@ const data = reactive({
         enable: [
             { required: true, message: "请选择状态", trigger: "blur" }
         ],
+        pkg: [
+           {required:true,message: "请输入包名", trigger: "blur"}
+      ],
+        downloadUrl: [
+            {required:true,message: "请输入下载地址", trigger: "blur"}
+      ],
     }
 })
 
@@ -371,7 +377,7 @@ function loadMediaList() {
             // 娣诲姞鍒伴€夐」鍒楄〃锛岀敤浜庝笅鎷夐€夋嫨
             mediaOptions.value.push({
                 value: media.id,
-                label: `${media.mediaCompanyName}(${media.id})`
+                label: `${media.mediaCompanyShort}(${media.id})`
             })
         })
     })

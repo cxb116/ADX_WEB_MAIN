@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="app-container">
         <el-form :model="queryParams"
                  ref="queryRef"
@@ -10,7 +10,7 @@
           <el-form-item  prop="mediaId">
             <el-select
                 v-model="queryParams.mediaId"
-                placeholder="请选择媒体"
+                placeholder="请选择媒体简名"
                 clearable
                 filterable
                 style="width: 150px;"
@@ -27,15 +27,6 @@
                 <el-input
                     v-model="queryParams.mediaCompanyName"
                     placeholder="请输入公司名称"
-                    clearable
-                    style="width: 150px;"
-                    @keyup.enter="handleQuery"
-                />
-            </el-form-item>
-            <el-form-item label="" prop="mediaCompanyShort">
-                <el-input
-                    v-model="queryParams.mediaCompanyShort"
-                    placeholder="请输入公司简称"
                     clearable
                     style="width: 150px;"
                     @keyup.enter="handleQuery"
@@ -158,20 +149,20 @@
         >
           <template #header>
             <div class="drawer-header">
-              <!-- 第一行：返回 + 标题 -->
-              <div class="header-line">
-                <el-icon class="back-icon" @click="cancel">
-                  <Close />
-                </el-icon>
-                <span class="drawer-title">{{ title }}</span>
+              <div class="drawer-header-left">
+                <el-button class="back-btn" circle text @click="cancel">
+                  <el-icon class="back-icon">
+                    <Close />
+                  </el-icon>
+                </el-button>
+                <div class="header-title-wrap">
+                  <span class="drawer-title">{{ title }}</span>
+                  <span class="drawer-subtitle">请完善信息后提交保存</span>
+                </div>
               </div>
 
-              <!-- 分割线 -->
-              <el-divider class="dividerClass" />
-
-              <!-- 第二行：按钮 -->
               <div class="drawer-actions">
-                <el-button class="btn-blue" @click="submitForm">
+                <el-button class="btn-blue submit-btn" @click="submitForm">
                   <el-icon>
                     <Position />
                   </el-icon>
@@ -392,7 +383,7 @@ function loadMediaList() {
       const rows = Array.isArray(response?.rows) ? response.rows : []
       mediaOptions.value = rows.map(media => ({
         value: media.id,
-        label: `${media.mediaCompanyName || media.name || media.id}(${media.id})`
+        label: `${media.mediaCompanyShort || media.name || media.id}(${media.id})`
       }))
     })
     .catch(() => {
@@ -557,73 +548,85 @@ loadMediaList()
 
 
 
+.media-drawer {
+  --drawer-header-bg: linear-gradient(120deg, #f8fbff 0%, #eef5ff 100%);
+  --drawer-body-bg: linear-gradient(180deg, #f4f8fd 0%, #eef3f9 100%);
+}
+
 :deep(.media-drawer .el-drawer__header) {
   margin-bottom: 0;
   padding: 0;
   background: transparent;
 }
 
-
+:deep(.media-drawer .el-drawer__body) {
+  padding: 0;
+  background: var(--drawer-body-bg);
+}
 
 .drawer-header {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 1000px;
-  padding: 0;
-  background: #fff;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 24px;
+  background: var(--drawer-header-bg);
   border-bottom: 1px solid #dfe7f2;
+  box-shadow: 0 6px 20px rgba(44, 85, 150, 0.06);
 }
 
-.header-top {
+.drawer-header-left {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 0 0 13px;
+  gap: 12px;
+  min-width: 0;
 }
 
 .back-btn {
   width: 34px;
   height: 34px;
   color: #2A5FB7;
+  border: 1px solid #d8e4f6;
   background: #ffffff;
 }
 
 .back-btn:hover {
   color: #1f4f96;
-  background: #f5f9ff;
   border-color: #bdd2ef;
+  background: #f5f9ff;
 }
 
 .back-icon {
-  cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .header-title-wrap {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .drawer-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
-  color: #303133;
+  line-height: 1.2;
+  color: #223149;
 }
 
 .drawer-subtitle {
   font-size: 12px;
-  color: #6b7b91;
   line-height: 1.4;
+  color: #6b7b91;
 }
 
 .drawer-actions {
   display: flex;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: flex-end;
   gap: 10px;
-  padding: 0 20px 13px;
-  width: 100%;
+  flex-shrink: 0;
 }
 
 .drawer-actions .el-icon {
@@ -636,33 +639,19 @@ loadMediaList()
 }
 
 .drawer-content {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 20px;
   height: 100%;
-  width: 900px;
-  margin: 0 auto;
   overflow-y: auto;
-  background: #fff;
+  padding: 20px 24px 28px;
+  background: transparent;
 }
-
-/* 第一行 */
-.header-line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 20px 0 0 20px;
-}
-
 
 .drawer-form {
   width: min(980px, 100%);
   margin: 0 auto;
   padding: 24px 26px 18px;
   background: #ffffff;
-
   border: 1px solid #e3eaf5;
+  border-radius: 14px;
   box-shadow: 0 12px 30px rgba(36, 76, 140, 0.08);
 }
 
@@ -670,7 +659,7 @@ loadMediaList()
   width: 100%;
   margin-bottom: 18px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #edf1f7;
+  border-bottom: 1px solid #f6f7f9;
 }
 
 .title-content2 {
@@ -689,11 +678,12 @@ loadMediaList()
   top: 3px;
   width: 4px;
   height: 16px;
+  border-radius: 3px;
   background: #2A5FB7;
 }
 
 .dividerClass1 {
-  margin: 10px 0;
+  display: none;
 }
 
 .drawer-form :deep(.el-form-item) {
@@ -708,6 +698,10 @@ loadMediaList()
 .drawer-form :deep(.el-input__wrapper),
 .drawer-form :deep(.el-textarea__inner) {
   border-radius: 8px;
+}
+
+.drawer-form :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px #2A5FB7 inset;
 }
 
 @media (max-width: 1200px) {
@@ -728,20 +722,12 @@ loadMediaList()
   }
 
   .drawer-actions {
-    display: flex;
-    justify-content: flex-start;  /* 靠左 */
+    width: 100%;
+    justify-content: flex-end;
   }
 
   .drawer-content {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding-top: 20px;
-    height: 100%;
-    width: 900px;
-    margin: 0 auto;
-    overflow-y: auto;
-    background: #fff;
+    padding: 12px;
   }
 
   .drawer-form {
@@ -750,5 +736,3 @@ loadMediaList()
   }
 }
 </style>
-
-

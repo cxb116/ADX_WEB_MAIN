@@ -33,7 +33,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <sql id="selectSspSlotInfoVo">
         select ssi.id, ssi.media_id, ssi.app_id, ssi.name, ssi.name_alise, ssi.ad_type_id, ssi.ad_scene_id, ssi.ad_size_id,
         sa.os_type, sa.access_type, ssi.ssp_ecpm,
-        ssi.ssp_pay_type, ssi.ssp_deal_ratio, ssi.width, ssi.height, ssi.ad_image, ssi.interaction_type, ssi.enable,ssi.create_time
+        ssi.ssp_pay_type, ssi.ssp_deal_ratio, ssi.width, ssi.height, ssi.ad_image, ssi.interaction_type, ssi.enable,ssi.create_time,ssi.update_time
         from ssp_slot_info ssi
         left join ssp_app sa on ssi.app_id = sa.id
     </sql>
@@ -41,6 +41,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectSspSlotInfoList" parameterType="SspSlotInfo" resultMap="SspSlotInfoResult">
         <include refid="selectSspSlotInfoVo"/>
         <where>
+            <if test="id != null">and ssi.id=#{id}</if>
             <if test="mediaId != null "> and ssi.media_id = #{mediaId}</if>
             <if test="appId != null "> and ssi.app_id = #{appId}</if>
             <if test="name != null and name != ''"> and ssi.name like concat('%', #{name}, '%')</if>
