@@ -90,7 +90,7 @@ public class DspSlotInfo extends BaseEntity
     private Long dspPayType;
 
     /** 成交系数，0到100，单位%，给上游预算出价打折扣  （rtb 时有这个） */
-    @Excel(name = "成交系数，0到100，单位%，给上游预算出价打折扣  ", readConverterExp = "rtb,时有这个")
+    @Excel(name = "成交系数，0到100，单位%，给上游预算出价打折扣  ")
     private Long dspDealRatio;
 
     /** 公司ID */

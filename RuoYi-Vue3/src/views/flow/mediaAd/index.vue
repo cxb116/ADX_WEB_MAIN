@@ -681,10 +681,7 @@
                     </template>
                     <el-form :model="slot" label-width="120px" size="small" class="launch-config-form">
                       <!-- 第一行：投放策略、捕获日志时长、IP限流 -->
-
                       <!-- 第二行：底价 -->
-
-
                       <!-- 第三行：请求、展现、点击 -->
                       <el-row :gutter="16">
                         <el-col :span="8">
@@ -756,6 +753,21 @@
                           <el-tag>结算方式: {{ slot.dspPayType }} ({{ typeof slot.dspPayType }})</el-tag>
                         </el-col>
                   </el-row>
+                    <el-row v-if="isSlotRtb(slot)">
+                      <el-col :span="8">
+                        <el-form-item label="RTB结算比例">
+                          <el-input-number
+                              v-model="slot.dspDealRatio"
+                              @change="value => handleRtbDealRatioChange(slot, value)"
+                              :min="0"
+                              placeholder="请输入RTB结算比例"
+                              :controls="false"
+                              style="width: 100%"
+                          />
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+
                     </el-form>
                   </el-collapse-item>
                 </el-collapse>
@@ -1140,6 +1152,7 @@ import { getApp } from "@/api/flow/app"
 import { listType } from "@/api/ad/type"
 import { listScene } from "@/api/ad/scene"
 import { listSize } from "@/api/ad/size"
+import { updateInfo } from "@/api/budget/info"
 import { listCompany } from "@/api/budget/company"
 import { listProduct } from "@/api/budget/product"
 import { useDict } from "@/utils/dict"
@@ -2368,8 +2381,13 @@ function getDspPayTypeValue(row) {
   return row.dsp_pay_type !== undefined ? row.dsp_pay_type : row.dspPayType
 }
 
+function isSlotRtb(slot) {
+  return Number(getDspPayTypeValue(slot)) === 2
+}
+
 function shouldShowFloorPrice(slot) {
-  return Number(slot?.dspPayType) === 2 && Number(slot?.sspPayType) !== 2
+  const basePayType = String(configMediaAd.value?.sspPayType ?? slot?.sspPayType ?? '')
+  return isSlotRtb(slot) && (basePayType === '1' || basePayType === '3')
 }
 
 /** DSP广告位表格选择变化 */
@@ -2459,6 +2477,46 @@ function handleCaptureLog(slot) {
     }
   }).catch(() => {
     proxy.$modal.msgError('捕获日志设置失败')
+  })
+}
+
+const rtbDealRatioSavingIds = new Set()
+
+/** RTB结算比例修改后立即保存 */
+function handleRtbDealRatioChange(slot, value) {
+  if (!slot || !slot.dspSlotInfoId) {
+    proxy.$modal.msgError('保存失败：缺少广告位ID')
+    return
+  }
+
+  if (value === null || value === undefined || value === '') {
+    return
+  }
+
+  const slotId = Number(slot.dspSlotInfoId)
+  const ratio = Number(value)
+  if (!slotId || Number.isNaN(ratio)) {
+    proxy.$modal.msgError('保存失败：RTB结算比例格式错误')
+    return
+  }
+  const ratioInt = Math.round(ratio)
+
+  if (rtbDealRatioSavingIds.has(slotId)) {
+    return
+  }
+  rtbDealRatioSavingIds.add(slotId)
+
+  updateInfo({
+    id: slotId,
+    dspDealRatio: ratioInt,
+    dsp_deal_ratio: ratioInt
+  }).then(() => {
+    slot.dspDealRatio = ratioInt
+    proxy.$modal.msgSuccess('RTB结算比例已自动保存')
+  }).catch(() => {
+    proxy.$modal.msgError('RTB结算比例保存失败')
+  }).finally(() => {
+    rtbDealRatioSavingIds.delete(slotId)
   })
 }
 
