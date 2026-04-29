@@ -581,13 +581,19 @@
                       </el-form-item>
                     </el-col>
                     <el-col :lg="12" :md="12" :sm="24" :xs="24">
-                      <el-form-item label="分成系数">
+                      <el-form-item label="分成系数" v-if="String(configMediaAd.sspPayType) === '1'">
                         <el-input
                           v-model="configMediaAd.sspDealRatio"
                           placeholder="请输入分成系数"
-                          :disabled="String(configMediaAd.sspPayType) === '2'"
                         />
                       </el-form-item>
+                      <el-form-item label="CPM"  v-else-if="String(configMediaAd.sspPayType) === '3'">
+                        <el-input
+                        v-model="configMediaAd.fixedPrice"
+                        placeholder="请输入千次收益">
+                        </el-input>
+                      </el-form-item>
+
                     </el-col>
                   </el-row>
                 </el-form>
@@ -1196,7 +1202,8 @@ const editForm = ref({
   adImage: null,
   interactionType: 0,
   enable: null,
-  remark: null
+  remark: null,
+  fixedPrice: null
 })
 
 // 广告类型、广告场景、样式尺寸列表
