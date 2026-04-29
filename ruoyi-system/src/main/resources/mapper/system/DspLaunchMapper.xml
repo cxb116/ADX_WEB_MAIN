@@ -28,6 +28,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
+        <result property="indexs" column="indexs"/>
     </resultMap>
 
     <resultMap type="DspLaunchDTO" id="DspLaunchDTOResult">
@@ -48,6 +49,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="brandDirection"    column="brand_direction"    />
         <result property="priceTransfer"    column="price_transfer"    />
         <result property="pkgTransfer"    column="pkg_transfer"    />
+        <result property="crowdDirection"    column="crowd_direction"    />
+        <result property="indexs" column="indexs"/>
+        <result property="sspPayType" column="ssp_pay_type"/>
         <association property="dspSlotInfo" javaType="DspSlotInfo">
             <result property="id"    column="dsp_info_id"    />
             <result property="name"    column="dsp_info_name"    />
@@ -70,7 +74,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectDspLaunchVo">
-        select id, ssp_slot_id, dsp_slot_id, traffic_weight, launch_strategy, floor_price, ip_limit, log_capture_at, track_schwarz, req, ims, clk, launch_time, region_direction, brand_direction, price_transfer, pkg_transfer, crowd_direction, create_by, create_time, update_by, update_time, remark from dsp_launch
+        select id, ssp_slot_id, dsp_slot_id, traffic_weight, launch_strategy, floor_price, ip_limit, log_capture_at, track_schwarz, req, ims, clk, launch_time, region_direction, brand_direction, price_transfer, pkg_transfer, crowd_direction, create_by, create_time, update_by, update_time, remark,indexs from dsp_launch
     </sql>
 
     <select id="selectDspLaunchList" parameterType="DspLaunch" resultMap="DspLaunchResult">
@@ -93,6 +97,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="priceTransfer != null "> and price_transfer = #{priceTransfer}</if>
             <if test="pkgTransfer != null "> and pkg_transfer = #{pkgTransfer}</if>
             <if test="crowdDirection != null "> and crowd_direction = #{crowdDirection}</if>
+             <if test="indexs !=null">and indexs = #{indexs}</if>
         </where>
     </select>
     
@@ -126,6 +131,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
             <if test="remark != null">remark,</if>
+            <if test="indexs !=null">indexs,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="sspSlotId != null">#{sspSlotId},</if>
@@ -150,6 +156,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
             <if test="remark != null">#{remark},</if>
+            <if test="indexs !=null">#{indexs},</if>
          </trim>
     </insert>
 
@@ -178,6 +185,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="remark != null">remark = #{remark},</if>
+            <if test="indexs != null">indexs = #{indexs},</if>
         </trim>
         where id = #{id}
     </update>
@@ -197,13 +205,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         insert into dsp_launch (ssp_slot_id, dsp_slot_id, traffic_weight, launch_strategy, floor_price,
                                 ip_limit, log_capture_at, track_schwarz,
                                 req, ims, clk, launch_time, region_direction, brand_direction, price_transfer, pkg_transfer, crowd_direction,
-                                create_by, create_time, update_by, update_time, remark)
+                                create_by, create_time, update_by, update_time, remark,indexs)
         values
         <foreach collection="list" item="item" separator=",">
             (#{item.sspSlotId}, #{item.dspSlotId}, #{item.trafficWeight}, #{item.launchStrategy}, #{item.floorPrice},
              #{item.ipLimit}, #{item.logCaptureAt}, #{item.trackSchwarz},
              #{item.req}, #{item.ims}, #{item.clk}, #{item.launchTime}, #{item.regionDirection}, #{item.brandDirection}, #{item.priceTransfer}, #{item.pkgTransfer}, #{item.crowdDirection},
-             #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark})
+             #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark},#{item.indexs})
         </foreach>
     </insert>
 
@@ -237,6 +245,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             dl.brand_direction,
             dl.price_transfer,
             dl.pkg_transfer,
+            dl.crowd_direction,
+            dl.indexs,
+            ssi.ssp_pay_type as ssp_pay_type,
             dsi.id as dsp_info_id,
             dsi.name as dsp_info_name,
             dsi.os_type as dsp_info_os_type,
@@ -256,6 +267,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             dsi.product_id as dsp_info_product_id
         FROM dsp_launch dl
         LEFT JOIN dsp_slot_info dsi ON dl.dsp_slot_id = dsi.id
+        left join ssp_slot_info ssi on dl.ssp_slot_id = ssi.id
         WHERE dl.ssp_slot_id = #{sspSlotId}
         ORDER BY dl.id ASC
     </select>

@@ -89,6 +89,8 @@ public class DspLaunch extends BaseEntity
     @Excel(name = "人群定向", readConverterExp = "1=不限制,2=定向,3=排除")
     private Integer crowdDirection;
 
+    private Integer indexs;
+
     public void setId(Long id)
     {
         this.id = id;
@@ -361,5 +363,14 @@ public class DspLaunch extends BaseEntity
             .append("updateTime", getUpdateTime())
             .append("remark", getRemark())
             .toString();
+    }
+
+
+    public Integer getIndexs() {
+        return indexs;
+    }
+
+    public void setIndexs(Integer indexs) {
+        this.indexs = indexs;
     }
 }

@@ -60,8 +60,15 @@ public class DspLaunchDTO
     /** 包透传：0不透传，1透传 */
     private Integer pkgTransfer;
 
+    /** 流量组编号（1=流量1，2=流量2...） */
+    private Integer crowdDirection;
+
     /** 预算方广告位信息 */
     private DspSlotInfo dspSlotInfo;
+
+    private Integer indexs;
+
+    private Integer sspPayType;
 
     public Long getId() {
         return id;
@@ -199,11 +206,35 @@ public class DspLaunchDTO
         this.pkgTransfer = pkgTransfer;
     }
 
+    public Integer getCrowdDirection() {
+        return crowdDirection;
+    }
+
+    public void setCrowdDirection(Integer crowdDirection) {
+        this.crowdDirection = crowdDirection;
+    }
+
     public DspSlotInfo getDspSlotInfo() {
         return dspSlotInfo;
     }
 
     public void setDspSlotInfo(DspSlotInfo dspSlotInfo) {
         this.dspSlotInfo = dspSlotInfo;
+    }
+
+    public Integer getIndexs() {
+        return indexs;
+    }
+
+    public void setIndexs(Integer indexs) {
+        this.indexs = indexs;
+    }
+
+    public Integer getSspPayType() {
+        return sspPayType;
+    }
+
+    public void setSspPayType(Integer sspPayType) {
+        this.sspPayType = sspPayType;
     }
 }

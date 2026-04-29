@@ -90,14 +90,38 @@
             highlight-current-row="true"
         >
           <el-table-column label="ID" align="center" width="66" prop="id" />
-            <el-table-column label="媒体名称" align="center" width="260" show-overflow-tooltip prop="name">
-                <template #default="scope">
-                    {{ formatMediaName(scope.row) }}
-                </template>
-            </el-table-column>
-            <el-table-column label="公司名称" align="center" show-overflow-tooltip width="150" prop="mediaCompanyName" />
-            <el-table-column label="公司简称" align="center" prop="mediaCompanyShort" />
+          <el-table-column label="公司简称" align="center" prop="mediaCompanyShort" />
+
+<!--            <el-table-column label="媒体名称" align="center" width="260" show-overflow-tooltip prop="name">-->
+<!--                <template #default="scope">-->
+<!--                    {{ formatMediaName(scope.row) }}-->
+<!--                </template>-->
+<!--            </el-table-column>-->
+          <el-table-column label="公司名称" align="center" show-overflow-tooltip width="150" prop="mediaCompanyName" />
+
           <el-table-column label="法人姓名" align="center" prop="mediaOwnerName" />
+          <el-table-column label="接入方式" align="center" prop="accessType">
+            <template #default="scope">
+              {{
+                scope.row.accessType === 1
+                    ? 'API'
+                    : scope.row.accessType === 2
+                        ? 'SDK'
+                        : '未知'
+              }}
+            </template>
+          </el-table-column>
+          <el-table-column label="流量类型" align="center" prop="type">
+            <template #default="scope">
+              {{
+                scope.row.type === 1
+                    ? 'API'
+                    : scope.row.type === 2
+                        ? '直媒'
+                        : '未知'
+              }}
+            </template>
+          </el-table-column>
           <el-table-column label="联系人" align="center" prop="contactName" />
           <el-table-column label="联系电话" align="center" show-overflow-tooltip prop="contactPhone" />
           <el-table-column label="联系邮箱" align="center" show-overflow-tooltip prop="contactEmail" />
@@ -142,51 +166,51 @@
         <el-drawer
             v-model="open"
             direction="rtl"
-            size="72%"
-            class="media-drawer"
+            size="1400px"
             :show-close="false"
             style="background: #f2f5f7"
         >
           <template #header>
             <div class="drawer-header">
-              <div class="drawer-header-left">
-                <el-button class="back-btn" circle text @click="cancel">
-                  <el-icon class="back-icon">
-                    <Close />
-                  </el-icon>
-                </el-button>
-                <div class="header-title-wrap">
-                  <span class="drawer-title">{{ title }}</span>
-                  <span class="drawer-subtitle">请完善信息后提交保存</span>
+                <div class="header-top">
+                    <el-icon class="back-icon" @click="cancel">
+                        <Close />
+                    </el-icon>
+                    <span class="drawer-title">{{ title }}</span>
                 </div>
-              </div>
-
-              <div class="drawer-actions">
-                <el-button class="btn-blue submit-btn" @click="submitForm">
-                  <el-icon>
-                    <Position />
-                  </el-icon>
-                  提交
-                </el-button>
-              </div>
+                <el-divider class="dividerClass" />
+                <div class="drawer-actions">
+                    <el-button class="btn-blue" @click="submitForm">
+                        <el-icon>
+                            <Position />
+                        </el-icon>
+                        提 交
+                    </el-button>
+                </div>
             </div>
           </template>
           <div class="drawer-content">
             <el-form ref="mediaRef"
-                     class="drawer-form"
                      :model="form"
                      :rules="rules"
-                     label-width="88px">
+                     label-width="100px"
+                     style="padding: 20px; border-radius: 8px;">
               <div class="title-content1">
                 <div class="title-content2">基本信息</div>
                 <el-divider class="dividerClass1" />
               </div>
               <el-row :gutter="20">
+
                 <el-col :span="12">
-                  <el-form-item label="媒体名称" prop="name">
-                    <el-input v-model="form.name" placeholder="请输入媒体名称" />
+                  <el-form-item label="公司简称" prop="mediaCompanyShort">
+                    <el-input v-model="form.mediaCompanyShort" placeholder="请输入公司简称" />
                   </el-form-item>
                 </el-col>
+<!--                <el-col :span="12">-->
+<!--                  <el-form-item label="媒体名称" prop="name">-->
+<!--                    <el-input v-model="form.name" placeholder="请输入媒体名称" />-->
+<!--                  </el-form-item>-->
+<!--                </el-col>-->
                 <el-col :span="12">
                   <el-form-item label="公司名称" prop="mediaCompanyName">
                     <el-input v-model="form.mediaCompanyName" placeholder="请输入公司名称" />
@@ -207,15 +231,20 @@
               </el-row>
 
               <el-row :gutter="20">
-                <el-col :span="12">
-              <el-form-item label="公司简称" prop="mediaCompanyShort">
-                <el-input v-model="form.mediaCompanyShort" placeholder="请输入公司简称" />
-              </el-form-item>
-                </el-col>
+
                 <el-col :span="12">
               <el-form-item label="信用代码" prop="mediaCompanyCode">
                 <el-input v-model="form.mediaCompanyCode" placeholder="请输入信用代码" />
               </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="接入方式" prop="accessType">
+                    <el-select v-model="form.accessType" placeholder="请选择接入方式" style="width: 100%">
+                      <el-option label="API" :value="1" />
+                      <el-option label="SDK" :value="2" />
+                      <el-option label="未知" :value="0" />
+                    </el-select>
+                  </el-form-item>
                 </el-col>
               </el-row>
 
@@ -264,11 +293,21 @@
                 <el-col :span="12">
               <el-form-item label="联系邮箱" prop="contactEmail">
                 <el-input v-model="form.contactEmail" placeholder="请输入联系邮箱" />
-
               </el-form-item>
                 </el-col>
               </el-row>
+              <el-row :gutter="20">
 
+                <el-col :span="12">
+                  <el-form-item label="流量类型" prop="type">
+                    <el-select v-model="form.type" placeholder="请选择接入方式" style="width: 100%">
+                      <el-option label="API" :value="1" />
+                      <el-option label="直媒" :value="2" />
+                      <el-option label="未知" :value="0" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
 
               <el-form-item label="备注" prop="remark">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
@@ -324,6 +363,15 @@ const data = reactive({
         enable: [
             { required: true, message: "请输入用户状态", trigger: "blur" }
         ],
+      mediaCompanyShort:[
+        { required: true, message: "请输入公司简称", trigger: "blur" }
+      ],
+      name:[
+        {required: true,message:"请输入公司名称", trigger:"blur"}
+      ],
+      mediaCompanyName:[
+        {required: true,message:"请输入公司", trigger:"blur"}
+      ]
     }
 })
 
@@ -371,7 +419,9 @@ function reset() {
         createTime: null,
         updateBy: null,
         updateTime: null,
-        remark: null
+        remark: null,
+        accessType:null,
+        type: null
     }
     proxy.resetForm("mediaRef")
 }
@@ -504,6 +554,11 @@ loadMediaList()
   border-color: #1f4f96 !important;
 }
 
+:deep(.el-form--inline .el-form-item) {
+  margin-right: 8px;   /* 馃憟 璋冨皬闂磋窛 */
+  margin-bottom: 8px;
+}
+
 .btn-regge {
   background-color: #DCA550 !important;
   border-color: #f1b965 !important;
@@ -515,16 +570,27 @@ loadMediaList()
   border-color: #df9318 !important;
 }
 
+
+/* 缁胯壊锛堟甯革級 */
+.dot-success {
+  background-color: #67c23a;
+}
+
+/* 绾㈣壊锛堢鐢?鎷掔粷锛?*/
+.dot-danger {
+  background-color: #f56c6c;
+}
+
+/* 榛勮壊锛堝鏍镐腑锛?*/
+.dot-warning {
+  background-color: #e6a23c;
+}
+
 .el-form--inline .el-form-item {
-  margin-right: 8px;
+  margin-right: 8px;  /* 榛樿涓€鑸槸 18px+ */
   margin-bottom: 8px;
 }
 
-.status-wrap {
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-}
 
 .status-dot {
   display: inline-block;
@@ -534,205 +600,103 @@ loadMediaList()
   margin-right: 6px;
 }
 
-.dot-success {
-  background-color: #67c23a;
+.status-wrap {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap; /* 鍏抽敭锛氱姝㈡崲琛?*/
 }
 
-.dot-danger {
-  background-color: #f56c6c;
-}
-
-.dot-warning {
-  background-color: #e6a23c;
-}
-
-
-
-.media-drawer {
-  --drawer-header-bg: linear-gradient(120deg, #f8fbff 0%, #eef5ff 100%);
-  --drawer-body-bg: linear-gradient(180deg, #f4f8fd 0%, #eef3f9 100%);
-}
-
-:deep(.media-drawer .el-drawer__header) {
-  margin-bottom: 0;
-  padding: 0;
-  background: transparent;
-}
-
-:deep(.media-drawer .el-drawer__body) {
-  padding: 0;
-  background: var(--drawer-body-bg);
+.status-dot {
+  margin-right: 6px;
 }
 
 .drawer-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  width: 100%;
-  padding: 16px 24px;
-  background: var(--drawer-header-bg);
-  border-bottom: 1px solid #dfe7f2;
-  box-shadow: 0 6px 20px rgba(44, 85, 150, 0.06);
-}
-
-.drawer-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.back-btn {
-  width: 34px;
-  height: 34px;
-  color: #2A5FB7;
-  border: 1px solid #d8e4f6;
-  background: #ffffff;
-}
-
-.back-btn:hover {
-  color: #1f4f96;
-  border-color: #bdd2ef;
-  background: #f5f9ff;
-}
-
-.back-icon {
-  font-size: 16px;
-}
-
-.header-title-wrap {
-  display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  align-items: flex-start;
+  width: 1000px;
+  padding: 0;
+  background: #fff;
+  border-bottom: 1px solid #dfe7f2;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 0 13px;
 }
 
 .drawer-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  line-height: 1.2;
-  color: #223149;
+  color: #303133;
+  margin: 15px 15px 8px;
 }
 
-.drawer-subtitle {
-  font-size: 12px;
-  line-height: 1.4;
-  color: #6b7b91;
+.back-icon {
+  cursor: pointer;
+  font-size: 18px;
+  margin-left: 20px;
+  margin-top: 8px;
 }
 
 .drawer-actions {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-end;  /* 👉 改这里 */
   gap: 10px;
-  flex-shrink: 0;
+  padding: 0 20px 13px;
+  width: 100%;
 }
 
 .drawer-actions .el-icon {
   margin-right: 6px;
 }
 
-.submit-btn {
-  min-width: 96px;
-  box-shadow: 0 8px 18px rgba(42, 95, 183, 0.2);
+.dividerClass {
+  margin-top: -10px;
+}
+
+:deep(.el-drawer__header) {
+  margin-bottom: 0;
+  padding: 0;
+  background: #fff;
+}
+
+:deep(.el-drawer__body) {
+  padding: 16px;
+  background: #f2f5f7;
 }
 
 .drawer-content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 20px;
   height: 100%;
-  overflow-y: auto;
-  padding: 20px 24px 28px;
-  background: transparent;
-}
-
-.drawer-form {
-  width: min(980px, 100%);
+  width: 900px;
   margin: 0 auto;
-  padding: 24px 26px 18px;
-  background: #ffffff;
-  border: 1px solid #e3eaf5;
-  border-radius: 14px;
-  box-shadow: 0 12px 30px rgba(36, 76, 140, 0.08);
+  overflow-y: auto;
+  background: #fff;
 }
 
 .title-content1 {
-  width: 100%;
-  margin-bottom: 18px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #f6f7f9;
+  width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 12px;
 }
 
 .title-content2 {
   width: 100%;
-  position: relative;
-  padding-left: 12px;
-  font-size: 16px;
   font-weight: 600;
-  color: #253043;
-}
-
-.title-content2::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 3px;
-  width: 4px;
-  height: 16px;
-  border-radius: 3px;
-  background: #2A5FB7;
+  font-size: 16px;
+  margin-bottom: 8px;
 }
 
 .dividerClass1 {
-  display: none;
-}
-
-.drawer-form :deep(.el-form-item) {
-  margin-bottom: 18px;
-}
-
-.drawer-form :deep(.el-form-item__label) {
-  color: #4d5e74;
-  font-weight: 500;
-}
-
-.drawer-form :deep(.el-input__wrapper),
-.drawer-form :deep(.el-textarea__inner) {
-  border-radius: 8px;
-}
-
-.drawer-form :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px #2A5FB7 inset;
-}
-
-@media (max-width: 1200px) {
-  .drawer-content {
-    padding: 16px;
-  }
-
-  .drawer-form {
-    padding: 20px;
-  }
-}
-
-@media (max-width: 768px) {
-  .drawer-header {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 14px 16px;
-  }
-
-  .drawer-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .drawer-content {
-    padding: 12px;
-  }
-
-  .drawer-form {
-    padding: 16px 14px;
-    border-radius: 10px;
-  }
+  width: 100% !important;
+  margin: 0 !important;
 }
 </style>

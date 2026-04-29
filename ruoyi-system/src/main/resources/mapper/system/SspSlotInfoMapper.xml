@@ -28,12 +28,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
         <result property="remark"    column="remark"    />
+        <result property="fixedPrice" column="fixed_price"/>
     </resultMap>
 
     <sql id="selectSspSlotInfoVo">
         select ssi.id, ssi.media_id, ssi.app_id, ssi.name, ssi.name_alise, ssi.ad_type_id, ssi.ad_scene_id, ssi.ad_size_id,
         sa.os_type, sa.access_type, ssi.ssp_ecpm,
-        ssi.ssp_pay_type, ssi.ssp_deal_ratio, ssi.width, ssi.height, ssi.ad_image, ssi.interaction_type, ssi.enable,ssi.create_time,ssi.update_time
+        ssi.ssp_pay_type, ssi.ssp_deal_ratio, ssi.width, ssi.height, ssi.ad_image, ssi.interaction_type, ssi.enable,ssi.create_time,ssi.update_time, ssi.fixed_price
         from ssp_slot_info ssi
         left join ssp_app sa on ssi.app_id = sa.id
     </sql>
@@ -42,6 +43,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectSspSlotInfoVo"/>
         <where>
             <if test="id != null">and ssi.id=#{id}</if>
+            <if test="idList != null and idList.length > 0">
+                and ssi.id in
+                <foreach item="slotId" collection="idList" open="(" separator="," close=")">
+                    #{slotId}
+                </foreach>
+            </if>
             <if test="mediaId != null "> and ssi.media_id = #{mediaId}</if>
             <if test="appId != null "> and ssi.app_id = #{appId}</if>
             <if test="name != null and name != ''"> and ssi.name like concat('%', #{name}, '%')</if>
@@ -64,7 +71,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateBy != null "> and ssi.update_by = #{updateBy}</if>
             <if test="updateTime != null "> and ssi.update_time = #{updateTime}</if>
             <if test="remark != null "> and ssi.remark = #{remark}</if>
+
         </where>
+        order by ssi.create_time desc
     </select>
 
     <select id="selectSspSlotInfoById" parameterType="Long" resultMap="SspSlotInfoResult">
@@ -94,6 +103,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
             <if test="remark != null">remark,</if>
+            <if test="fixedPrice != null">fixed_price,</if>
         </trim>
         values
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -116,6 +126,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
             <if test="remark != null">#{remark},</if>
+            <if test="fixedPrice != null">#{fixedPrice},</if>
         </trim>
     </insert>
 
@@ -142,6 +153,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="remark != null">remark = #{remark},</if>
+            <if test="fixedPrice !=null">fixed_price = #{fixedPrice}</if>
          </trim>
         where id = #{id}
     </update>
@@ -162,6 +174,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT dsi.id,
             dsi.name,
             dsi.os_type,
+            dsi.ad_type_id,
+            dsi.company_id,
+            dsi.product_id,
             dsi.dsp_slot_code,
             dsi.dsp_app_id,
             dsi.dsp_app_pkg,
@@ -170,8 +185,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             dsi.price_encrypt_key,
             dsi.dsp_app_store_link,
             dsi.dsp_pay_type,
-            dsi.dsp_deal_ratio
+            dsi.dsp_deal_ratio,
+            dsi.fixed_price,
+            dc.name as companyName,
+            dp.name as productName
         FROM dsp_slot_info dsi
+        LEFT JOIN dsp_company dc ON dsi.company_id = dc.id
+        LEFT JOIN dsp_product dp ON dsi.product_id = dp.id
         WHERE dsi.id NOT IN (
             SELECT dl.dsp_slot_id
             FROM dsp_launch dl

@@ -1,6 +1,7 @@
 package com.ruoyi.system.domain;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import java.util.Arrays;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -18,6 +19,9 @@ public class SspSlotInfo extends BaseEntity
 
     /** ID */
     private Long id;
+    
+    /** 批量广告位ID（查询条件） */
+    private Long[] idList;
 
     /** 媒体id */
     @Excel(name = "媒体id")
@@ -88,6 +92,9 @@ public class SspSlotInfo extends BaseEntity
     @Excel(name = "状态：1正常 0禁用 2审核中 3拒绝")
     private Long enable;
 
+    @Excel(name="固价(单位分)")
+    private int fixedPrice;
+
     public void setId(Long id) 
     {
         this.id = id;
@@ -97,6 +104,16 @@ public class SspSlotInfo extends BaseEntity
     public Long getId()
     {
         return id;
+    }
+    
+    public void setIdList(Long[] idList)
+    {
+        this.idList = idList;
+    }
+    
+    public Long[] getIdList()
+    {
+        return idList;
     }
 
     public void setMediaId(Long mediaId) 
@@ -226,6 +243,7 @@ public class SspSlotInfo extends BaseEntity
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("id", getId())
+            .append("idList", Arrays.toString(getIdList()))
             .append("mediaId", getMediaId())
             .append("appId", getAppId())
             .append("name", getName())
@@ -309,5 +327,13 @@ public class SspSlotInfo extends BaseEntity
 
     public void setEcpm(Long ecpm) {
         this.sspEcpm = ecpm;
+    }
+
+    public int getFixedPrice() {
+        return fixedPrice;
+    }
+
+    public void setFixedPrice(int fixedPrice) {
+        this.fixedPrice = fixedPrice;
     }
 }

@@ -31,6 +31,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="method != null "> and method = #{method}</if>
             <if test="timeout != null "> and timeout = #{timeout}</if>
         </where>
+        order by create_time desc
     </select>
     
     <select id="selectDspCompanyById" parameterType="Long" resultMap="DspCompanyResult">

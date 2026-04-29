@@ -96,39 +96,77 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改产品管理对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="productRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="预算公司" prop="companyId">
-          <el-select v-model="form.companyId" placeholder="请选择公司">
-            <el-option
-                v-for="company in companyList"
-                :key="company.id"
-                :label="company.name"
-                :value="company.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="产品名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入产品名称" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
+    <!-- 添加或修改产品管理 -->
+    <el-drawer
+      v-model="open"
+      direction="rtl"
+      size="1400px"
+      :show-close="false"
+      style="background: #f2f5f7"
+    >
+      <template #header>
+        <div class="drawer-header">
+          <div class="header-top">
+            <el-icon class="back-icon" @click="cancel">
+              <Close />
+            </el-icon>
+            <span class="drawer-title">{{ title }}</span>
+          </div>
+          <el-divider class="dividerClass" />
+          <div class="drawer-actions">
+            <el-button class="btn-blue" @click="submitForm">
+              <el-icon>
+                <Position />
+              </el-icon>
+              提 交
+            </el-button>
+          </div>
         </div>
       </template>
-    </el-dialog>
+      <div class="drawer-content">
+        <el-form
+          ref="productRef"
+          :model="form"
+          :rules="rules"
+          label-width="100px"
+          style="padding: 20px; border-radius: 8px;"
+        >
+          <div class="title-content1">
+            <div class="title-content2">基本信息</div>
+            <el-divider class="dividerClass1" />
+          </div>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="预算公司" prop="companyId">
+                <el-select v-model="form.companyId" placeholder="请选择公司" style="width: 100%">
+                  <el-option
+                    v-for="company in companyList"
+                    :key="company.id"
+                    :label="company.name"
+                    :value="company.id"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="产品名称" prop="name">
+                <el-input v-model="form.name" placeholder="请输入产品名称" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
 <script setup name="Product">
 import { listProduct, getProduct, delProduct, addProduct, updateProduct } from "@/api/budget/product"
 import { listCompany } from "@/api/budget/company"
+import { Close, Position } from "@element-plus/icons-vue"
 
 const { proxy } = getCurrentInstance()
 
@@ -321,6 +359,96 @@ getList()
 .btn-regge:hover {
   background-color: #df9318 !important;
   border-color: #df9318 !important;
+}
+
+.drawer-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 1000px;
+  padding: 0;
+  background: #fff;
+  border-bottom: 1px solid #dfe7f2;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 0 13px;
+}
+
+.drawer-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin: 15px 15px 8px;
+}
+
+.back-icon {
+  cursor: pointer;
+  font-size: 18px;
+  margin-left: 20px;
+  margin-top: 8px;
+}
+
+.drawer-actions {
+  display: flex;
+  justify-content: flex-end;  /* 👉 改这里 */
+  gap: 10px;
+  padding: 0 20px 13px;
+  width: 100%;
+}
+
+.drawer-actions .el-icon {
+  margin-right: 6px;
+}
+
+.dividerClass {
+  margin-top: -10px;
+}
+
+:deep(.el-drawer__header) {
+  margin-bottom: 0;
+  padding: 0;
+  background: #fff;
+}
+
+:deep(.el-drawer__body) {
+  padding: 16px;
+  background: #f2f5f7;
+}
+
+.drawer-content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 20px;
+  height: 100%;
+  width: 900px;
+  margin: 0 auto;
+  overflow-y: auto;
+  background: #fff;
+}
+
+.title-content1 {
+  width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.title-content2 {
+  width: 100%;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.dividerClass1 {
+  width: 100% !important;
+  margin: 0 !important;
 }
 
 

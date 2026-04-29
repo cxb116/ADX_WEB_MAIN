@@ -70,6 +70,12 @@ public class SspMedia extends BaseEntity
     @Excel(name = "状态：1正常 0禁用 2审核中 3拒绝")
     private Long enable;
 
+    @Excel(name="接入方式 接入方式:1=API，2=SDK")
+    private int accessType;
+
+    private int type;
+
+
     public void setId(Long id) 
     {
         this.id = id;
@@ -233,5 +239,22 @@ public class SspMedia extends BaseEntity
             .append("updateTime", getUpdateTime())
             .append("remark", getRemark())
             .toString();
+    }
+
+    public int getAccessType() {
+        return accessType;
+    }
+
+    public void setAccessType(int accessType) {
+        this.accessType = accessType;
+    }
+
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public int getType() {
+        return type;
     }
 }

@@ -3,6 +3,7 @@ package com.ruoyi.system.service.impl;
 import java.util.List;
 import com.ruoyi.common.core.etcd.EtcdTemplate;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.system.mapper.DspSlotInfoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.SspSlotInfoMapper;
@@ -21,6 +22,10 @@ public class SspSlotInfoServiceImpl implements ISspSlotInfoService
 {
     @Autowired
     private SspSlotInfoMapper sspSlotInfoMapper;
+
+    @Autowired
+    private DspSlotInfoMapper dspSlotInfoMapper;
+
 
     @Autowired(required = false)
     private EtcdTemplate etcdTemplate;
@@ -170,6 +175,16 @@ public class SspSlotInfoServiceImpl implements ISspSlotInfoService
     @Override
     public List<DspSlotInfo> selectMatchedDspSlotInfo(Long sspSlotId)
     {
+        // 首先用 id 查到这个数据，然后根据这个数据的ios 去查询对应的数据
+        SspSlotInfo sspSlotInfo = sspSlotInfoMapper.selectSspSlotInfoById(sspSlotId);
+        if (sspSlotInfo != null) {
+            DspSlotInfo dspSlotInfo = new DspSlotInfo();
+            dspSlotInfo.setOsType(sspSlotInfo.getOsType());
+            dspSlotInfo.setAdTypeId(sspSlotInfo.getAdTypeId());
+            List<DspSlotInfo> dspSlotInfos = dspSlotInfoMapper.selectDspSlotInfoList(dspSlotInfo);
+            return dspSlotInfos;
+        }
+
         return sspSlotInfoMapper.selectMatchedDspSlotInfo(sspSlotId);
     }
 }

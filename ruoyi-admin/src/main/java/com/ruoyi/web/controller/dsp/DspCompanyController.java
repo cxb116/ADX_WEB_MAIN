@@ -77,6 +77,10 @@ public class DspCompanyController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody DspCompany dspCompany)
     {
+        if (isDspCodeDuplicate(dspCompany))
+        {
+            return error("新增公司'" + dspCompany.getName() + "'失败，预算映射值已存在");
+        }
         return toAjax(dspCompanyService.insertDspCompany(dspCompany));
     }
 
@@ -88,6 +92,10 @@ public class DspCompanyController extends BaseController
     @PutMapping
     public AjaxResult edit(@RequestBody DspCompany dspCompany)
     {
+        if (isDspCodeDuplicate(dspCompany))
+        {
+            return error("修改公司'" + dspCompany.getName() + "'失败，预算映射值已存在");
+        }
         return toAjax(dspCompanyService.updateDspCompany(dspCompany));
     }
 
@@ -100,5 +108,37 @@ public class DspCompanyController extends BaseController
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(dspCompanyService.deleteDspCompanyByIds(ids));
+    }
+
+    /**
+     * 校验预算映射值是否重复
+     */
+    private boolean isDspCodeDuplicate(DspCompany dspCompany)
+    {
+        if (dspCompany == null || dspCompany.getDspCode() == null)
+        {
+            return false;
+        }
+        DspCompany query = new DspCompany();
+        query.setDspCode(dspCompany.getDspCode());
+        List<DspCompany> companies = dspCompanyService.selectDspCompanyList(query);
+        if (companies == null || companies.isEmpty())
+        {
+            return false;
+        }
+
+        Long currentId = dspCompany.getId();
+        for (DspCompany company : companies)
+        {
+            if (company == null || company.getId() == null)
+            {
+                continue;
+            }
+            if (currentId == null || !company.getId().equals(currentId))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

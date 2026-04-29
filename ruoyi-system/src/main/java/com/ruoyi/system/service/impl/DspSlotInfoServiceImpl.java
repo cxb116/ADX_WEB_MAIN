@@ -1,8 +1,10 @@
 package com.ruoyi.system.service.impl;
 
 import java.util.List;
+import java.util.Arrays;
 import com.ruoyi.common.core.etcd.EtcdTemplate;
 import com.ruoyi.common.utils.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +56,31 @@ public class DspSlotInfoServiceImpl implements IDspSlotInfoService
     @Override
     public List<DspSlotInfo> selectDspSlotInfoList(DspSlotInfo dspSlotInfo)
     {
+        if (dspSlotInfo != null)
+        {
+            String[] dspSlotCodeList = dspSlotInfo.getDspSlotCodeList();
+            if (dspSlotCodeList != null && dspSlotCodeList.length > 0)
+            {
+                dspSlotInfo.setDspSlotCode(null);
+            }
+            else if (StringUtils.isNotBlank(dspSlotInfo.getDspSlotCode()))
+            {
+                String[] parsedSlotCodeList = Arrays.stream(dspSlotInfo.getDspSlotCode().split("[\\s,，;；]+"))
+                    .map(String::trim)
+                    .filter(StringUtils::isNotBlank)
+                    .distinct()
+                    .toArray(String[]::new);
+                if (parsedSlotCodeList.length > 1)
+                {
+                    dspSlotInfo.setDspSlotCodeList(parsedSlotCodeList);
+                    dspSlotInfo.setDspSlotCode(null);
+                }
+                else if (parsedSlotCodeList.length == 1)
+                {
+                    dspSlotInfo.setDspSlotCode(parsedSlotCodeList[0]);
+                }
+            }
+        }
         return dspSlotInfoMapper.selectDspSlotInfoList(dspSlotInfo);
     }
 

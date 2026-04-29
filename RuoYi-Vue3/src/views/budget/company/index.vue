@@ -10,12 +10,13 @@
                 />
             </el-form-item>
             <el-form-item  prop="dspCode">
-                <el-input
-                        v-model="queryParams.dspCode"
-                        placeholder="请输入预算映射值"
-                        clearable
-                        @keyup.enter="handleQuery"
-                />
+              <el-input
+                  v-model="queryParams.dspCode"
+                  placeholder="请输入公司简称"
+                  clearable
+                  @input="handleInput"
+                  @keyup.enter="handleQuery"
+              />
             </el-form-item>
             <el-form-item  prop="method">
                 <el-select
@@ -233,6 +234,10 @@ const data = reactive({
     }
 })
 
+const handleInput = (val) => {
+  queryParams.dspCode = val.replace(/\D/g, '')
+}
+
 const { queryParams, form, rules } = toRefs(data)
 
 function formatCompanyName(row) {
@@ -317,8 +322,19 @@ function handleUpdate(row) {
 
 /** 提交按钮 */
 function submitForm() {
-    proxy.$refs["companyRef"].validate(valid => {
+    proxy.$refs["companyRef"].validate(async valid => {
         if (valid) {
+            let duplicated = false
+            try {
+                duplicated = await checkDspCodeDuplicate()
+            } catch (error) {
+                proxy.$modal.msgError("校验预算映射值失败，请稍后重试")
+                return
+            }
+            if (duplicated) {
+                proxy.$modal.msgWarning("预算映射值已存在，请重新输入")
+                return
+            }
             if (form.value.id != null) {
                 updateCompany(form.value).then(response => {
                     proxy.$modal.msgSuccess("修改成功")
@@ -333,6 +349,32 @@ function submitForm() {
                 })
             }
         }
+    })
+}
+
+/**
+ * 校验预算映射值是否重复
+ */
+async function checkDspCodeDuplicate() {
+    if (form.value.dspCode === null || form.value.dspCode === undefined || form.value.dspCode === "") {
+        return false
+    }
+    const query = {
+        pageNum: 1,
+        pageSize: 100,
+        dspCode: form.value.dspCode
+    }
+    const response = await listCompany(query)
+    const rows = response.rows || []
+    const currentId = form.value.id
+    return rows.some(item => {
+        if (!item || item.id === null || item.id === undefined) {
+            return false
+        }
+        if (currentId === null || currentId === undefined) {
+            return true
+        }
+        return String(item.id) !== String(currentId)
     })
 }
 
@@ -417,7 +459,7 @@ getList()
 
 .drawer-actions {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;  /* 👉 改这里 */
   gap: 10px;
   padding: 0 20px 13px;
   width: 100%;

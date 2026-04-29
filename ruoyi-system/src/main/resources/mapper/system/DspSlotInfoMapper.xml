@@ -24,6 +24,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="dspDealRatio"    column="dsp_deal_ratio"    />
         <result property="companyId"    column="company_id"    />
         <result property="productId"    column="product_id"    />
+        <result property="companyName"    column="companyName"    />
+        <result property="productName"    column="productName"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -49,6 +51,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         left join dsp_company as c
         on c.id = s.company_id
         <where>
+            <if test="idList != null and idList.length > 0">
+                and s.id in
+                <foreach item="slotId" collection="idList" open="(" separator="," close=")">
+                    #{slotId}
+                </foreach>
+            </if>
+            <if test="dspSlotCodeList != null and dspSlotCodeList.length > 0">
+                and s.dsp_slot_code in
+                <foreach item="slotCode" collection="dspSlotCodeList" open="(" separator="," close=")">
+                    #{slotCode}
+                </foreach>
+            </if>
             <if test="name != null  and name != ''"> and s.name like concat('%', #{name}, '%')</if>
             <if test="osType != null "> and s.os_type = #{osType}</if>
             <if test="adTypeId != null "> and s.ad_type_id = #{adTypeId}</if>
@@ -68,6 +82,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="companyId != null "> and s.company_id = #{companyId}</if>
             <if test="productId != null "> and s.product_id = #{productId}</if>
         </where>
+        order by s.create_time desc
     </select>
     
     <select id="selectDspSlotInfoById" parameterType="Long" resultMap="DspSlotInfoResult">

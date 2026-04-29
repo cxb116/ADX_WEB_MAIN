@@ -22,6 +22,12 @@ public class DspSlotInfo extends BaseEntity
 
     /** ID */
     private Long id;
+    
+    /** 批量预算位ID（查询条件） */
+    private Long[] idList;
+    
+    /** 批量预算方广告位（查询条件） */
+    private String[] dspSlotCodeList;
 
     /** 广告位名称 */
     @Excel(name = "广告位名称")
@@ -120,6 +126,26 @@ public class DspSlotInfo extends BaseEntity
     public Long getId()
     {
         return id;
+    }
+    
+    public void setIdList(Long[] idList)
+    {
+        this.idList = idList;
+    }
+    
+    public Long[] getIdList()
+    {
+        return idList;
+    }
+    
+    public void setDspSlotCodeList(String[] dspSlotCodeList)
+    {
+        this.dspSlotCodeList = dspSlotCodeList;
+    }
+    
+    public String[] getDspSlotCodeList()
+    {
+        return dspSlotCodeList;
     }
 
     public void setName(String name)
@@ -328,6 +354,8 @@ public class DspSlotInfo extends BaseEntity
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("id", getId())
+            .append("idList", getIdList())
+            .append("dspSlotCodeList", getDspSlotCodeList())
             .append("name", getName())
             .append("osType", getOsType())
             .append("adTypeId", getAdTypeId())

@@ -120,13 +120,13 @@
                 <dict-tag :options="os_type" :value="scope.row.osType" />
               </template>
             </el-table-column>
-            <el-table-column label="接入方式" align="center" prop="accessType">
-                <template #default="scope">
-                    <span v-if="scope.row.accessType === 1">API</span>
-                    <span v-else-if="scope.row.accessType === 2">SDK</span>
-                    <span v-else>{{ scope.row.accessType }}</span>
-                </template>
-            </el-table-column>
+<!--            <el-table-column label="接入方式" align="center" prop="accessType">-->
+<!--                <template #default="scope">-->
+<!--                    <span v-if="scope.row.accessType === 1">API</span>-->
+<!--                    <span v-else-if="scope.row.accessType === 2">SDK</span>-->
+<!--                    <span v-else>{{ scope.row.accessType }}</span>-->
+<!--                </template>-->
+<!--            </el-table-column>-->
             <el-table-column label="包名" align="center" width="100" prop="pkg" />
             <el-table-column label="下载地址" align="center" prop="downloadUrl" />
 <!--            <el-table-column label="鐘舵€? align="center" prop="enable">-->
@@ -246,44 +246,33 @@
                                 </el-select>
                             </el-form-item>
                         </el-col>
-                        <el-col :span="12">
-                            <el-form-item label="接入方式" prop="accessType">
-                                <el-select v-model="form.accessType" placeholder="请选择接入方式" style="width: 100%">
-                                    <el-option
-                                        v-for="dict in access_type"
-                                        :key="dict.value"
-                                        :label="dict.label"
-                                        :value="dict.value"
-                                    />
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
+                      <el-col :span="12">
+                        <el-form-item label="包名" prop="pkg">
+                          <el-input v-model="form.pkg" placeholder="请输入包名" />
+                        </el-form-item>
+                      </el-col>
                     </el-row>
                     <el-row :gutter="20">
-                        <el-col :span="12">
-                            <el-form-item label="包名" prop="pkg">
-                                <el-input v-model="form.pkg" placeholder="请输入包名" />
-                            </el-form-item>
-                        </el-col>
                         <el-col :span="12">
                             <el-form-item label="下载地址" prop="downloadUrl">
                                 <el-input v-model="form.downloadUrl" placeholder="请输入下载地址" />
                             </el-form-item>
                         </el-col>
+                      <el-col :span="12">
+                        <el-form-item label="状态" prop="enable">
+                          <el-select v-model="form.enable" placeholder="请选择状态" style="width: 100%">
+                            <el-option
+                                v-for="dict in media_status"
+                                :key="dict.value"
+                                :label="dict.label"
+                                :value="dict.value"
+                            />
+                          </el-select>
+                        </el-form-item>
+                      </el-col>
                     </el-row>
                     <el-row :gutter="20">
-                        <el-col :span="12">
-                            <el-form-item label="状态" prop="enable">
-                                <el-select v-model="form.enable" placeholder="请选择状态" style="width: 100%">
-                                    <el-option
-                                        v-for="dict in media_status"
-                                        :key="dict.value"
-                                        :label="dict.label"
-                                        :value="dict.value"
-                                    />
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
+
                     </el-row>
                     <el-form-item label="备注" prop="remark">
                         <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
@@ -662,7 +651,7 @@ getList()
 
 .drawer-actions {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;  /* 👉 改这里 */
   gap: 10px;
   padding: 0 20px 13px;
   width: 100%;

@@ -42,6 +42,22 @@
         </el-select>
       </el-form-item>
 
+      <el-form-item label="" prop="osType">
+        <el-select
+            v-model="queryParams.osType"
+            placeholder="请选择操作系统"
+            clearable
+            style="width: 150px;"
+        >
+          <el-option
+              v-for="dict in os_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+
       <el-form-item label="" prop="adTypeId">
         <el-select
           v-model="queryParams.adTypeId"
@@ -57,15 +73,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item  label-width="110px" prop="Id">
-        <el-input
-          v-model="queryParams.id"
-          placeholder="请输入广告ID"
-          clearable
-          @keyup.enter="handleQuery"
-          style="width: 150px;"
-        />
-      </el-form-item>
+
       <el-form-item label="" label-width="110px" prop="nameAlise">
         <el-input
           v-model="queryParams.nameAlise"
@@ -75,21 +83,7 @@
           style="width: 150px;"
         />
       </el-form-item>
-      <el-form-item label="" prop="osType">
-        <el-select
-          v-model="queryParams.osType"
-          placeholder="请选择操作系统"
-          clearable
-          style="width: 150px;"
-        >
-          <el-option
-            v-for="dict in os_type"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
+
       <el-form-item label="" prop="accessType">
         <el-select
           v-model="queryParams.accessType"
@@ -105,17 +99,20 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="" prop="createTimeRange">
-        <el-date-picker
-            v-model="createTimeRange"
-            type="daterange"
-            range-separator="-"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            value-format="YYYY-MM-DD"
-            style="width: 250px"
-
-        />
+      <el-form-item label="" prop="sspPayType">
+        <el-select
+          v-model="queryParams.sspPayType"
+          placeholder="请选择结算方式"
+          clearable
+          style="width: 150px;"
+        >
+          <el-option
+            v-for="dict in ssp_pay_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="" prop="enable">
         <el-select
@@ -132,11 +129,16 @@
           />
         </el-select>
       </el-form-item>
-
-
-
-
-
+      <el-form-item label-width="110px" prop="id">
+        <el-input
+            v-model="queryParams.idStr"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入广告位ID(每行一个)"
+            clearable
+            style="width: 150px;"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button class="btn-blue" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button class="btn-blue" icon="Refresh" @click="resetQuery">重置</el-button>
@@ -593,7 +595,7 @@
             </div>
           </el-card>
 
-          <el-card class="config-card" style="margin-top: 20px;">
+          <el-card class="config-card flow-config-card" style="margin-top: 20px;">
             <template #header>
               <div class="card-header">
                 <span>流量拆分配置</span>
@@ -673,57 +675,9 @@
                     </template>
                     <el-form :model="slot" label-width="120px" size="small" class="launch-config-form">
                       <!-- 第一行：投放策略、捕获日志时长、IP限流 -->
-                      <el-row :gutter="16">
-                        <el-col :span="8">
-                          <el-form-item label="投放策略" required>
-                            <el-select v-model="slot.launchStrategy" placeholder="请选择" style="width: 100%">
-                              <el-option label="对接第三方" :value="1" />
-                              <el-option label="自主投放" :value="2" />
-                            </el-select>
-                          </el-form-item>
-                        </el-col>
-                        <el-col :span="8">
-                          <el-form-item label="日志时长(秒)" required>
-                            <el-input-number
-                              v-model="slot.logCaptureAt"
-                              :min="0"
-                              placeholder="请输入"
-                              :controls="false"
-                              style="width: 100%"
-                            />
-                          </el-form-item>
-                        </el-col>
-                        <el-col :span="8">
-                          <el-form-item label="IP限流次数">
-                            <el-input-number
-                              v-model="slot.ipLimit"
-                              :min="0"
-                              placeholder="不限制留空"
-                              :controls="false"
-                              style="width: 100%"
-                            />
-                          </el-form-item>
-                        </el-col>
-                      </el-row>
 
                       <!-- 第二行：底价 -->
-                      <el-row :gutter="16">
-                        <el-col :span="8" v-if="Number(slot.dspPayType) === 2">
-                          <el-form-item label="底价(分)">
-                            <el-input-number
-                              v-model="slot.floorPrice"
-                              :min="0"
-                              placeholder="请输入底价"
-                              :controls="false"
-                              style="width: 100%"
-                            />
-                          </el-form-item>
-                        </el-col>
-                        <!-- 调试信息：显示结算方式 -->
-                        <el-col :span="8" v-if="false">
-                          <el-tag>结算方式: {{ slot.dspPayType }} ({{ typeof slot.dspPayType }})</el-tag>
-                        </el-col>
-                      </el-row>
+
 
                       <!-- 第三行：请求、展现、点击 -->
                       <el-row :gutter="16">
@@ -773,36 +727,6 @@
                           </el-form-item>
                         </el-col>
                         <el-col :span="8">
-                          <el-form-item label="地域定向" required>
-                            <el-select v-model="slot.regionDirection" placeholder="请选择" style="width: 100%">
-                              <el-option label="不限制" :value="1" />
-                              <el-option label="定向" :value="2" />
-                              <el-option label="排除" :value="3" />
-                            </el-select>
-                          </el-form-item>
-                        </el-col>
-                        <el-col :span="8">
-                          <el-form-item label="品牌定向" required>
-                            <el-select v-model="slot.brandDirection" placeholder="请选择" style="width: 100%">
-                              <el-option label="不限制" :value="1" />
-                              <el-option label="定向" :value="2" />
-                              <el-option label="排除" :value="3" />
-                            </el-select>
-                          </el-form-item>
-                        </el-col>
-                      </el-row>
-
-                      <!-- 第六行：价格透传、包透传 -->
-                      <el-row :gutter="16">
-                        <el-col :span="8">
-                          <el-form-item label="价格透传" required>
-                            <el-select v-model="slot.priceTransfer" placeholder="请选择" style="width: 100%">
-                              <el-option label="不透传" :value="0" />
-                              <el-option label="透传" :value="1" />
-                            </el-select>
-                          </el-form-item>
-                        </el-col>
-                        <el-col :span="8">
                           <el-form-item label="包透传" required>
                             <el-select v-model="slot.pkgTransfer" placeholder="请选择" style="width: 100%">
                               <el-option label="不透传" :value="0" />
@@ -810,19 +734,22 @@
                             </el-select>
                           </el-form-item>
                         </el-col>
-                      </el-row>
-
-                      <!-- 第七行：上报黑名单 -->
-                      <el-row :gutter="16">
-                        <el-col :span="24">
-                          <el-form-item label="上报黑名单">
-                            <el-input
-                              v-model="slot.trackSchwarz"
-                              placeholder="多个用逗号分隔"
+                        <el-col :span="8" v-if="shouldShowFloorPrice(slot)">
+                          <el-form-item label="底价(分)">
+                            <el-input-number
+                                v-model="slot.floorPrice"
+                                :min="0"
+                                placeholder="请输入底价"
+                                :controls="false"
+                                style="width: 100%"
                             />
                           </el-form-item>
                         </el-col>
-                      </el-row>
+                        <!-- 调试信息：显示结算方式 -->
+                        <el-col :span="8" v-if="false">
+                          <el-tag>结算方式: {{ slot.dspPayType }} ({{ typeof slot.dspPayType }})</el-tag>
+                        </el-col>
+                  </el-row>
                     </el-form>
                   </el-collapse-item>
                 </el-collapse>
@@ -1049,16 +976,50 @@
     <!-- 选择DSP广告位对话框 -->
     <el-dialog
       v-model="selectSlotDialogVisible"
-      title="流量拆分 - 选择 DSP 广告位"
-      width="1200px"
+      title="流量拆分 - 选择预算广告位"
+      width="1600px"
       append-to-body
     >
       <!-- 检索表单 -->
       <el-form :model="slotQueryParams" ref="slotQueryRef" :inline="true" label-width="80px" style="margin-bottom: 16px;">
-        <el-form-item label="操作系统" prop="osType">
+        <el-form-item prop="companyId">
+          <el-select
+              v-model="slotQueryParams.companyId"
+              placeholder="公司名称"
+              clearable
+              filterable
+              style="width: 160px"
+              @change="handleSlotCompanyChange"
+          >
+            <el-option
+                v-for="item in slotCompanyOptions"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item prop="productId">
+          <el-select
+              v-model="slotQueryParams.productId"
+              placeholder="产品名称"
+              clearable
+              filterable
+              style="width: 160px"
+              @change="handleSlotProductChange"
+          >
+            <el-option
+                v-for="item in slotProductOptions"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item prop="osType">
           <el-select
             v-model="slotQueryParams.osType"
-            placeholder="请选择操作系统"
+            placeholder="操作系统"
             clearable
             style="width: 150px"
           >
@@ -1066,10 +1027,10 @@
             <el-option label="iOS" :value="2" />
           </el-select>
         </el-form-item>
-        <el-form-item label="广告类型" prop="adTypeId">
+        <el-form-item  prop="adTypeId">
           <el-select
             v-model="slotQueryParams.adTypeId"
-            placeholder="请选择广告类型"
+            placeholder="广告类型"
             clearable
             style="width: 150px"
           >
@@ -1081,18 +1042,35 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="广告位编码" prop="dspSlotCode">
+
+        <el-form-item prop="budgetSlotId">
+          <el-select
+            v-model="slotQueryParams.budgetSlotId"
+            placeholder="预算名称"
+            clearable
+            filterable
+            style="width: 220px"
+          >
+            <el-option
+              v-for="item in slotBudgetNameOptions"
+              :key="item.id"
+              :label="item.label"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item prop="dspSlotCode">
           <el-input
             v-model="slotQueryParams.dspSlotCode"
-            placeholder="请输入广告位编码"
+            placeholder="预算广告位ID"
             clearable
-            style="width: 200px"
+            style="width: 150px"
             @keyup.enter="handleSlotQuery"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="Search" @click="handleSlotQuery">搜索</el-button>
-          <el-button icon="Refresh" @click="handleResetSlotQuery">重置</el-button>
+          <el-button class="btn-blue" type="primary" icon="Search" @click="handleSlotQuery">搜索</el-button>
+          <el-button class="btn-blue" icon="Refresh" @click="handleResetSlotQuery">重置</el-button>
         </el-form-item>
       </el-form>
 
@@ -1100,9 +1078,17 @@
         :data="filteredMatchedDspSlots"
         @selection-change="handleSlotSelectionChange"
         style="width: 100%"
+        :header-cell-style="{ background: '#F5F7FA', color: '#000' }"
+        :cell-style="{ color: '#000' }"
+        border
+        table-layout="auto"
+        highlight-current-row="true"
       >
         <el-table-column type="selection" width="55" align="center" fixed />
-        <el-table-column label="预算方名称" align="center" prop="name" width="200" fixed />
+        <el-table-column label="ID" align="center" prop="id" width="66" fixed />
+        <el-table-column label="公司名称" align="center" prop="companyName" width="250" fixed />
+        <el-table-column label="产品名称" align="center" prop="productName" width="250" fixed />
+        <el-table-column label="预算方名称" align="center" prop="name" width="250" fixed />
         <el-table-column label="操作系统" align="center" width="100">
           <template #default="scope">
             <el-tag v-if="getOsTypeValue(scope.row) === 1" type="success">Android</el-tag>
@@ -1120,23 +1106,19 @@
             {{ getDspSlotCodeValue(scope.row) }}
           </template>
         </el-table-column>
-        <el-table-column label="DSP AppKey" align="center" width="180">
-          <template #default="scope">
-            {{ getDspAppKeyValue(scope.row) }}
-          </template>
-        </el-table-column>
         <el-table-column label="结算方式" align="center" width="100">
           <template #default="scope">
             <el-tag v-if="getDspPayTypeValue(scope.row) == 1" type="success">分成</el-tag>
             <el-tag v-else-if="getDspPayTypeValue(scope.row) == 2" type="primary">RTB</el-tag>
-            <el-tag v-else type="info">未知</el-tag>
+            <el-tag v-else-if="getDspPayTypeValue(scope.row) == 3" type="primary">固价</el-tag>
+
           </template>
         </el-table-column>
       </el-table>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="handleCancelSelectSlot">取 消</el-button>
-          <el-button type="primary" @click="handleConfirmSelectSlot">
+          <el-button class="btn-blue" @click="handleCancelSelectSlot">取 消</el-button>
+          <el-button class="btn-blue" type="primary" @click="handleConfirmSelectSlot">
             确定添加 ({{ selectedDspSlotIds.length }})
           </el-button>
         </div>
@@ -1152,6 +1134,8 @@ import { getApp } from "@/api/flow/app"
 import { listType } from "@/api/ad/type"
 import { listScene } from "@/api/ad/scene"
 import { listSize } from "@/api/ad/size"
+import { listCompany } from "@/api/budget/company"
+import { listProduct } from "@/api/budget/product"
 import { useDict } from "@/utils/dict"
 import { ref, reactive, toRefs, computed, getCurrentInstance, watch } from "vue"
 import { Close, InfoFilled, Link, Operation, Position, Setting } from '@element-plus/icons-vue'
@@ -1271,17 +1255,96 @@ const selectSlotDialogVisible = ref(false)
 const matchedDspSlots = ref([])
 // 选中的DSP广告位ID列表
 const selectedDspSlotIds = ref([])
+// 预算公司与产品列表（用于流量拆分筛选展示）
+const budgetCompanyList = ref([])
+const budgetProductList = ref([])
 
 // 弹窗检索参数
 const slotQueryParams = ref({
+  companyId: null,
+  productId: null,
+  budgetSlotId: null,
   osType: null,
   adTypeId: null,
   dspSlotCode: null
 })
 
+const slotCompanyOptions = computed(() => {
+  const optionMap = new Map()
+  matchedDspSlots.value.forEach(slot => {
+    const companyId = getSlotCompanyId(slot)
+    if (companyId === null || companyId === undefined || companyId === '') {
+      return
+    }
+    if (!optionMap.has(String(companyId))) {
+      optionMap.set(String(companyId), {
+        id: companyId,
+        name: getSlotCompanyName(slot)
+      })
+    }
+  })
+  return Array.from(optionMap.values())
+})
+
+const slotProductOptions = computed(() => {
+  const optionMap = new Map()
+  matchedDspSlots.value.forEach(slot => {
+    const companyId = getSlotCompanyId(slot)
+    if (!isEmptyValue(slotQueryParams.value.companyId) && !isSameId(companyId, slotQueryParams.value.companyId)) {
+      return
+    }
+    const productId = getSlotProductId(slot)
+    if (productId === null || productId === undefined || productId === '') {
+      return
+    }
+    if (!optionMap.has(String(productId))) {
+      optionMap.set(String(productId), {
+        id: productId,
+        name: getSlotProductName(slot)
+      })
+    }
+  })
+  return Array.from(optionMap.values())
+})
+
+const slotBudgetNameOptions = computed(() => {
+  const optionMap = new Map()
+  matchedDspSlots.value.forEach(slot => {
+    if (!isEmptyValue(slotQueryParams.value.companyId) && !isSameId(getSlotCompanyId(slot), slotQueryParams.value.companyId)) {
+      return
+    }
+    if (!isEmptyValue(slotQueryParams.value.productId) && !isSameId(getSlotProductId(slot), slotQueryParams.value.productId)) {
+      return
+    }
+    const slotId = slot?.id
+    if (slotId === null || slotId === undefined || slotId === '') {
+      return
+    }
+    if (!optionMap.has(String(slotId))) {
+      optionMap.set(String(slotId), {
+        id: slotId,
+        label: getBudgetOptionLabel(slot)
+      })
+    }
+  })
+  return Array.from(optionMap.values())
+})
+
 // 过滤后的DSP广告位列表
 const filteredMatchedDspSlots = computed(() => {
   let filtered = matchedDspSlots.value
+
+  if (!isEmptyValue(slotQueryParams.value.companyId)) {
+    filtered = filtered.filter(slot => isSameId(getSlotCompanyId(slot), slotQueryParams.value.companyId))
+  }
+
+  if (!isEmptyValue(slotQueryParams.value.productId)) {
+    filtered = filtered.filter(slot => isSameId(getSlotProductId(slot), slotQueryParams.value.productId))
+  }
+
+  if (!isEmptyValue(slotQueryParams.value.budgetSlotId)) {
+    filtered = filtered.filter(slot => isSameId(slot?.id, slotQueryParams.value.budgetSlotId))
+  }
 
   // 按操作系统过滤（兼容驼峰和下划线）
   if (slotQueryParams.value.osType !== null && slotQueryParams.value.osType !== '') {
@@ -1317,7 +1380,8 @@ const totalTrafficWeight = computed(() => {
 const data = reactive({
   form: {},
   queryParams: {
-    id: null,
+    idStr: null,
+    idList: null,
     pageNum: 1,
     pageSize: 10,
     mediaId: null,
@@ -1328,6 +1392,7 @@ const data = reactive({
     nameAlise: null,
     osType: null,
     accessType: null,
+    sspPayType: null,
     enable: null,
     params: {
       startTime: null,
@@ -1526,6 +1591,21 @@ function loadAdSizeList() {
   })
 }
 
+/** 加载预算公司和产品名称映射（用于流量拆分筛选展示） */
+function loadBudgetCompanyAndProduct() {
+  listCompany({ pageNum: 1, pageSize: 1000 }).then(response => {
+    budgetCompanyList.value = response.rows || []
+  }).catch(() => {
+    budgetCompanyList.value = []
+  })
+
+  listProduct({ pageNum: 1, pageSize: 1000 }).then(response => {
+    budgetProductList.value = response.rows || []
+  }).catch(() => {
+    budgetProductList.value = []
+  })
+}
+
 /** 根据媒体ID获取媒体名称 */
 function getMediaName(mediaId) {
   return mediaCompanyNameMap.value.get(mediaId) || mediaId
@@ -1630,6 +1710,19 @@ function reset() {
 
 /** 搜索按钮操作 */
 function handleQuery() {
+  // 处理批量广告位ID
+  if (queryParams.value.idStr && queryParams.value.idStr.trim()) {
+    // 将换行分隔的字符串转换为数组
+    const idArray = queryParams.value.idStr.split('\n')
+      .map(id => id.trim())
+      .filter(id => id !== '')
+      .map(id => Number(id))
+      .filter(id => !isNaN(id))
+    queryParams.value.idList = idArray.length > 0 ? idArray : null
+  } else {
+    queryParams.value.idList = null
+  }
+
   // 处理时间范围
   if (createTimeRange.value && createTimeRange.value.length === 2) {
     queryParams.value.params.startTime = createTimeRange.value[0]
@@ -1647,6 +1740,9 @@ function resetQuery() {
   createTimeRange.value = []
   queryParams.value.params.startTime = null
   queryParams.value.params.endTime = null
+  queryParams.value.idStr = null
+  queryParams.value.idList = null
+  queryParams.value.sspPayType = null
   proxy.resetForm("queryRef")
   searchAppOptions.value = allSearchAppOptions.value
   handleQuery()
@@ -1993,6 +2089,7 @@ function loadSlotList(mediaAdId) {
         priceEncryptKey: slotInfo.priceEncryptKey || '',
         dspAppStoreLink: slotInfo.dspAppStoreLink || '',
         dspPayType: slotInfo.dsp_pay_type,  // 使用下划线命名匹配后端返回
+        sspPayType: launch.sspPayType ?? launch.ssp_pay_type ?? configMediaAd.value?.sspPayType,
         dspDealRatio: slotInfo.dsp_deal_ratio,
         activeCollapse: ['launch'] // 默认展开投放配置
       }
@@ -2070,6 +2167,7 @@ async function handleAddSlot() {
       // 如果有匹配的数据，打开选择对话框
       matchedDspSlots.value = matchedSlots
       selectedDspSlotIds.value = []
+      handleResetSlotQuery()
       selectSlotDialogVisible.value = true
     } else {
       console.warn('没有可用的DSP广告位')
@@ -2093,6 +2191,7 @@ function handleConfirmSelectSlot() {
     return
   }
 
+  let addedCount = 0
   // 根据选中的 ID 找到对应的数据并添加到列表
   selectedDspSlotIds.value.forEach(slotId => {
     const matchedSlot = matchedDspSlots.value.find(slot => slot.id === slotId)
@@ -2115,6 +2214,7 @@ function handleConfirmSelectSlot() {
         priceEncryptKey: matchedSlot.price_encrypt_key !== undefined ? matchedSlot.price_encrypt_key : matchedSlot.priceEncryptKey || '',
         dspAppStoreLink: matchedSlot.dsp_app_store_link !== undefined ? matchedSlot.dsp_app_store_link : matchedSlot.dspAppStoreLink || '',
         dspPayType: getDspPayTypeValue(matchedSlot),
+        sspPayType: configMediaAd.value?.sspPayType ?? null,
         dspDealRatio: matchedSlot.dsp_deal_ratio !== undefined ? matchedSlot.dsp_deal_ratio : matchedSlot.dspDealRatio,
         // 投放配置字段
         trafficWeight: 0,
@@ -2135,8 +2235,16 @@ function handleConfirmSelectSlot() {
       }
       console.log(`添加 DSP 广告位 [${newSlot.name}]: dspPayType=${newSlot.dspPayType}, 类型=${typeof newSlot.dspPayType}`)
       slotList.value.push(newSlot)
+      addedCount += 1
     }
   })
+
+  if (addedCount > 0) {
+    const hasPositiveWeight = slotList.value.some(item => (Number(item.trafficWeight) || 0) > 0)
+    if (!hasPositiveWeight && slotList.value.length > 0) {
+      slotList.value[0].trafficWeight = 100
+    }
+  }
 
   // 关闭对话框
   selectSlotDialogVisible.value = false
@@ -2156,13 +2264,76 @@ function handleSlotQuery() {
   console.log('执行检索，检索条件:', slotQueryParams.value)
 }
 
+function handleSlotCompanyChange() {
+  slotQueryParams.value.productId = null
+  slotQueryParams.value.budgetSlotId = null
+}
+
+function handleSlotProductChange() {
+  slotQueryParams.value.budgetSlotId = null
+}
+
 /** DSP广告位弹窗重置检索 */
 function handleResetSlotQuery() {
   slotQueryParams.value = {
+    companyId: null,
+    productId: null,
+    budgetSlotId: null,
     osType: null,
     adTypeId: null,
     dspSlotCode: null
   }
+}
+
+function isEmptyValue(value) {
+  return value === null || value === undefined || value === ''
+}
+
+function isSameId(a, b) {
+  if (isEmptyValue(a) || isEmptyValue(b)) {
+    return false
+  }
+  return String(a) === String(b)
+}
+
+function getSlotCompanyId(row) {
+  return row.company_id !== undefined ? row.company_id : (row.companyId !== undefined ? row.companyId : null)
+}
+
+function getSlotProductId(row) {
+  if (row.product_id !== undefined) {
+    return row.product_id
+  }
+  if (row.dsp_product_id !== undefined) {
+    return row.dsp_product_id
+  }
+  return row.productId !== undefined ? row.productId : null
+}
+
+function getSlotCompanyName(row) {
+  const companyName = row.company_name !== undefined ? row.company_name : row.companyName
+  if (companyName) {
+    return companyName
+  }
+  const companyId = getSlotCompanyId(row)
+  const company = budgetCompanyList.value.find(item => isSameId(item.id ?? item.company_id, companyId))
+  return company?.name || companyId || ''
+}
+
+function getSlotProductName(row) {
+  const productName = row.product_name !== undefined ? row.product_name : row.productName
+  if (productName) {
+    return productName
+  }
+  const productId = getSlotProductId(row)
+  const product = budgetProductList.value.find(item => isSameId(item.id ?? item.product_id, productId))
+  return product?.name || productId || ''
+}
+
+function getBudgetOptionLabel(row) {
+  const name = row?.name || '未命名'
+  const id = row?.id ?? '-'
+  return `预算 ${name}(${id})`
 }
 
 /** 获取操作系统类型值（兼容驼峰和下划线） */
@@ -2188,6 +2359,10 @@ function getDspAppKeyValue(row) {
 /** 获取结算方式值（兼容驼峰和下划线） */
 function getDspPayTypeValue(row) {
   return row.dsp_pay_type !== undefined ? row.dsp_pay_type : row.dspPayType
+}
+
+function shouldShowFloorPrice(slot) {
+  return Number(slot?.dspPayType) === 2 && Number(slot?.sspPayType) !== 2
 }
 
 /** DSP广告位表格选择变化 */
@@ -2560,6 +2735,7 @@ loadMediaList()
 loadAdTypeList()
 loadAdSceneList()
 loadAdSizeList()
+loadBudgetCompanyAndProduct()
 getList()
 </script>
 
@@ -2613,6 +2789,10 @@ getList()
 .config-card {
   height: 270px;
   margin-bottom: 20px;
+}
+
+.flow-config-card {
+  height: auto;
 }
 
 .edit-card {
