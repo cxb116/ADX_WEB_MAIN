@@ -32,11 +32,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="createdAt"    column="created_at"    />
         <result property="appName"    column="app_name"    />
         <result property="sspSlotName"    column="ssp_slot_name"    />
+
         <result property="dspSlotName"    column="dsp_slot_name"    />
         <result property="mediaName"    column="media_name"    />
         <result property="sspPayType"    column="ssp_pay_type"    />
         <result property="sspDealRatio"    column="ssp_deal_ratio"    />
         <result property="sspEcpm"    column="ssp_ecpm"    />
+        <result property="appOsType" column="app_os_type"/>
     </resultMap>
 
     <sql id="selectDataSspSlotVo">
@@ -47,6 +49,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ssp_slot.ssp_deal_ratio,
         ssp_slot.ssp_ecpm,
         ssp_slot.media_id,
+        app.os_type as app_os_type,
         media.name as media_name,
         dsp_slot.name as dsp_slot_name
         from ${tableName} t
@@ -83,6 +86,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="activatePv != null "> and t.activate_pv = #{activatePv}</if>
             <if test="date != null "> and t.date = #{date}</if>
             <if test="createdAt != null "> and t.created_at = #{createdAt}</if>
+            <if test="appOsType !=null and appOsType != ''">and app.os_type =#{appOsType}</if>
         </where>
     </select>
 

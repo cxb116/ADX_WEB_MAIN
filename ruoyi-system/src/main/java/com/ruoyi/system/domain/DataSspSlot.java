@@ -154,6 +154,8 @@ public class DataSspSlot extends BaseEntity
     /** eCPM（计算字段，不属于表字段，单位元） */
     private Double ecpm;
 
+    private int appOsType;
+
     public void setId(Long id) 
     {
         this.id = id;
@@ -567,5 +569,13 @@ public class DataSspSlot extends BaseEntity
             .append("ecpm", getEcpm())
             .append("createdAt", getCreatedAt())
             .toString();
+    }
+
+    public int getAppOsType() {
+        return appOsType;
+    }
+
+    public void setAppOsType(int appOsType) {
+        this.appOsType = appOsType;
     }
 }

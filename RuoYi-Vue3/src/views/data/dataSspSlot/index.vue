@@ -37,14 +37,32 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label-width="90" prop="sspSlotId">
-        <el-input
-          v-model="queryParams.sspSlotId"
-          placeholder="请输入媒体广告位"
+      <el-form-item prop="appOsType">
+        <el-select
+          v-model="queryParams.appOsType"
+          placeholder="请选择应用平台"
           clearable
-          @keyup.enter="handleQuery"
           style="width: 120px;"
-        />
+        >
+          <el-option label="Android" :value="1" />
+          <el-option label="iOS" :value="2" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label-width="90" prop="sspSlotId">
+        <el-select
+          v-model="queryParams.sspSlotId"
+          placeholder="请选择媒体广告位"
+          clearable
+          filterable
+          style="width: 120px;"
+        >
+          <el-option
+            v-for="item in mediaAdList"
+            :key="item.id"
+            :label="`${item.name || '媒体广告位'}(${item.id})`"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label-width="90" prop="dspSlotId">
         <el-input
@@ -84,9 +102,9 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-radio-group v-model="tableType" @change="handleTableTypeChange">
-          <el-radio-button  class="btn-blue" label="day">天表</el-radio-button>
-          <el-radio-button  class="btn-blue" label="hour">小时表</el-radio-button>
+        <el-radio-group v-model="tableType" class="btn-blue" @change="handleTableTypeChange">
+          <el-radio-button  class="btn-blue" label="day">日报表</el-radio-button>
+          <el-radio-button  class="btn-blue" label="hour">小时报表</el-radio-button>
         </el-radio-group>
       </el-col>
       <el-col :span="1.5">
@@ -96,7 +114,7 @@
           icon="TrendCharts"
           @click="handleShowChart"
           class="btn-blue"
-        >图表</el-button>
+        >查看折现数据</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -133,7 +151,20 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="应用" align="center" width="150" show-overflow-tooltip  prop="appName">
+
+<!--      <el-table-column label="应用平台" align="center" width="150" prop="appOsType">-->
+<!--        <template slot-scope="scope">-->
+<!--          <span>{{ scope.row.appOsType === 1 ? 'Android' : 'iOS' }}</span>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+
+      <el-table-column label="应用平台" align="center" width="150" prop="appOsType">
+        <template #default="scope">
+          <span>{{ scope && scope.row ? (scope.row.appOsType === 1 ? 'Android' : (scope.row.appOsType === 2 ? 'iOS' : '未知')) : '未知' }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="应用名称" align="center" width="150" show-overflow-tooltip  prop="appName">
         <template #default="scope">
           <span v-if="scope.row.appName">{{ scope.row.appName }}（{{ scope.row.appId }}）</span>
           <span v-else>{{ scope.row.appId }}</span>
@@ -350,6 +381,7 @@
 import { listData_ssp_slot, getData_ssp_slot, delData_ssp_slot, addData_ssp_slot, updateData_ssp_slot } from "@/api/data/dataSspSlot.js"
 import { listMedia } from "@/api/flow/media.js"
 import { listApp } from "@/api/flow/app.js"
+import { listMediaAd } from "@/api/flow/mediaAd.js"
 import { useDict } from "@/utils/dict"
 import * as echarts from 'echarts'
 
@@ -371,6 +403,7 @@ const dateRange = ref([])
 const tableType = ref('day') // 表类型: 'day' 或 'hour'
 const mediaList = ref([]) // 媒体列表
 const appList = ref([]) // 应用列表
+const mediaAdList = ref([]) // 媒体广告位列表
 const chartDialogVisible = ref(false) // 图表对话框显示状态
 const correctDialogVisible = ref(false) // 修正对话框显示状态
 // 修正表单
@@ -427,6 +460,7 @@ const data = reactive({
     pageSize: 10,
     mediaId: null,
     appId: null,
+    appOsType: null,
     sspSlotId: null,
     dspSlotId: null,
     dspSlotCode: null,
@@ -502,6 +536,13 @@ function getAppList() {
   })
 }
 
+/** 获取媒体广告位列表 */
+function getMediaAdList() {
+  listMediaAd({ pageNum: 1, pageSize: 1000 }).then(response => {
+    mediaAdList.value = response.rows || []
+  })
+}
+
 /** 生成表名 */
 function generateTableName() {
   const now = new Date()
@@ -550,6 +591,8 @@ function getList() {
         const income = item.sspDealRatio ? Math.floor(spend * item.sspDealRatio / 100) : 0
         item.income = income
       }
+      console.log("data_ssp_slotList============== :",data_ssp_slotList)
+
       return item
     })
     total.value = response.total
@@ -569,6 +612,7 @@ function reset() {
     id: null,
     mediaId: null,
     appId: null,
+    appOsType: null,
     sspSlotId: null,
     dspSlotId: null,
     dspSlotCode: null,
@@ -875,6 +919,7 @@ function updateChart() {
 getList()
 getMediaList()
 getAppList()
+getMediaAdList()
 </script>
 <style scoped>
 .btn-blue {

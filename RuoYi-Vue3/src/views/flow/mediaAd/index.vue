@@ -604,173 +604,187 @@
           <el-card class="config-card flow-config-card" style="margin-top: 20px;">
             <template #header>
               <div class="card-header">
-                <span>流量拆分配置</span>
+                <span>流量模块配置</span>
                 <div class="header-actions">
                   <el-tag :type="totalTrafficWeight === 100 ? 'success' : 'warning'" size="small">
                     权重总和: {{ totalTrafficWeight }} / 100
                   </el-tag>
                   <el-divider direction="vertical" />
-                  <el-button-group size="small">
-                    <el-button type="primary" @click="handleSetFirstTo100" :disabled="slotList.length === 0">
-                      首个100%
-                    </el-button>
-                    <el-button type="success" @click="handleAverageWeight" :disabled="slotList.length === 0">
-                      平均分配
-                    </el-button>
-                    <el-button type="warning" @click="handleResetWeight" :disabled="slotList.length === 0">
-                      重置
-                    </el-button>
-                  </el-button-group>
-                  <el-divider direction="vertical" />
-                  <el-button type="primary" size="small" icon="Plus" @click="handleAddSlot">流量拆分</el-button>
+                  <el-button type="primary" size="small" icon="Plus" @click="handleAddSlot">添加流量</el-button>
                 </div>
               </div>
             </template>
 
-            <div v-if="slotList.length === 0" class="empty-slots">
-              <el-empty description="暂未配置流量拆分">
-                <el-text type="info" size="small">点击"流量拆分"按钮添加 DSP 广告位</el-text>
+            <div v-if="flowIndexList.length === 0" class="empty-slots">
+              <el-empty description="暂未添加流量模块">
+                <el-text type="info" size="small">点击"添加流量"按钮新增流量模块</el-text>
                 <template #image>
                   <el-icon :size="60" color="#909399"><Operation /></el-icon>
                 </template>
               </el-empty>
             </div>
 
-            <div v-for="(slot, index) in slotList" :key="slot.id || index" :class="['slot-card', slot.deleted ? 'slot-card-deleted' : '']">
-              <el-card shadow="hover">
+            <div v-for="flowIndex in flowIndexList" :key="flowIndex" class="flow-module">
+              <el-card shadow="never" class="flow-module-card">
                 <template #header>
-                  <div class="slot-card-header">
+                  <div class="slot-card-header flow-module-header">
                     <div class="header-left">
-                      <el-tag size="small" type="info" style="margin-right: 8px;">{{ index + 1 }}</el-tag>
-                      <span class="title-text">
-                        {{ slot.name || 'DSP广告位' }}（ID: {{ slot.dspSlotInfoId }} 操作系统：{{ slot.osType == 1 ? 'Android' : slot.osType == 2 ? 'iOS' : '未知' }}）
-                      </span>
-                      <el-tag size="small" :type="Number(slot.dspPayType) === 1 ? 'success' : 'primary'" style="margin-left: 8px;">
-                        {{ Number(slot.dspPayType) === 1 ? '分成' : 'RTB' }}
-                      </el-tag>
-                      <el-tag v-if="slot.deleted" size="small" type="danger" style="margin-left: 8px;">已删除（未保存）</el-tag>
+                      <el-tag size="small" type="primary" style="margin-right: 8px;">流量{{ flowIndex }}</el-tag>
+                      <span class="title-text">预算数量: {{ getFlowSlotList(flowIndex).length }}</span>
                     </div>
                     <div class="header-right">
                       <div class="weight-input-wrapper">
                         <span class="weight-label">流量权重:</span>
                         <el-input-number
-                          v-model="slot.trafficWeight"
+                          :model-value="getFlowWeight(flowIndex)"
+                          @update:model-value="value => handleFlowWeightChange(flowIndex, value)"
                           :min="0"
                           :max="100"
                           size="small"
                           :precision="0"
-                          :disabled="slot.deleted"
                           style="width: 100px"
                         />
                       </div>
-                      <el-button type="warning" size="small" icon="Document" :disabled="slot.deleted" @click="handleCaptureLog(slot)">捕获日志</el-button>
-                      <el-button v-if="slot.deleted" type="success" size="small" icon="Refresh" @click="handleRestoreSlot(index)">恢复</el-button>
-                      <el-button v-else type="danger" size="small" icon="Delete" @click="handleDeleteSlot(index)">删除</el-button>
+                      <el-button type="primary" size="small" icon="Plus" @click="handleAddBudget(flowIndex)">添加预算</el-button>
                     </div>
                   </div>
                 </template>
 
-                <!-- 投放配置（可编辑） -->
-                <el-collapse v-model="slot.activeCollapse" class="slot-collapse">
-                  <el-collapse-item name="launch">
-                    <template #title>
-                      <div class="collapse-title">
-                        <el-icon color="#409eff"><Setting /></el-icon>
-                        <span>投放配置</span>
+                <div v-if="getFlowSlotList(flowIndex).length === 0" class="empty-flow-slots">
+                  <el-empty description="该流量模块暂无预算">
+                    <el-text type="info" size="small">点击"添加预算"按钮为流量{{ flowIndex }}添加预算</el-text>
+                  </el-empty>
+                </div>
+
+                <div
+                  v-for="(slot, index) in getFlowSlotList(flowIndex)"
+                  :key="slot.id || slot.dspSlotInfoId || `${flowIndex}-${index}`"
+                  :class="['slot-card', slot.deleted ? 'slot-card-deleted' : '']"
+                >
+                  <el-card shadow="hover">
+                    <template #header>
+                      <div class="slot-card-header">
+                        <div class="header-left">
+                          <el-tag size="small" type="info" style="margin-right: 8px;">{{ index + 1 }}</el-tag>
+                          <span class="title-text">
+                            {{ slot.name || 'DSP广告位' }}（ID: {{ slot.dspSlotInfoId }} 操作系统：{{ slot.osType == 1 ? 'Android' : slot.osType == 2 ? 'iOS' : '未知' }}）
+                          </span>
+                          <el-tag size="small" :type="Number(slot.dspPayType) === 1 ? 'success' : 'primary'" style="margin-left: 8px;">
+                            {{ Number(slot.dspPayType) === 1 ? '分成' : 'RTB' }}
+                          </el-tag>
+                          <el-tag v-if="slot.deleted" size="small" type="danger" style="margin-left: 8px;">已删除（未保存）</el-tag>
+                        </div>
+                        <div class="header-right">
+                          <el-button type="warning" size="small" icon="Document" :disabled="slot.deleted" @click="handleCaptureLog(slot)">捕获日志</el-button>
+                          <el-button v-if="slot.deleted" type="success" size="small" icon="Refresh" @click="handleRestoreSlot(slot)">恢复</el-button>
+                          <el-button v-else type="danger" size="small" icon="Delete" @click="handleDeleteSlot(slot)">删除</el-button>
+                        </div>
                       </div>
                     </template>
-                    <el-form :model="slot" label-width="120px" size="small" class="launch-config-form">
-                      <!-- 第一行：投放策略、捕获日志时长、IP限流 -->
-                      <!-- 第二行：底价 -->
-                      <!-- 第三行：请求、展现、点击 -->
-                      <el-row :gutter="16">
-                        <el-col :span="8">
-                          <el-form-item label="请求次数">
-                            <el-input-number
-                              v-model="slot.req"
-                              :min="0"
-                              placeholder="请输入"
-                              :controls="false"
-                              style="width: 100%"
-                            />
-                          </el-form-item>
-                        </el-col>
-                        <el-col :span="8">
-                          <el-form-item label="展现次数">
-                            <el-input-number
-                              v-model="slot.ims"
-                              :min="0"
-                              placeholder="请输入"
-                              :controls="false"
-                              style="width: 100%"
-                            />
-                          </el-form-item>
-                        </el-col>
-                        <el-col :span="8">
-                          <el-form-item label="点击次数">
-                            <el-input-number
-                              v-model="slot.clk"
-                              :min="0"
-                              placeholder="请输入"
-                              :controls="false"
-                              style="width: 100%"
-                            />
-                          </el-form-item>
-                        </el-col>
+
+                    <!-- 投放配置（可编辑） -->
+                    <el-collapse v-model="slot.activeCollapse" class="slot-collapse">
+                      <el-collapse-item name="launch">
+                        <template #title>
+                          <div class="collapse-title">
+                            <el-icon color="#409eff"><Setting /></el-icon>
+                            <span>投放配置</span>
+                          </div>
+                        </template>
+                        <el-form :model="slot" label-width="120px" size="small" class="launch-config-form">
+                          <!-- 第一行：投放策略、捕获日志时长、IP限流 -->
+                          <!-- 第二行：底价 -->
+                          <!-- 第三行：请求、展现、点击 -->
+                          <el-row :gutter="16">
+                            <el-col :span="8">
+                              <el-form-item label="请求次数">
+                                <el-input-number
+                                  v-model="slot.req"
+                                  :min="0"
+                                  placeholder="请输入"
+                                  :controls="false"
+                                  style="width: 100%"
+                                />
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="8">
+                              <el-form-item label="展现次数">
+                                <el-input-number
+                                  v-model="slot.ims"
+                                  :min="0"
+                                  placeholder="请输入"
+                                  :controls="false"
+                                  style="width: 100%"
+                                />
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="8">
+                              <el-form-item label="点击次数">
+                                <el-input-number
+                                  v-model="slot.clk"
+                                  :min="0"
+                                  placeholder="请输入"
+                                  :controls="false"
+                                  style="width: 100%"
+                                />
+                              </el-form-item>
+                            </el-col>
+                          </el-row>
+
+                          <!-- 第四行：投放时段、地域定向、品牌定向 -->
+                          <el-row :gutter="16">
+                            <el-col :span="8">
+                              <el-form-item label="投放时段" required>
+                                <el-select v-model="slot.launchTime" placeholder="请选择" style="width: 100%">
+                                  <el-option label="全时段" :value="1" />
+                                  <el-option label="自定义" :value="2" />
+                                </el-select>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="8">
+                              <el-form-item label="包透传" required>
+                                <el-select v-model="slot.pkgTransfer" placeholder="请选择" style="width: 100%">
+                                  <el-option label="不透传" :value="0" />
+                                  <el-option label="透传" :value="1" />
+                                </el-select>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="8" v-if="shouldShowFloorPrice(slot)">
+                              <el-form-item label="底价(分)">
+                                <el-input-number
+                                    v-model="slot.floorPrice"
+                                    :min="0"
+                                    placeholder="请输入底价"
+                                    :controls="false"
+                                    style="width: 100%"
+                                />
+                              </el-form-item>
+                            </el-col>
+                            <!-- 调试信息：显示结算方式 -->
+                            <el-col :span="8" v-if="false">
+                              <el-tag>结算方式: {{ slot.dspPayType }} ({{ typeof slot.dspPayType }})</el-tag>
+                            </el-col>
                       </el-row>
+                        <el-row v-if="isSlotRtb(slot)">
+                          <el-col :span="8">
+                            <el-form-item label="RTB结算比例">
+                              <el-input-number
+                                  v-model="slot.dspDealRatio"
+                                  @change="value => handleRtbDealRatioChange(slot, value)"
+                                  :min="0"
+                                  placeholder="请输入RTB结算比例"
+                                  :controls="false"
+                                  style="width: 100%"
+                              />
+                            </el-form-item>
+                          </el-col>
+                        </el-row>
 
-                      <!-- 第四行：投放时段、地域定向、品牌定向 -->
-                      <el-row :gutter="16">
-                        <el-col :span="8">
-                          <el-form-item label="投放时段" required>
-                            <el-select v-model="slot.launchTime" placeholder="请选择" style="width: 100%">
-                              <el-option label="全时段" :value="1" />
-                              <el-option label="自定义" :value="2" />
-                            </el-select>
-                          </el-form-item>
-                        </el-col>
-                        <el-col :span="8">
-                          <el-form-item label="包透传" required>
-                            <el-select v-model="slot.pkgTransfer" placeholder="请选择" style="width: 100%">
-                              <el-option label="不透传" :value="0" />
-                              <el-option label="透传" :value="1" />
-                            </el-select>
-                          </el-form-item>
-                        </el-col>
-                        <el-col :span="8" v-if="shouldShowFloorPrice(slot)">
-                          <el-form-item label="底价(分)">
-                            <el-input-number
-                                v-model="slot.floorPrice"
-                                :min="0"
-                                placeholder="请输入底价"
-                                :controls="false"
-                                style="width: 100%"
-                            />
-                          </el-form-item>
-                        </el-col>
-                        <!-- 调试信息：显示结算方式 -->
-                        <el-col :span="8" v-if="false">
-                          <el-tag>结算方式: {{ slot.dspPayType }} ({{ typeof slot.dspPayType }})</el-tag>
-                        </el-col>
-                  </el-row>
-                    <el-row v-if="isSlotRtb(slot)">
-                      <el-col :span="8">
-                        <el-form-item label="RTB结算比例">
-                          <el-input-number
-                              v-model="slot.dspDealRatio"
-                              @change="value => handleRtbDealRatioChange(slot, value)"
-                              :min="0"
-                              placeholder="请输入RTB结算比例"
-                              :controls="false"
-                              style="width: 100%"
-                          />
-                        </el-form-item>
-                      </el-col>
-                    </el-row>
-
-                    </el-form>
-                  </el-collapse-item>
-                </el-collapse>
+                        </el-form>
+                      </el-collapse-item>
+                    </el-collapse>
+                  </el-card>
+                </div>
               </el-card>
             </div>
           </el-card>
@@ -1102,11 +1116,11 @@
         table-layout="auto"
         highlight-current-row="true"
       >
-        <el-table-column type="selection" width="55" align="center" fixed />
-        <el-table-column label="ID" align="center" prop="id" width="66" fixed />
-        <el-table-column label="公司名称" align="center" prop="companyName" width="250" fixed />
-        <el-table-column label="产品名称" align="center" prop="productName" width="250" fixed />
-        <el-table-column label="预算方名称" align="center" prop="name" width="250" fixed />
+        <el-table-column type="selection" width="55" align="center"  />
+        <el-table-column label="ID" align="center" prop="id" width="66"  />
+        <el-table-column label="公司名称" align="center" prop="companyName" width="250"  />
+        <el-table-column label="产品名称" align="center" prop="productName" width="250"  />
+        <el-table-column label="预算方名称" align="center" prop="name" width="250"  />
         <el-table-column label="操作系统" align="center" width="100">
           <template #default="scope">
             <el-tag v-if="getOsTypeValue(scope.row) === 1" type="success">Android</el-tag>
@@ -1132,6 +1146,8 @@
 
           </template>
         </el-table-column>
+        <el-table-column label="ID" align="center" prop="id" width="66"  />
+
       </el-table>
       <template #footer>
         <div class="dialog-footer">
@@ -1267,6 +1283,12 @@ const widthHeightDisplay = computed(() => {
 
 // 流量分配 - 已绑定的DSP广告位列表（通过 dsp_launch 关联）
 const slotList = ref([])
+// 流量模块索引列表（如 1,2,3）
+const flowIndexList = ref([])
+// 当前操作中的流量模块
+const activeFlowIndex = ref(null)
+// 每个流量模块对应一个统一权重
+const flowWeightByIndex = ref({})
 // 应用信息
 const appInfo = ref(null)
 // 选择DSP广告位对话框
@@ -1388,13 +1410,58 @@ const filteredMatchedDspSlots = computed(() => {
   return filtered
 })
 
-// 计算总流量权重（所有已绑定的DSP广告位的权重之和，排除已删除的）
+function getSlotFlowIndex(slot) {
+  const indexValue = Number(slot?.indexs)
+  return Number.isInteger(indexValue) && indexValue > 0 ? indexValue : 1
+}
+
+function getFlowSlotList(flowIndex) {
+  return slotList.value.filter(slot => getSlotFlowIndex(slot) === Number(flowIndex))
+}
+
+function getFlowWeight(flowIndex) {
+  const key = String(flowIndex)
+  const value = Number(flowWeightByIndex.value[key])
+  return Number.isFinite(value) ? value : 0
+}
+
+function handleFlowWeightChange(flowIndex, value) {
+  const key = String(flowIndex)
+  const weight = Number(value) || 0
+  flowWeightByIndex.value[key] = weight
+  slotList.value.forEach(slot => {
+    if (getSlotFlowIndex(slot) === Number(flowIndex)) {
+      slot.trafficWeight = weight
+    }
+  })
+}
+
+function syncFlowStateFromSlotList() {
+  const flowSet = new Set()
+  const nextWeights = {}
+
+  slotList.value.forEach(slot => {
+    const flowIndex = getSlotFlowIndex(slot)
+    flowSet.add(flowIndex)
+    if (nextWeights[String(flowIndex)] === undefined) {
+      nextWeights[String(flowIndex)] = Number(slot.trafficWeight) || 0
+    }
+  })
+
+  flowIndexList.value = Array.from(flowSet).sort((a, b) => a - b)
+  flowWeightByIndex.value = nextWeights
+  activeFlowIndex.value = flowIndexList.value.length > 0 ? flowIndexList.value[0] : null
+
+  slotList.value.forEach(slot => {
+    slot.trafficWeight = getFlowWeight(getSlotFlowIndex(slot))
+  })
+}
+
+// 计算总流量权重（所有流量模块权重之和）
 const totalTrafficWeight = computed(() => {
-  return slotList.value
-    .filter(slot => !slot.deleted)  // 排除已删除的项
-    .reduce((sum, slot) => {
-      return sum + (slot.trafficWeight || 0)
-    }, 0)
+  return flowIndexList.value.reduce((sum, flowIndex) => {
+    return sum + getFlowWeight(flowIndex)
+  }, 0)
 })
 
 const data = reactive({
@@ -2056,6 +2123,9 @@ function closeConfigDrawer() {
   configOpen.value = false
   configMediaAd.value = null
   slotList.value = []
+  flowIndexList.value = []
+  activeFlowIndex.value = null
+  flowWeightByIndex.value = {}
   appInfo.value = null
 }
 
@@ -2079,6 +2149,7 @@ function loadSlotList(mediaAdId) {
       const slot = {
         id: launch.id, // dsp_launch 表的 ID
         dspSlotInfoId: launch.dspSlotId, // dsp_slot_info 表的 ID
+        indexs: Number(launch.indexs) > 0 ? Number(launch.indexs) : 1,
         trafficWeight: launch.trafficWeight ?? 0,
         launchStrategy: launch.launchStrategy ?? 1,
         floorPrice: launch.floorPrice,
@@ -2117,9 +2188,13 @@ function loadSlotList(mediaAdId) {
       console.log(`加载配置 [${slot.name}]: dspPayType=${slot.dspPayType}, 类型=${typeof slot.dspPayType}, 是否RTB=${Number(slot.dspPayType) === 2}`)
       return slot
     })
+    syncFlowStateFromSlotList()
   }).catch(() => {
     proxy.$modal.msgError('获取投放配置失败')
     slotList.value = []
+    flowIndexList.value = []
+    activeFlowIndex.value = null
+    flowWeightByIndex.value = {}
   })
 }
 
@@ -2141,7 +2216,19 @@ const getStatusClass = (status) => {
 
 
 /** 添加DSP广告位绑定 */
-async function handleAddSlot() {
+function handleAddSlot() {
+  const sortedIndexList = [...flowIndexList.value].sort((a, b) => a - b)
+  const lastIndex = sortedIndexList.length > 0 ? sortedIndexList[sortedIndexList.length - 1] : 0
+  const nextIndex = lastIndex + 1
+
+  flowIndexList.value.push(nextIndex)
+  flowWeightByIndex.value[String(nextIndex)] = flowIndexList.value.length === 1 ? 100 : 0
+  activeFlowIndex.value = nextIndex
+}
+
+/** 在指定流量模块中添加预算 */
+async function handleAddBudget(flowIndex) {
+  activeFlowIndex.value = Number(flowIndex)
   // 从数据库查询匹配的 DSP 广告位数据
   const sspSlotId = configMediaAd.value?.id
 
@@ -2212,6 +2299,15 @@ function handleConfirmSelectSlot() {
   }
 
   let addedCount = 0
+  const currentFlowIndex = Number(activeFlowIndex.value) > 0 ? Number(activeFlowIndex.value) : 1
+
+  if (!flowIndexList.value.includes(currentFlowIndex)) {
+    flowIndexList.value.push(currentFlowIndex)
+  }
+  if (flowWeightByIndex.value[String(currentFlowIndex)] === undefined) {
+    flowWeightByIndex.value[String(currentFlowIndex)] = flowIndexList.value.length === 1 ? 100 : 0
+  }
+
   // 根据选中的 ID 找到对应的数据并添加到列表
   selectedDspSlotIds.value.forEach(slotId => {
     const matchedSlot = matchedDspSlots.value.find(slot => slot.id === slotId)
@@ -2236,8 +2332,9 @@ function handleConfirmSelectSlot() {
         dspPayType: getDspPayTypeValue(matchedSlot),
         sspPayType: configMediaAd.value?.sspPayType ?? null,
         dspDealRatio: matchedSlot.dsp_deal_ratio !== undefined ? matchedSlot.dsp_deal_ratio : matchedSlot.dspDealRatio,
+        indexs: currentFlowIndex,
         // 投放配置字段
-        trafficWeight: 0,
+        trafficWeight: getFlowWeight(currentFlowIndex),
         launchStrategy: 1,
         floorPrice: null,
         ipLimit: null,
@@ -2260,10 +2357,9 @@ function handleConfirmSelectSlot() {
   })
 
   if (addedCount > 0) {
-    const hasPositiveWeight = slotList.value.some(item => (Number(item.trafficWeight) || 0) > 0)
-    if (!hasPositiveWeight && slotList.value.length > 0) {
-      slotList.value[0].trafficWeight = 100
-    }
+    slotList.value.forEach(slot => {
+      slot.trafficWeight = getFlowWeight(getSlotFlowIndex(slot))
+    })
   }
 
   // 关闭对话框
@@ -2409,18 +2505,18 @@ function handleCopySlot(index) {
 }
 
 /** 删除DSP广告位（软删除） */
-function handleDeleteSlot(index) {
+function handleDeleteSlot(slot) {
   proxy.$modal.confirm('确认删除该 DSP 广告位吗？').then(() => {
     // 软删除：标记 deleted 为 true，而不是直接从数组移除
-    slotList.value[index].deleted = true
+    slot.deleted = true
     proxy.$modal.msgSuccess('删除成功（未保存）')
   }).catch(() => {})
 }
 
 /** 恢复DSP广告位（撤销删除） */
-function handleRestoreSlot(index) {
+function handleRestoreSlot(slot) {
   proxy.$modal.confirm('确认恢复该 DSP 广告位吗？').then(() => {
-    slotList.value[index].deleted = false
+    slot.deleted = false
     proxy.$modal.msgSuccess('已恢复')
   }).catch(() => {})
 }
@@ -2451,7 +2547,8 @@ function handleCaptureLog(slot) {
     mediaAdId: configMediaAd.value.id,
     slotList: [{
       dsp_slot_id: slot.dspSlotInfoId,
-      traffic_weight: slot.trafficWeight ?? 0,
+      indexs: getSlotFlowIndex(slot),
+      traffic_weight: getFlowWeight(getSlotFlowIndex(slot)),
       launch_strategy: slot.launchStrategy ?? 1,
       floor_price: slot.floorPrice,
       ip_limit: slot.ipLimit,
@@ -2581,61 +2678,6 @@ function handleEditSave() {
   })
 }
 
-/** 首个DSP广告位设置为100% */
-function handleSetFirstTo100() {
-  if (slotList.value.length === 0) {
-    proxy.$modal.msgWarning('请先添加 DSP 广告位')
-    return
-  }
-
-  slotList.value.forEach((slot, index) => {
-    if (index === 0) {
-      slot.trafficWeight = 100
-    } else {
-      slot.trafficWeight = 0
-    }
-  })
-
-  proxy.$modal.msgSuccess('已将首个设置为 100%')
-}
-
-/** 平均分配权重 */
-function handleAverageWeight() {
-  if (slotList.value.length === 0) {
-    proxy.$modal.msgWarning('请先添加 DSP 广告位')
-    return
-  }
-
-  const count = slotList.value.length
-  const averageWeight = Math.floor(100 / count)
-  const remainder = 100 % count
-
-  slotList.value.forEach((slot, index) => {
-    if (index === 0) {
-      slot.trafficWeight = averageWeight + remainder
-    } else {
-      slot.trafficWeight = averageWeight
-    }
-  })
-
-  proxy.$modal.msgSuccess(`已平均分配权重（每个 ${averageWeight}%，首个 +${remainder}%）`)
-}
-
-/** 重置所有权重 */
-function handleResetWeight() {
-  if (slotList.value.length === 0) {
-    proxy.$modal.msgWarning('请先添加 DSP 广告位')
-    return
-  }
-
-  proxy.$modal.confirm('确认重置所有流量权重为 0 吗？').then(() => {
-    slotList.value.forEach(slot => {
-      slot.trafficWeight = 0
-    })
-    proxy.$modal.msgSuccess('已重置所有权重')
-  }).catch(() => {})
-}
-
 /** 保存投放配置 */
 function handleSaveConfig() {
   if (!configMediaAd.value) {
@@ -2670,6 +2712,14 @@ function handleSaveConfig() {
     return
   }
 
+  const activeFlowIndexes = Array.from(new Set(activeSlots.map(slot => getSlotFlowIndex(slot))))
+  for (const flowIndex of activeFlowIndexes) {
+    if (getFlowWeight(flowIndex) <= 0) {
+      proxy.$modal.msgWarning(`流量${flowIndex}的流量权重必须大于 0`)
+      return
+    }
+  }
+
   // 验证每个DSP广告位的必填字段（跳过已删除的项）
   for (let i = 0; i < slotList.value.length; i++) {
     const slot = slotList.value[i]
@@ -2677,12 +2727,6 @@ function handleSaveConfig() {
     // 跳过已删除的项
     if (slot.deleted) {
       continue
-    }
-
-    // 验证流量权重
-    if (!slot.trafficWeight || slot.trafficWeight <= 0) {
-      proxy.$modal.msgWarning(`第 ${i + 1} 个 DSP 广告位的流量权重必须大于 0`)
-      return
     }
 
     // 验证其他必填字段
@@ -2763,7 +2807,8 @@ function doSaveConfig(slotList) {
     mediaAdId: configMediaAd.value.id,
     slotList: activeSlotList.map(slot => ({
       dsp_slot_id: slot.dspSlotInfoId,
-      traffic_weight: slot.trafficWeight ?? 0,
+      indexs: getSlotFlowIndex(slot),
+      traffic_weight: getFlowWeight(getSlotFlowIndex(slot)),
       launch_strategy: slot.launchStrategy ?? 1,
       floor_price: slot.floorPrice,
       ip_limit: slot.ipLimit,
@@ -2941,6 +2986,27 @@ getList()
 
 .empty-slots {
   padding: 40px 0;
+}
+
+.flow-module {
+  margin-bottom: 16px;
+}
+
+.flow-module:last-child {
+  margin-bottom: 0;
+}
+
+.flow-module-card {
+  border: 1px solid #e4e7ed;
+  background: #fbfcff;
+}
+
+.flow-module-header {
+  min-height: 32px;
+}
+
+.empty-flow-slots {
+  padding: 16px 0;
 }
 
 .slot-card {
