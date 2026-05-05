@@ -49,6 +49,24 @@ public class DataSspSlotController extends BaseController
         return getDataTable(list);
     }
 
+
+    @GetMapping("/dataDspSlotList")
+    public TableDataInfo lists(DataSspSlot dataSspSlot)
+    {
+        startPage();
+        List<DataSspSlot> list = dataSspSlotService.selectDataSspSlotListToDspData(dataSspSlot);
+
+        for (DataSspSlot sspSlot : list) {
+
+        }
+
+        return getDataTable(list);
+    }
+
+
+
+
+
     /**
      * 导出媒体数据报表列表
      */

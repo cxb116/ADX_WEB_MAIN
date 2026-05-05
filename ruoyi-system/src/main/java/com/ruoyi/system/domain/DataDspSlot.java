@@ -29,6 +29,9 @@ public class DataDspSlot extends BaseEntity
     /** 预算广告位 */
     @Excel(name = "预算广告位")
     private String dspSlotCode;
+    
+    /** 批量预算广告位编码（查询条件） */
+    private String[] dspSlotCodeList;
 
     /** 展示PV */
     @Excel(name = "展示PV")
@@ -135,6 +138,20 @@ public class DataDspSlot extends BaseEntity
 
     /** eCPM（计算字段，不属于表字段） */
     private Double ecpm;
+    /** 公司ID（查询条件） */
+    private Long companyId;
+    /** 产品ID（查询条件） */
+    private Long productId;
+    /** 广告类型ID（查询条件） */
+    private Long adType;
+    /** 操作系统 */
+    private Integer osType;
+    /** 产品名称 */
+    private String productName;
+    /** 广告类型名称 */
+    private String adTypeName;
+    /** 公司名称 */
+    private String dspCompany;
 
     public void setId(Long id) 
     {
@@ -164,6 +181,16 @@ public class DataDspSlot extends BaseEntity
     public String getDspSlotCode() 
     {
         return dspSlotCode;
+    }
+
+    public String[] getDspSlotCodeList()
+    {
+        return dspSlotCodeList;
+    }
+
+    public void setDspSlotCodeList(String[] dspSlotCodeList)
+    {
+        this.dspSlotCodeList = dspSlotCodeList;
     }
 
     public void setShowPv(Long showPv) 
@@ -464,6 +491,76 @@ public class DataDspSlot extends BaseEntity
     public Double getEcpm()
     {
         return ecpm;
+    }
+
+    public Long getCompanyId()
+    {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId)
+    {
+        this.companyId = companyId;
+    }
+
+    public Long getProductId()
+    {
+        return productId;
+    }
+
+    public void setProductId(Long productId)
+    {
+        this.productId = productId;
+    }
+
+    public Long getAdType()
+    {
+        return adType;
+    }
+
+    public void setAdType(Long adType)
+    {
+        this.adType = adType;
+    }
+
+    public Integer getOsType()
+    {
+        return osType;
+    }
+
+    public void setOsType(Integer osType)
+    {
+        this.osType = osType;
+    }
+
+    public String getProductName()
+    {
+        return productName;
+    }
+
+    public void setProductName(String productName)
+    {
+        this.productName = productName;
+    }
+
+    public String getAdTypeName()
+    {
+        return adTypeName;
+    }
+
+    public void setAdTypeName(String adTypeName)
+    {
+        this.adTypeName = adTypeName;
+    }
+
+    public String getDspCompany()
+    {
+        return dspCompany;
+    }
+
+    public void setDspCompany(String dspCompany)
+    {
+        this.dspCompany = dspCompany;
     }
 
     @Override

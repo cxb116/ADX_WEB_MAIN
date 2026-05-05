@@ -29,14 +29,26 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="activatePv"    column="activate_pv"    />
         <result property="date"    column="date"    />
         <result property="createdAt"    column="created_at"    />
+        <result property="osType" column="os_type"/>
+        <result property="productName" column="product_name"/>
+        <result property="adTypeName" column="ad_type_name"/>
+        <result property="dspCompany" column="dsp_company"/>
     </resultMap>
 
     <sql id="selectDataDspSlotVo">
         select t.id, t.dsp_slot_id, t.dsp_slot_code, t.show_pv, t.show_uv, t.click_pv, t.click_uv, t.req_pv, t.req_uv, t.discard, t.ret_pv, t.ret_uv, t.spend, t.income, t.discount_click_pv, t.discount_show_pv, t.dplsucc_pv, t.complete_pv, t.install_pv, t.activate_pv, t.date, t.created_at,
         dsp_slot.name as dsp_slot_name,
-        dsp_slot.dsp_pay_type as dsp_pay_type
+        dsp_slot.dsp_pay_type as dsp_pay_type,
+        dsp_slot.os_type as os_type,
+        product.name as product_name,
+        adType.name as ad_type_name,
+        company.name as dsp_company
         from ${tableName} t
         left join dsp_slot_info dsp_slot on t.dsp_slot_id = dsp_slot.id
+        left join dsp_product product on product.id = dsp_slot.product_id
+        left join dsp_ad_type adType on adType.id = dsp_slot.ad_type_id
+        left join dsp_company company on company.id = dsp_slot.company_id
+
     </sql>
 
     <select id="selectDataDspSlotList" parameterType="DataDspSlot" resultMap="DataDspSlotResult">
@@ -45,11 +57,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="dspSlotId != null">
                 AND t.dsp_slot_id = #{dspSlotId}
             </if>
-            <if test="dspSlotCode != null and dspSlotCode != ''">
+            <if test="dspSlotCodeList != null and dspSlotCodeList.length > 0">
+                AND t.dsp_slot_code IN
+                <foreach collection="dspSlotCodeList" item="code" open="(" separator="," close=")">
+                    #{code}
+                </foreach>
+            </if>
+            <if test="(dspSlotCodeList == null or dspSlotCodeList.length == 0) and dspSlotCode != null and dspSlotCode != ''">
                 AND t.dsp_slot_code = #{dspSlotCode}
             </if>
             <if test="dspPayType != null">
                 AND dsp_slot.dsp_pay_type = #{dspPayType}
+            </if>
+            <if test="companyId != null">
+                AND dsp_slot.company_id = #{companyId}
+            </if>
+            <if test="productId != null">
+                AND dsp_slot.product_id = #{productId}
+            </if>
+            <if test="osType != null">
+                AND dsp_slot.os_type = #{osType}
+            </if>
+            <if test="adType != null">
+                AND dsp_slot.ad_type_id = #{adType}
             </if>
             <if test="beginDate != null and beginDate != ''">
                 AND t.date &gt;= #{beginDate}

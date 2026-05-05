@@ -57,6 +57,9 @@ public class DataDspSlotServiceImpl implements IDataDspSlotService
         return dataDspSlotMapper.selectDataDspSlotById(dataDspSlot);
     }
 
+
+
+
     /**
      * 查询预算报表列表
      *
@@ -127,6 +130,15 @@ public class DataDspSlotServiceImpl implements IDataDspSlotService
                 {
                     data.setClickRate(0.0);
                 }
+
+                if (data.getSpend() > 0) {
+                    data.setSpend(data.getSpend() / 10);
+                }
+
+                if (data.getIncome() > 0) {
+                    data.setIncome(data.getIncome() / 10);
+                }
+
 
                 // eCPM = (收入 / 100) / 展示PV × 1000 = 收入 / 展示PV × 10
                 if (data.getShowPv() != null && data.getShowPv() > 0)

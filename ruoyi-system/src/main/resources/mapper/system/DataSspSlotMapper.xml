@@ -31,7 +31,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="date"    column="date"    />
         <result property="createdAt"    column="created_at"    />
         <result property="appName"    column="app_name"    />
-        <result property="sspSlotName"    column="ssp_slot_name"    />
+        <result property="sspAliseName"    column="ssp_alise_name"    />
 
         <result property="dspSlotName"    column="dsp_slot_name"    />
         <result property="mediaName"    column="media_name"    />
@@ -39,24 +39,86 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="sspDealRatio"    column="ssp_deal_ratio"    />
         <result property="sspEcpm"    column="ssp_ecpm"    />
         <result property="appOsType" column="app_os_type"/>
+        <result property="adType" column="ad_type"/>
     </resultMap>
 
     <sql id="selectDataSspSlotVo">
-        select t.id, t.media_id, t.app_id, t.ssp_slot_id, t.dsp_slot_id, t.dsp_slot_code, t.show_pv, t.show_uv, t.click_pv, t.click_uv, t.req_pv, t.req_uv, t.discard, t.ret_pv, t.ret_uv, t.spend, t.income, t.discount_click_pv, t.discount_show_pv, t.dplsucc_pv, t.complete_pv, t.install_pv, t.activate_pv, t.date, t.created_at,
+        SELECT
+        t.ssp_slot_id,
+        t.date,
+
+        SUM(t.show_pv) AS show_pv,
+        SUM(t.click_pv) AS click_pv,
+        SUM(t.req_count) AS req_pv,
+        SUM(t.discard) AS discard,
+        SUM(t.ret_pv) AS ret_pv,
+        SUM(t.spend) AS spend,
+        SUM(t.income) AS income,
+        SUM(t.discount_click_pv) AS discount_click_pv,
+        SUM(t.discount_show_pv) AS discount_show_pv,
+
+        MAX(app.name) AS app_name,
+        MAX(ssp_slot.name_alise) AS ssp_alise_name,
+        MAX(ssp_slot.ssp_pay_type) AS ssp_pay_type,
+        MAX(ssp_slot.ssp_deal_ratio) AS ssp_deal_ratio,
+        MAX(ssp_slot.ssp_ecpm) AS ssp_ecpm,
+        MAX(ssp_slot.media_id) AS ssp_media_id,
+        MAX(app.os_type) AS app_os_type,
+        MAX(media.name) AS media_name,
+        MAX(ssp_slot.ad_type_id) AS ad_type
+        FROM
+        ${tableName} t
+        LEFT JOIN
+        ssp_slot_info ssp_slot ON t.ssp_slot_id = ssp_slot.id
+        LEFT JOIN
+        ssp_media media ON ssp_slot.media_id = media.id
+        LEFT JOIN
+        ssp_app app ON ssp_slot.app_id = app.id
+        GROUP BY
+        t.ssp_slot_id, t.date
+    </sql>
+
+
+    <sql id="selectDataSspSlotVoTODSPDATA">
+        select t.id,
+               t.media_id,
+               t.app_id,
+               t.ssp_slot_id,
+               t.dsp_slot_id,
+               t.dsp_slot_code,
+               t.show_pv,
+               t.show_uv,
+               t.click_pv,
+               t.click_uv,
+               t.req_pv,
+               t.req_uv,
+               t.discard,
+               t.ret_pv,
+               t.ret_uv,
+               t.spend,
+               t.income,
+               t.discount_click_pv,
+               t.discount_show_pv,
+               t.dplsucc_pv,
+               t.complete_pv,
+               t.install_pv,
+               t.activate_pv,
+               t.date,
+               t.created_at,
         app.name as app_name,
-        ssp_slot.name as ssp_slot_name,
+        ssp_slot.name_alise as ssp_alise_name,
         ssp_slot.ssp_pay_type,
         ssp_slot.ssp_deal_ratio,
         ssp_slot.ssp_ecpm,
         ssp_slot.media_id,
         app.os_type as app_os_type,
         media.name as media_name,
-        dsp_slot.name as dsp_slot_name
+        ssp_slot.ad_type_id as ad_type
         from ${tableName} t
         left join ssp_slot_info ssp_slot on t.ssp_slot_id = ssp_slot.id
         left join ssp_media media on ssp_slot.media_id = media.id
         left join ssp_app app on ssp_slot.app_id = app.id
-        left join dsp_slot_info dsp_slot on t.dsp_slot_id = dsp_slot.id
+
     </sql>
 
     <select id="selectDataSspSlotList" parameterType="DataSspSlot" resultMap="DataSspSlotResult">
@@ -65,7 +127,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="mediaId != null "> and t.media_id = #{mediaId}</if>
             <if test="appId != null "> and t.app_id = #{appId}</if>
             <if test="sspSlotId != null "> and t.ssp_slot_id = #{sspSlotId}</if>
-            <if test="dspSlotId != null "> and t.dsp_slot_id = #{dspSlotId}</if>
             <if test="dspSlotCode != null  and dspSlotCode != ''"> and t.dsp_slot_code = #{dspSlotCode}</if>
             <if test="showPv != null "> and t.show_pv = #{showPv}</if>
             <if test="showUv != null "> and t.show_uv = #{showUv}</if>
@@ -87,8 +148,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="date != null "> and t.date = #{date}</if>
             <if test="createdAt != null "> and t.created_at = #{createdAt}</if>
             <if test="appOsType !=null and appOsType != ''">and app.os_type =#{appOsType}</if>
+            <if test="adType !=null and adType != ''">and ssp_slot.ad_type_id =#{adType}</if>
+            <if test="sspSlotIds != null and sspSlotIds != ''">
+                and FIND_IN_SET(CAST(t.ssp_slot_id AS CHAR), #{sspSlotIds})
+            </if>
+            <if test="sspAliseNames != null and sspAliseNames != ''">
+                and FIND_IN_SET(ssp_slot.name_alise, #{sspAliseNames})
+            </if>
         </where>
     </select>
+
+    <select id="selectDataSspSlotListToDspData" parameterType="DataSspSlot" resultMap="DataSspSlotResult">
+        <include refid="selectDataSspSlotVoTODSPDATA"/>
+        <where>
+            <if test="mediaId != null "> and t.media_id = #{mediaId}</if>
+            <if test="appId != null "> and t.app_id = #{appId}</if>
+            <if test="sspSlotId != null "> and t.ssp_slot_id = #{sspSlotId}</if>
+            <if test="dspSlotCode != null  and dspSlotCode != ''"> and t.dsp_slot_code = #{dspSlotCode}</if>
+            <if test="dspSlotId != null and dspSlotId != ''">and t.dsp_slot_id = #{dspSlotId}</if>
+            <if test="date != null "> and t.date = #{date}</if>
+            <if test="createdAt != null "> and t.created_at = #{createdAt}</if>
+            <if test="appOsType !=null and appOsType != ''">and app.os_type =#{appOsType}</if>
+            <if test="adType !=null and adType != ''">and ssp_slot.ad_type_id =#{adType}</if>
+            <if test="sspSlotIds != null and sspSlotIds != ''">
+                and FIND_IN_SET(CAST(t.ssp_slot_id AS CHAR), #{sspSlotIds})
+            </if>
+            <if test="sspAliseNames != null and sspAliseNames != ''">
+                and FIND_IN_SET(ssp_slot.name_alise, #{sspAliseNames})
+            </if>
+        </where>
+    </select>
+
 
     <select id="selectDataSspSlotById" parameterType="DataSspSlot" resultMap="DataSspSlotResult">
         <include refid="selectDataSspSlotVo"/>

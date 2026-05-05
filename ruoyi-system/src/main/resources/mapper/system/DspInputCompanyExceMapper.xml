@@ -29,7 +29,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="inputTime != null"> and d.input_time = #{inputTime}</if>
             <if test="createTime != null"> and d.create_time = #{createTime}</if>
         </where>
-        order by d.update_time desc
+        order by d.create_time desc
     </select>
     
     <select id="selectDspInputCompanyExceById" parameterType="Long" resultMap="DspInputCompanyExceResult">

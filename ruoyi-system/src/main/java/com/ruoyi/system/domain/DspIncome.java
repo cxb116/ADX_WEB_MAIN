@@ -26,17 +26,19 @@ public class DspIncome extends BaseEntity
     private Date inputTime;
 
     /** 预算位Id */
-    @Excel(name = "预算位Id")
+//    @Excel(name = "预算位Id")
     private Long dspSlotId;
 
     /** 预算位code */
-    @Excel(name = "预算位编码")
+    @Excel(name = "预算位广告位ID")
     private String dspSlotCode;
 
-
+    /** 预算放收益 */
+    @Excel(name = "收益")
+    private Long income;
 
     /** 媒体位id */
-    @Excel(name = "媒体位id")
+    @Excel(name = "广告位ID")
     private Long sspSlotId;
 
     /** 结算方式(1分成 2 RTB) */
@@ -51,9 +53,15 @@ public class DspIncome extends BaseEntity
 //    @Excel(name = "导入数据条数")
     private Long table;
 
-    /** 预算放收益 */
-    @Excel(name = "我方收益")
-    private Long income;
+
+
+
+
+    @Excel(name = "结算比例")
+    private String proportion;
+
+    @Excel(name = "媒体公司")
+    private String mediaName;
 
     public void setId(Long id) 
     {
@@ -162,5 +170,21 @@ public class DspIncome extends BaseEntity
             .append("updateTime", getUpdateTime())
             .append("remark", getRemark())
             .toString();
+    }
+
+    public String getMediaName() {
+        return mediaName;
+    }
+
+    public void setMediaName(String mediaName) {
+        this.mediaName = mediaName;
+    }
+
+    public String getProportion() {
+        return proportion;
+    }
+
+    public void setProportion(String proportion) {
+        this.proportion = proportion;
     }
 }

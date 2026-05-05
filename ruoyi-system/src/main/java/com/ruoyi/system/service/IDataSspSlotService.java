@@ -27,6 +27,10 @@ public interface IDataSspSlotService
      */
     public List<DataSspSlot> selectDataSspSlotList(DataSspSlot dataSspSlot);
 
+
+
+    public List<DataSspSlot> selectDataSspSlotListToDspData(DataSspSlot dataSspSlot);
+
     /**
      * 修改媒体数据报表
      *

@@ -125,7 +125,11 @@ public class DataSspSlot extends BaseEntity
     private String mediaName;
 
     /** 媒体广告位名称（关联查询，不属于表字段） */
-    private String sspSlotName;
+    private String sspAliseName;
+    /** 批量媒体广告位ID（逗号分隔） */
+    private String sspSlotIds;
+    /** 批量媒体内部广告位名称（逗号分隔） */
+    private String sspAliseNames;
 
     /** 预算广告位名称（关联查询，不属于表字段） */
     private String dspSlotName;
@@ -155,6 +159,17 @@ public class DataSspSlot extends BaseEntity
     private Double ecpm;
 
     private int appOsType;
+
+    private int adType;
+
+    private int oSType;
+
+    private String productName;
+
+    private String adTypeName;
+
+    private String  dspCompany;
+
 
     public void setId(Long id) 
     {
@@ -436,15 +451,6 @@ public class DataSspSlot extends BaseEntity
         return mediaName;
     }
 
-    public void setSspSlotName(String sspSlotName)
-    {
-        this.sspSlotName = sspSlotName;
-    }
-
-    public String getSspSlotName()
-    {
-        return sspSlotName;
-    }
 
     public void setDspSlotName(String dspSlotName)
     {
@@ -577,5 +583,69 @@ public class DataSspSlot extends BaseEntity
 
     public void setAppOsType(int appOsType) {
         this.appOsType = appOsType;
+    }
+
+    public int getAdType() {
+        return adType;
+    }
+
+    public void setAdType(int adType) {
+        this.adType = adType;
+    }
+
+    public String getSspAliseName() {
+        return sspAliseName;
+    }
+
+    public void setSspAliseName(String sspAliseName) {
+        this.sspAliseName = sspAliseName;
+    }
+
+    public String getSspSlotIds() {
+        return sspSlotIds;
+    }
+
+    public void setSspSlotIds(String sspSlotIds) {
+        this.sspSlotIds = sspSlotIds;
+    }
+
+    public String getSspAliseNames() {
+        return sspAliseNames;
+    }
+
+    public void setSspAliseNames(String sspAliseNames) {
+        this.sspAliseNames = sspAliseNames;
+    }
+
+    public int getoSType() {
+        return oSType;
+    }
+
+    public void setoSType(int oSType) {
+        this.oSType = oSType;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getAdTypeName() {
+        return adTypeName;
+    }
+
+    public void setAdTypeName(String adTypeName) {
+        this.adTypeName = adTypeName;
+    }
+
+    public String getDspCompany() {
+        return dspCompany;
+    }
+
+    public void setDspCompany(String dspCompany) {
+        this.dspCompany = dspCompany;
     }
 }

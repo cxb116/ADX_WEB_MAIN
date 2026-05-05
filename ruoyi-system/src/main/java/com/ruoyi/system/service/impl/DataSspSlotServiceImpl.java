@@ -2,6 +2,7 @@ package com.ruoyi.system.service.impl;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,17 @@ public class DataSspSlotServiceImpl implements IDataSspSlotService
         return dataSspSlotMapper.selectDataSspSlotById(dataSspSlot);
     }
 
+    /**
+     * 生成当前月份的表名
+     * 格式：data_dsp_slot_day_YYYYMM
+     *
+     * @return 表名
+     */
+    private String DspGenerateCurrentTableName()
+    {
+        String currentMonth = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
+        return "data_dsp_slot_day_" + currentMonth;
+    }
     /**
      * 查询媒体数据报表列表
      *
@@ -130,6 +142,113 @@ public class DataSspSlotServiceImpl implements IDataSspSlotService
                 if (data.getSspPayType() != null && data.getSspPayType() == 1L
                     && data.getShowPv() != null && data.getShowPv() > 0
                     && data.getSspEcpm() != null && data.getSspEcpm() > 0)
+                {
+                    // 预算流水（分）= 展示PV × 千次收益（分） / 1000
+                    long spend = data.getSspEcpm() * data.getShowPv() / 1000;
+                    long spends = spend / 10;
+                    data.setSpend(spends);
+
+                    // 利润收入（分）= 预算流水（分）× 分成系数（%） / 100
+                    long incomes = 0L;
+                    if (data.getSspDealRatio() != null && data.getSspDealRatio() > 0)
+                    {
+                        long  income = spend * data.getSspDealRatio() / 100;
+                         incomes = income / 10;
+                    }
+                    data.setIncome(incomes);
+
+                } else {
+                    if (data.getSpend() > 0) {
+                        data.setSpend(data.getSpend() /10 );
+                    }
+                    if (data.getIncome() > 0) {
+                        data.setIncome(data.getIncome() /10 );
+                    }
+                }
+
+                // eCPM = (收入 / 100) / 展示PV × 1000 = 收入 / 展示PV × 10
+                if (data.getShowPv() != null && data.getShowPv() > 0)
+                {
+                    double ecpm = (data.getIncome() != null ? data.getIncome() : 0.0) * 10.0 / data.getShowPv();
+                    // 保留两位小数
+                    data.setEcpm(Math.round(ecpm * 100.0) / 100.0);
+                }
+                else
+                {
+                    data.setEcpm(0.0);
+                }
+            }
+        }
+        return list;
+    }
+
+
+
+    @Override
+    public List<DataSspSlot> selectDataSspSlotListToDspData(DataSspSlot dataSspSlot) {
+        // 如果没有设置表名，使用当前月份的表名
+        if (dataSspSlot.getTableName() == null || dataSspSlot.getTableName().trim().isEmpty())
+        {
+            dataSspSlot.setTableName(generateCurrentTableName());
+        }
+        // 查询数据
+        List<DataSspSlot> list = dataSspSlotMapper.selectDataSspSlotListToDspData(dataSspSlot);
+        if (list != null && !list.isEmpty())
+        {
+            for (DataSspSlot data : list)
+            {
+                // 填充率 = 返回PV / 请求PV * 100%
+                if (data.getReqPv() != null && data.getReqPv() > 0)
+                {
+                    double fillRate = (data.getRetPv() != null ? data.getRetPv() : 0.0) * 100.0 / data.getReqPv();
+                    // 保留两位小数
+                    data.setFillRate(Math.round(fillRate * 100.0) / 100.0);
+                }
+                else
+                {
+                    data.setFillRate(0.0);
+                }
+
+                // 请求丢失率 = 丢弃请求 / 请求PV * 100%
+                if (data.getReqPv() != null && data.getReqPv() > 0)
+                {
+                    double requestLossRate = (data.getDiscard() != null ? data.getDiscard() : 0.0) * 100.0 / data.getReqPv();
+                    // 保留两位小数
+                    data.setRequestLossRate(Math.round(requestLossRate * 100.0) / 100.0);
+                }
+                else
+                {
+                    data.setRequestLossRate(0.0);
+                }
+
+                // 展现率 = 展示PV / 返回PV * 100%
+                if (data.getRetPv() != null && data.getRetPv() > 0)
+                {
+                    double showRate = (data.getShowPv() != null ? data.getShowPv() : 0.0) * 100.0 / data.getRetPv();
+                    // 保留两位小数
+                    data.setShowRate(Math.round(showRate * 100.0) / 100.0);
+                }
+                else
+                {
+                    data.setShowRate(0.0);
+                }
+
+                // 点击率 = 点击PV / 返回PV * 100%
+                if (data.getRetPv() != null && data.getRetPv() > 0)
+                {
+                    double clickRate = (data.getClickPv() != null ? data.getClickPv() : 0.0) * 100.0 / data.getRetPv();
+                    // 保留两位小数
+                    data.setClickRate(Math.round(clickRate * 100.0) / 100.0);
+                }
+                else
+                {
+                    data.setClickRate(0.0);
+                }
+
+                // 如果是分成模式，自动计算预算流水和利润收入
+                if (data.getSspPayType() != null && data.getSspPayType() == 1L
+                        && data.getShowPv() != null && data.getShowPv() > 0
+                        && data.getSspEcpm() != null && data.getSspEcpm() > 0)
                 {
                     // 预算流水（分）= 展示PV × 千次收益（分） / 1000
                     long spend = data.getSspEcpm() * data.getShowPv() / 1000;

@@ -3327,7 +3327,7 @@ getList()
 
 .drawer-actions {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;  /* 👉 改这里 */
   gap: 1px;
   padding: 0 20px 10px;
   width: 100%;

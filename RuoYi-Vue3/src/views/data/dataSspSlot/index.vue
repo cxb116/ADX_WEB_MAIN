@@ -8,7 +8,7 @@
       <el-form-item  prop="mediaId">
         <el-select
           v-model="queryParams.mediaId"
-          placeholder="请选择媒体用户"
+          placeholder="媒体简称"
           clearable
           filterable
           style="width: 120px;"
@@ -24,7 +24,7 @@
       <el-form-item prop="appId">
         <el-select
           v-model="queryParams.appId"
-          placeholder="请选择应用"
+          placeholder="应用名称"
           clearable
           filterable
           style="width: 120px;"
@@ -40,7 +40,7 @@
       <el-form-item prop="appOsType">
         <el-select
           v-model="queryParams.appOsType"
-          placeholder="请选择应用平台"
+          placeholder="应用平台"
           clearable
           style="width: 120px;"
         >
@@ -48,10 +48,26 @@
           <el-option label="iOS" :value="2" />
         </el-select>
       </el-form-item>
+      <el-form-item prop="adType">
+        <el-select
+          v-model="queryParams.adType"
+          placeholder="广告类型"
+          clearable
+          filterable
+          style="width: 120px;"
+        >
+          <el-option
+            v-for="item in adTypeList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label-width="90" prop="sspSlotId">
         <el-select
           v-model="queryParams.sspSlotId"
-          placeholder="请选择媒体广告位"
+          placeholder="流量广告位"
           clearable
           filterable
           style="width: 120px;"
@@ -59,29 +75,32 @@
           <el-option
             v-for="item in mediaAdList"
             :key="item.id"
-            :label="`${item.name || '媒体广告位'}(${item.id})`"
+            :label="`${item.name || '流量广告位'}(${item.id})`"
             :value="item.id"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label-width="90" prop="dspSlotId">
+      <el-form-item label-width="90" prop="sspSlotIds">
         <el-input
-          v-model="queryParams.dspSlotId"
-          placeholder="请输入预算广告位"
+          v-model="queryParams.sspSlotIds"
+          type="textarea"
+          :rows="2"
+          placeholder="批量流量广告位ID(逗号/换行分隔)"
           clearable
-          @keyup.enter="handleQuery"
-          style="width: 120px;"
+          style="width: 180px;"
         />
       </el-form-item>
-      <el-form-item label-width="110" prop="dspSlotCode">
+      <el-form-item label-width="110" prop="sspAliseNames">
         <el-input
-          v-model="queryParams.dspSlotCode"
-          placeholder="请输入预算广告位编号"
+          v-model="queryParams.sspAliseNames"
+          type="textarea"
+          :rows="2"
+          placeholder="批量内部广告位名称(逗号/换行分隔)"
           clearable
-          @keyup.enter="handleQuery"
-          style="width: 120px;"
+          style="width: 200px;"
         />
       </el-form-item>
+
       <el-form-item label-width="90">
         <el-date-picker
           v-model="dateRange"
@@ -129,22 +148,88 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="data_ssp_slotList" @selection-change="handleSelectionChange"
-
+    <el-table
+              ref="mainTableRef"
+              v-loading="loading"
+              :data="data_ssp_slotList"
+              @selection-change="handleSelectionChange"
+              @expand-change="handleExpandChange"
+              @row-click="handleRowClick"
               style="width: 100%"
-              :header-cell-style="{ background: '#F5F7FA', color: '#000' }"
-              :cell-style="{ color: '#000' }"
+              :header-cell-style="{ background: '#F5F7FA', color: '#00030b' }"
+              :cell-style="{ color: '#000309' }"
               border
               table-layout="auto"
+
               highlight-current-row="true">
+      <el-table-column type="expand" width="50">
+        <template #default="scope">
+          <div class="dsp-subtable-wrapper">
+            <el-table
+              v-loading="isSubTableLoading(scope.row)"
+              :data="getSubTableRows(scope.row)"
+              size="small"
+              border
+              style="width: 100%"
+            >
+              <el-table-column label="时间" align="center" width="160">
+                <template #default="subScope">
+                  <span>{{ formatDate(subScope.row.date) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="公司名称" align="center" prop="dspCompany" width="130" />
+              <el-table-column label="产品名称" align="center" prop="productName" width="130" />
+              <el-table-column label="广告类型" align="center" prop="adTypeName" width="130" />
+              <el-table-column label="应用系统" align="center" prop="osType" width="130">
+                <template #default="{ row }">
+                  <!-- 根据 osType 的值显示 Android 或 iOS -->
+                  {{ row.osType === 1 ? 'Android' : row.osType === 2 ? 'iOS' : '未知' }}
+                </template>
+              </el-table-column>
+
+
+              <el-table-column label="预算广告位" align="center" width="260" show-overflow-tooltip>
+                <template #default="subScope">
+                  <span v-if="subScope.row.dspSlotName">{{ subScope.row.dspSlotName }}({{ subScope.row.dspSlotId }})</span>
+                  <span v-else>{{ subScope.row.dspSlotId }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="预算广告位编码" align="center" prop="dspSlotCode" width="250" show-overflow-tooltip />
+              <el-table-column label="请求" align="center" prop="reqPv" width="100" />
+              <el-table-column label="返回" align="center" prop="retPv" width="100" />
+              <el-table-column label="展示" align="center" prop="showPv" width="100" />
+              <el-table-column label="点击" align="center" prop="clickPv" width="100" />
+
+              <el-table-column label="丢弃请求" align="center" prop="discard" width="100" />
+              <el-table-column label="请求丢失率(%)" align="center" prop="requestLossRate" width="130" />
+              <el-table-column label="展现率(%)" align="center" prop="showRate" width="120" />
+              <el-table-column label="点击率(%)" align="center" prop="clickRate" width="120" />
+              <el-table-column label="填充率(%)" align="center" prop="fillRate" width="120" />
+              <el-table-column label="ecpm" align="center" prop="ecpm" width="100" />
+
+
+
+              <el-table-column label="成本(元)" align="center" width="120">
+                <template #default="subScope">
+                  <span>{{ subScope.row.spend !== null && subScope.row.spend !== undefined ? (subScope.row.spend / 100).toFixed(2) : '-' }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="收入(元)" align="center" width="120">
+                <template #default="subScope">
+                  <span>{{ subScope.row.income !== null && subScope.row.income !== undefined ? (subScope.row.income / 100).toFixed(2) : '-' }}</span>
+                </template>
+              </el-table-column>
+            </el-table>
+<!--            <el-empty v-if="!isSubTableLoading(scope.row) && getSubTableRows(scope.row).length === 0" description="未查询到子表数据" />-->
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="日期" align="center" width="150" prop="date">
         <template #default="scope">
           <span v-if="scope.row.date">{{ formatDate(scope.row.date) }}</span>
           <span v-else>-</span>
         </template>
       </el-table-column>
-<!--      <el-table-column label="主键" align="center" prop="id" />-->
-<!--      <el-table-column label="媒体用户" align="center" width="55" prop="mediaId" />-->
       <el-table-column label="媒体" align="center" width="150" show-overflow-tooltip  prop="mediaName">
         <template #default="scope">
           <span v-if="scope.row.mediaName">{{ scope.row.mediaName }}</span>
@@ -158,35 +243,36 @@
 <!--        </template>-->
 <!--      </el-table-column>-->
 
-      <el-table-column label="应用平台" align="center" width="150" prop="appOsType">
+      <el-table-column label="应用平台" align="center" width="100" prop="appOsType">
         <template #default="scope">
           <span>{{ scope && scope.row ? (scope.row.appOsType === 1 ? 'Android' : (scope.row.appOsType === 2 ? 'iOS' : '未知')) : '未知' }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="应用名称" align="center" width="150" show-overflow-tooltip  prop="appName">
-        <template #default="scope">
-          <span v-if="scope.row.appName">{{ scope.row.appName }}（{{ scope.row.appId }}）</span>
-          <span v-else>{{ scope.row.appId }}</span>
-        </template>
+      <el-table-column label="应用名称" align="center" width="250" show-overflow-tooltip  prop="appName">
       </el-table-column>
-      <el-table-column label="媒体广告位" align="center" width="250" show-overflow-tooltip  prop="sspSlotName">
+      <el-table-column label="内部广告位名称" align="center" width="250" show-overflow-tooltip  prop="sspSlotName">
         <template #default="scope">
-          <span v-if="scope.row.sspSlotName">{{ scope.row.sspSlotName }}（{{ scope.row.sspSlotId }}）</span>
+          <span v-if="scope.row.sspAliseName">{{ scope.row.sspAliseName }}（{{ scope.row.sspSlotId }}）</span>
           <span v-else>{{ scope.row.sspSlotId }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预算广告位" align="center" width="280" show-overflow-tooltip  prop="dspSlotName">
+<!--      <el-table-column label="预算广告位" align="center" width="280" show-overflow-tooltip  prop="dspSlotName">-->
+<!--        <template #default="scope">-->
+<!--          <span v-if="scope.row.dspSlotName">{{ scope.row.dspSlotName }}（{{ scope.row.dspSlotId }}）</span>-->
+<!--          <span v-else>{{ scope.row.dspSlotId }}</span>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+      <el-table-column label="广告类型" align="center" width="100" prop="adType">
         <template #default="scope">
-          <span v-if="scope.row.dspSlotName">{{ scope.row.dspSlotName }}（{{ scope.row.dspSlotId }}）</span>
-          <span v-else>{{ scope.row.dspSlotId }}</span>
+          <span>{{ getAdTypeName(scope.row.adType) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="媒体广告位ID" align="center" width="150" show-overflow-tooltip  prop="sspSlotId" />
-      <el-table-column label="请求PV" align="center" width="100" prop="reqPv" />
-      <el-table-column label="返回PV" align="center" width="100" prop="retPv" />
-      <el-table-column label="展示PV" align="center" width="100" prop="showPv" />
-      <el-table-column label="点击PV" align="center" width="100" prop="clickPv" />
+      <el-table-column label="媒体广告位" align="center" width="150" show-overflow-tooltip  prop="sspSlotId" />
+      <el-table-column label="请求" align="center" width="100" prop="reqPv" />
+      <el-table-column label="返回" align="center" width="100" prop="retPv" />
+      <el-table-column label="展示" align="center" width="100" prop="showPv" />
+      <el-table-column label="点击" align="center" width="100" prop="clickPv" />
       <el-table-column label="丢弃请求" align="center" width="100" prop="discard" />
       <el-table-column label="请求丢失率(%)" align="center" width="130" prop="requestLossRate">
         <template #default="scope">
@@ -379,9 +465,11 @@
 
 <script setup name="Data_ssp_slot">
 import { listData_ssp_slot, getData_ssp_slot, delData_ssp_slot, addData_ssp_slot, updateData_ssp_slot } from "@/api/data/dataSspSlot.js"
+import { listDataDspSlot } from "@/api/data/dataDspSlot.js"
 import { listMedia } from "@/api/flow/media.js"
 import { listApp } from "@/api/flow/app.js"
 import { listMediaAd } from "@/api/flow/mediaAd.js"
+import { listType } from "@/api/ad/type"
 import { useDict } from "@/utils/dict"
 import * as echarts from 'echarts'
 
@@ -391,6 +479,7 @@ const chartRef = ref(null)
 let chartInstance = null
 
 const data_ssp_slotList = ref([])
+const mainTableRef = ref(null)
 const open = ref(false)
 const loading = ref(true)
 const showSearch = ref(true)
@@ -404,6 +493,10 @@ const tableType = ref('day') // 表类型: 'day' 或 'hour'
 const mediaList = ref([]) // 媒体列表
 const appList = ref([]) // 应用列表
 const mediaAdList = ref([]) // 媒体广告位列表
+const adTypeList = ref([]) // 广告类型列表
+const loadingDetailMap = ref({})
+const dspSubTableMap = ref({})
+const expandedRowKeys = ref(new Set())
 const chartDialogVisible = ref(false) // 图表对话框显示状态
 const correctDialogVisible = ref(false) // 修正对话框显示状态
 // 修正表单
@@ -461,7 +554,10 @@ const data = reactive({
     mediaId: null,
     appId: null,
     appOsType: null,
+    adType: null,
     sspSlotId: null,
+    sspSlotIds: null,
+    sspAliseNames: null,
     dspSlotId: null,
     dspSlotCode: null,
     showPv: null,
@@ -543,6 +639,106 @@ function getMediaAdList() {
   })
 }
 
+/** 获取广告类型列表 */
+function getAdTypeList() {
+  listType({ pageNum: 1, pageSize: 1000 }).then(response => {
+    adTypeList.value = response.rows || []
+  })
+}
+
+/** 根据广告类型ID获取广告类型名称 */
+function getAdTypeName(typeId) {
+  if (typeId === null || typeId === undefined || typeId === '') {
+    return '-'
+  }
+  const type = adTypeList.value.find(item => String(item.id) === String(typeId))
+  return type ? type.name : typeId
+}
+
+function getRowKey(row) {
+  return `${row?.sspSlotId || ''}-${row?.date || ''}-${row?.id || ''}`
+}
+
+function getSubTableRows(row) {
+  const key = getRowKey(row)
+  return dspSubTableMap.value[key] || []
+}
+
+function isSubTableLoading(row) {
+  const key = getRowKey(row)
+  return !!loadingDetailMap.value[key]
+}
+
+function generateDspTableNameByRow(row) {
+  const dateValue = String(row?.date || '')
+  if (dateValue.length < 6) {
+    return null
+  }
+  const yearMonth = dateValue.substring(0, 6)
+  return tableType.value === 'day'
+    ? `data_dsp_slot_day_${yearMonth}`
+    : `data_dsp_slot_hour_${yearMonth}`
+}
+
+function toggleRowExpand(row) {
+  const key = getRowKey(row)
+  const expanded = expandedRowKeys.value.has(key)
+  if (expanded) {
+    expandedRowKeys.value.delete(key)
+  } else {
+    expandedRowKeys.value.add(key)
+  }
+  if (mainTableRef.value?.toggleRowExpansion) {
+    mainTableRef.value.toggleRowExpansion(row, !expanded)
+  }
+}
+
+function handleRowClick(row) {
+  toggleRowExpand(row)
+}
+
+async function handleExpandChange(row, expandedRows) {
+  const key = getRowKey(row)
+  const expanded = expandedRows.some(item => getRowKey(item) === key)
+  if (!expanded) {
+    expandedRowKeys.value.delete(key)
+    return
+  }
+  expandedRowKeys.value.add(key)
+
+  const sspSlotId = row?.sspSlotId
+  if (!sspSlotId) {
+    return
+  }
+  if (dspSubTableMap.value[key] || loadingDetailMap.value[key]) {
+    return
+  }
+
+  const tableName = generateDspTableNameByRow(row)
+  if (!tableName) {
+    dspSubTableMap.value[key] = []
+    return
+  }
+
+  loadingDetailMap.value[key] = true
+  try {
+    const response = await listDataDspSlot({
+      pageNum: 1,
+      pageSize: 1000,
+      tableName,
+      sspSlotId,
+      beginDate: row?.date,
+      endDate: row?.date
+    })
+    dspSubTableMap.value[key] = response?.rows || []
+  } catch (error) {
+    dspSubTableMap.value[key] = []
+    proxy.$modal.msgError(`获取子表数据失败（sspSlotId=${sspSlotId}）`)
+  } finally {
+    loadingDetailMap.value[key] = false
+  }
+}
+
 /** 生成表名 */
 function generateTableName() {
   const now = new Date()
@@ -566,10 +762,31 @@ function handleTableTypeChange() {
   getList()
 }
 
+function normalizeBatchValue(value) {
+  if (value === null || value === undefined || value === '') {
+    return null
+  }
+  const parts = String(value)
+    .split(/[\n,，\s]+/)
+    .map(item => item.trim())
+    .filter(item => item !== '')
+  return parts.length > 0 ? parts.join(',') : null
+}
+
+function buildQueryParams() {
+  const params = { ...queryParams.value }
+  params.sspSlotIds = normalizeBatchValue(params.sspSlotIds)
+  params.sspAliseNames = normalizeBatchValue(params.sspAliseNames)
+  return params
+}
+
 /** 查询媒体数据报表列表 */
 function getList() {
   loading.value = true
-  const params = { ...queryParams.value }
+  expandedRowKeys.value = new Set()
+  loadingDetailMap.value = {}
+  dspSubTableMap.value = {}
+  const params = buildQueryParams()
 
   // 处理日期范围参数
   if (dateRange.value && dateRange.value.length === 2) {
@@ -614,6 +831,8 @@ function reset() {
     appId: null,
     appOsType: null,
     sspSlotId: null,
+    sspSlotIds: null,
+    sspAliseNames: null,
     dspSlotId: null,
     dspSlotCode: null,
     showPv: null,
@@ -769,7 +988,7 @@ function handleDelete(row) {
 /** 导出按钮操作 */
 function handleExport() {
   proxy.download('data/data_ssp_slot/export', {
-    ...queryParams.value,
+    ...buildQueryParams(),
     tableName: generateTableName()
   }, `data_ssp_slot_${new Date().getTime()}.xlsx`)
 }
@@ -920,6 +1139,7 @@ getList()
 getMediaList()
 getAppList()
 getMediaAdList()
+getAdTypeList()
 </script>
 <style scoped>
 .btn-blue {
@@ -947,6 +1167,28 @@ getMediaAdList()
 .el-form--inline .el-form-item {
   margin-right: 8px;  /* 默认一般是 18px+ */
   margin-bottom: 8px;
+}
+
+.dsp-subtable-wrapper {
+  padding: 12px 8px;
+  background: #fff4bf;
+}
+
+.dsp-subtable-wrapper :deep(.el-table) {
+  font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  color: #111111;
+}
+
+.dsp-subtable-wrapper :deep(.el-table th.el-table__cell) {
+  background-color: #ffe89a;
+  color: #111111;
+  font-weight: 700;
+}
+
+.dsp-subtable-wrapper :deep(.el-table td.el-table__cell) {
+  background-color: #fff7d6;
+  color: #111111;
+  font-weight: 500;
 }
 
 
@@ -1030,5 +1272,16 @@ getMediaAdList()
   background: #f2f5f7;
 }
 
+/* 设置表头字体颜色为黑色，背景颜色为黄色 */
+.custom-column-header {
+  background-color: yellow;
+  color: black;
+}
+
+/* 设置表格数据的字体颜色为黑色，背景颜色为黄色 */
+.custom-column-cell {
+  background-color: yellow;
+  color: black;
+}
 
 </style>

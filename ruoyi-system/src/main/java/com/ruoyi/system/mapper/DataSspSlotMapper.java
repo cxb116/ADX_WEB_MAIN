@@ -121,4 +121,5 @@ public interface DataSspSlotMapper
                                     @Param("list") java.util.List<java.util.Map<String, Object>> updateList);
 
 
+    List<DataSspSlot> selectDataSspSlotListToDspData(DataSspSlot dataSspSlot);
 }
