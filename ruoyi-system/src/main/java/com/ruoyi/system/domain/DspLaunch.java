@@ -91,6 +91,8 @@ public class DspLaunch extends BaseEntity
 
     private Integer indexs;
 
+    private Integer dspPayType;
+
     public void setId(Long id)
     {
         this.id = id;
@@ -372,5 +374,13 @@ public class DspLaunch extends BaseEntity
 
     public void setIndexs(Integer indexs) {
         this.indexs = indexs;
+    }
+
+    public Integer getDspPayType() {
+        return dspPayType;
+    }
+
+    public void setDspPayType(Integer dspPayType) {
+        this.dspPayType = dspPayType;
     }
 }

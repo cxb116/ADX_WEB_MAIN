@@ -3,6 +3,7 @@ package com.ruoyi.system.service.impl;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -122,171 +123,124 @@ public class DspInputCompanyExceServiceImpl implements IDspInputCompanyExceServi
             throw new ServiceException("导入我方收益不能为空");
         }
 
-        int successNum = 0;
-        int failureNum = 0;
-        StringBuilder successMsg = new StringBuilder();
-        StringBuilder failureMsg = new StringBuilder();
+//        int successNum = 0;
+//        int failureNum = 0;
+//        StringBuilder successMsg = new StringBuilder();
+//        StringBuilder failureMsg = new StringBuilder();
+
+//        DspInputExceDTO dspInputExceDTO = new DspInputExceDTO();
+
+        List<DspInputExceDTO> result = new ArrayList<>();
+
+        DspInputExceDTO currentGroup = null; // 当前分组
+
+        int total = 0;  // 统计条数
 
         for (DspIncome dspIncomeExcel : dspIncomeList) {
-            System.out.println("dspIncome: " + dspIncomeExcel);
+            total += 1;
+            String dspSlotCode = dspIncomeExcel.getDspSlotCode();
+            // 1. 如果 dspSlotCode 有值 → 新建一组
+            if (dspSlotCode != null && !dspSlotCode.trim().isEmpty()) {
 
-            try {
-                String code = dspIncomeExcel.getDspSlotCode();
-                Date inputTime = dspIncomeExcel.getInputTime();
-                long dspSlotId = dspIncomeExcel.getDspSlotId();
-                if (dspIncomeExcel.getIncome() < 0) {
-                    continue;
+                currentGroup = new DspInputExceDTO();
+                currentGroup.setDspSlotCode(dspSlotCode);
+                currentGroup.setInputTime(dspIncomeExcel.getInputTime());
+                currentGroup.setIncome(dspIncomeExcel.getIncome());
+                result.add(currentGroup);
+            }
+
+            // 2. 处理子数据（每一行都有）
+            if (currentGroup == null) {
+                //  防御：第一行就是空
+                continue;
+            }
+
+            SspInputExceData child = new SspInputExceData();
+            child.setSspSlotId(dspIncomeExcel.getSspSlotId());
+            child.setDspDealRatio(dspIncomeExcel.getProportion());
+
+//            currentGroup.addDspInputExceDTO.add(child);
+            currentGroup.addDspInputExceDTO(child);
+        }
+
+
+        for (DspInputExceDTO dspInputExceDTO : result) {
+            String dspSlotCode = dspInputExceDTO.getDspSlotCode();
+            // 首先 100 是将元转化成分， 10 这个是为了让0.1分钱变成 1
+            Long dspIncom = dspInputExceDTO.getIncome() * 10 * 100;
+            // 从这里面获取预算的曝光次数
+
+            Date inputTime = dspInputExceDTO.getInputTime();
+            LocalDate date = inputTime.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+            String dspInputTime = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String dataTableTime = date.format(DateTimeFormatter.ofPattern("yyyyMM"));
+
+            System.out.println("dspInputTime: " + dspInputTime);
+            System.out.println("dataTableTime: " + dataTableTime);
+
+            long showCount = 0;
+            // 曝光总次数
+            for (SspInputExceData sspInputExceData : dspInputExceDTO.getDspInputExceDTOList()) {
+//                Integer dspDealRatio = sspInputExceData.getDspDealRatio();
+
+                DataSspSlot dataSspSlot = new DataSspSlot();
+                dataSspSlot.setDspSlotCode(dspSlotCode);
+                dataSspSlot.setSspSlotId(sspInputExceData.getSspSlotId());
+                dataSspSlot.setTableName("data_ssp_slot_day_" + dataTableTime);
+                dataSspSlot.setDate(Long.valueOf(dspInputTime));
+                List<DataSspSlot> dataSspSlots = dataSspSlotMapper.selectDataSspSlotListInputExce(dataSspSlot);
+                if (dataSspSlots.size() == 0) {
+                    showCount += dataSspSlots.get(0).getShowPv();
+                } else {
+                    return "dataSspSlots size=" + dataSspSlots.size() + "数据异常,查找出了多条数据";
                 }
-                dspIncomeExcel.setIncome(dspIncomeExcel.getIncome() * 100);
+            }
+//            Long RemainingIncome = 0;
+            Long CountIncome = 0L;
+            for (SspInputExceData sspInputExceData : dspInputExceDTO.getDspInputExceDTOList()) {
+//                Integer dspDealRatio = sspInputExceData.getDspDealRatio();
 
-                //  参数校验（任意一个为空就拦截）
-                if (org.apache.commons.lang3.StringUtils.isBlank(code) || inputTime == null || dspSlotId == 0) {
-                    throw new ServiceException("导入日期和预算位编码不能为空");
-                }
+                DataSspSlot dataSspSlot = new DataSspSlot();
+                dataSspSlot.setDspSlotCode(dspSlotCode);
+                dataSspSlot.setSspSlotId(sspInputExceData.getSspSlotId());
+                dataSspSlot.setTableName("data_sp_slot_day_" + dataTableTime);
+                dataSspSlot.setDate(Long.valueOf(dspInputTime));
+                List<DataSspSlot> dataSspSlots = dataSspSlotMapper.selectDataSspSlotListInputExce(dataSspSlot);
+                if (dataSspSlots.size() == 0) {
 
-                //  Date → LocalDate（标准写法）
-                LocalDate date = inputTime.toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate();
-
-                //  格式化
-                String dspInputTime = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-                String dataTableTime = date.format(DateTimeFormatter.ofPattern("yyyyMM"));
-
-                System.out.println("dspInputTime: " + dspInputTime);
-                System.out.println("dataTableTime: " + dataTableTime);
-
-                // ================== 业务逻辑 ==================
-
-                DataSspSlot query = new DataSspSlot();
-                query.setDate(Long.valueOf(dspInputTime));
-                query.setDspSlotCode(code);
-                query.setTableName("data_ssp_slot_day_"+dataTableTime);
-                query.setDspSlotId(dspSlotId);
-
-                List<DataSspSlot> dataSspSlotsList = dataSspSlotMapper.selectDataSspSlotListInputExce(query);   // 获取媒体的数据
-                if (dataSspSlotsList.size() == 0) {
-                    throw new ServiceException("导入日期和预算位编码不能为空");
-                } else if (dataSspSlotsList.size() == 1) {  // 就是这一个预算下跑了1个预算
-                    // 1 获取分成比例
-                    Long id = dataSspSlotsList.get(0).getSspSlotId();
-                    SspSlotInfo sspSlotInfo = sspSlotInfoMapper.selectSspSlotInfoById(id);
-                    if (sspSlotInfo == null) {
-                        throw new ServiceException("sspSlotId 查询不到数据");
+//                 流量占比   展现 / 总展现 * 100
+                    long ratio = dataSspSlots.get(0).getShowPv() / showCount * 100;
+                    // 利润 * 分成系数 / 100 * 展现 / 100 （这个100 是把元转化成了分） 后面的这个10 是我用来将分后面的小数转化的（在获取的时候会去掉）
+                    long incom = dspIncom * sspInputExceData.getDspDealRatio() * ratio;
+                    dataSspSlot.setShowPv(incom);
+                    int i = dataSspSlotMapper.updateDataSspSlot(dataSspSlot);
+                    if (i > 0) {
+                        CountIncome += incom;
                     }
-                    Long sspDealRatio = sspSlotInfo.getSspDealRatio();  // 获取分成系数
-                    Long sspPayType = sspSlotInfo.getSspPayType();      // 获取结算方式
-                    if (sspPayType != 1 || sspDealRatio <= 0) {
-                        throw new ServiceException("不是分成无法导入计算下游收益,查看分成系数是否大于0");
-                    }
-                    // 2 根据分成比例算出下游媒体利润
-                    Long sspIncome =  dspIncomeExcel.getIncome() * sspDealRatio / 100;
-                    DataSspSlot sspSlot = new DataSspSlot();
-                    sspSlot.setId(dataSspSlotsList.get(0).getId());
-                    sspSlot.setIncome(sspIncome);
-                    sspSlot.setUpdateTime(new Date());
-                    sspSlot.setTableName("data_ssp_slot_day_"+dataTableTime);
-                    // 3 入库同步利润
-                    int i = dataSspSlotMapper.updateDataSspSlot(sspSlot);
-                } else if (dataSspSlotsList.size() > 1) {
-                    // 如果是大于1个预算，就需要通过获取他们的展现次数，算出，每个流量的展现比例,
-                    Long showPvNum = 0L;
-                    for (DataSspSlot dataSspSlot : dataSspSlotsList) {
-                        showPvNum +=  dataSspSlot.getShowPv();
-                    }
-                    // 获取到曝光总和，需要通过showPvNum,去计算每个流量的占比
-                    for (DataSspSlot dataSspSlot : dataSspSlotsList) {
-                        // 获取分成系数
-                        SspSlotInfo sspSlotInfo = sspSlotInfoMapper.selectSspSlotInfoById(dataSspSlot.getSspSlotId());
-                        // 获取展现次数的占比   10%
-                        System.out.println("showPv: " + dataSspSlot.getShowPv()+" showPvNum: " + showPvNum);
-                        long ratio = (long) ((double) dataSspSlot.getShowPv() / showPvNum * 100);
-                        System.out.println("ratio: "+ratio);
-                        if (ratio == 0) {
-                            continue;
-                        }
-                        // 检测是否是分成
-                        if (sspSlotInfo.getSspPayType() != 1 || sspSlotInfo.getSspDealRatio() <= 0) {
-                            continue;
-                        }
 
-                        // 2 根据分成比例算出下游媒体利润
-                        Long sspIncome = dspIncomeExcel.getIncome() * sspSlotInfo.getSspDealRatio() / 100 * ratio /100;
-                        DataSspSlot sspSlot = new DataSspSlot();
-                        sspSlot.setId(dataSspSlot.getId());
-                        sspSlot.setIncome(sspIncome);
-                        sspSlot.setTableName("data_ssp_slot_day_" + dataTableTime);
-                        // 3 入库同步利润
-                        int i = dataSspSlotMapper.updateDataSspSlot(sspSlot);
-                    }
+                } else {
+                    return "dataSspSlots size=" + dataSspSlots.size() + "数据异常,查找出了多条数据";
                 }
-                // 预算计算
-                List<DataSspSlot> dataSspSlotIncome = dataSspSlotMapper.selectDataSspSlotListInputExce(query);
-                if (dataSspSlotIncome.size() == 0) {
-                    throw new ServiceException("媒体数据不能为空");
-                }
-                long dspSpend = 0L;  // 就算出全部媒体的收益，减去总收益就是媒体的收益
-                for (DataSspSlot dataSspSlot : dataSspSlotIncome) {
-                    dspSpend +=  dataSspSlot.getIncome();
-                }
-                System.out.println("给下游媒体的总收益 sspIncome: " + dspSpend);
-                long dspIncomes = dspIncomeExcel.getIncome() - dspSpend;
-                System.out.println("预算给我的收益 dspIncomes: " + dspIncomes);
-
+            }
+            if (CountIncome < dspIncom) {
+                Long RemainingIncome = CountIncome - dspIncom;
                 DataDspSlot dataDspSlot = new DataDspSlot();
-                dataDspSlot.setDspSlotId(dspIncomeExcel.getDspSlotId());
-                dataDspSlot.setDspSlotCode(dspIncomeExcel.getDspSlotCode());
+                dataDspSlot.setDspSlotCode(dspSlotCode);
                 dataDspSlot.setDate(Long.valueOf(dspInputTime));
                 dataDspSlot.setTableName("data_dsp_slot_day_" + dataTableTime);
-                List<DataDspSlot> dataDspSlotList= dataDspSlotMapper.selectDataDspSlotList(dataDspSlot);
-                if (dataDspSlotList.size() > 1 || dataDspSlotList.size() == 0) {
-                    throw new ServiceException("预算数据异常，检查数据");
+                DataDspSlot dataDspSlot1 = dataDspSlotMapper.selectDataDspSlotOne(dataDspSlot);
+                if (dataDspSlot1 != null) {
+                    DataDspSlot dataDspSlot2 = new DataDspSlot();
+                    dataDspSlot2.setId(dataDspSlot1.getId());
+                    dataDspSlot2.setSpend(CountIncome);
+                    dataDspSlot2.setIncome(RemainingIncome);
+                    dataDspSlot2.setTableName("data_dsp_slot_day_" + dataTableTime);
+                    int i = dataDspSlotMapper.updateDataDspSlot(dataDspSlot2);
                 }
-
-                DataDspSlot InputdataDspSlot = new DataDspSlot();
-                InputdataDspSlot.setId(dataDspSlotList.get(0).getId());
-                InputdataDspSlot.setSpend(dspSpend);
-                InputdataDspSlot.setIncome(dspIncomes);
-                InputdataDspSlot.setTableName("data_dsp_slot_day_" + dataTableTime);
-                int i = dataDspSlotMapper.updateDataDspSlot(InputdataDspSlot);
-
-
-
-                // 根据日期 dspSlotCode 去查 公司id,然后再去跟新这个数据
-//                DspSlotInfoMapper
-                DspSlotInfo dspSlotInfo = dspSlotInfoMapper.selectDspSlotInfoById(dataDspSlotList.get(0).getDspSlotId());
-                if (dspSlotInfo == null) {
-                    throw new ServiceException("dspSlotInfo 预算数据异常，检查数据,公司数据未能查到");
-                }
-                DspInputCompanyExce dspInputCompanyExce = dspInputCompanyExceMapper.selectDspInputCompanyExceById(dspSlotInfo.getId());
-                if (dspInputCompanyExce == null) {
-                    throw new ServiceException("dspIncome 预算数据异常，检查数据,公司数据未能查到");
-                }
-
-                successNum++;
-                DspInputCompanyExce exce = new DspInputCompanyExce();
-                exce.setId(dspInputCompanyExce.getId());
-                if (dspInputCompanyExce.getInputTime() == null) {
-                    exce.setInputTime(new Date());
-                }
-                exce.setUpdateTime(new Date());
-                exce.setTables((long) successNum);
-                dspInputCompanyExceMapper.updateDspInputCompanyExce(exce);
-
-            } catch (Exception e) {
-                failureNum++;
-                String msg = "<br/>" + failureNum + "、账号 " + dspIncomeExcel.getDspSlotCode() + " 导入失败：";
-                failureMsg.append(msg).append(e.getMessage());
-                log.error(msg, e);
             }
         }
-
-        successMsg.append("<br/>共 ").append(successNum).append(" 条导入成功");
-        if (failureNum > 0) {
-            successMsg.append("<br/>共 ").append(failureNum).append(" 条导入失败")
-                    .append(failureMsg);
-        }
-
-        return successMsg.toString();
+        return "数据跟新成功";
     }
 }

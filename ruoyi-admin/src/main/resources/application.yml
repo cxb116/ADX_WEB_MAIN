@@ -68,16 +68,15 @@ spring:
       enabled:  false
   # redis 配置
   redis:
-    # 地址
-#    host: ${redis-host:127.0.0.1}
     host: 115.191.52.226
+#    host: redis-cnlf51b4prm2mn6xz.redis.ivolces.com
     # 端口，默认为6379
     port: 6379
     # 数据库索引
     database: 0
     username: root
     # 密码
-    password:
+#    password: Ddzcxl2008
     # 连接超时时间
     timeout: 10s
     lettuce:
@@ -99,7 +98,7 @@ token:
   # 令牌密钥
   secret: abcdefghijklmnopqrstuvwxyz
   # 令牌有效期（默认30分钟）
-  expireTime: 1300
+  expireTime: 604800
 
 # MyBatis配置
 mybatis:
@@ -145,6 +144,7 @@ etcd:
   enabled: true
   # etcd 服务器地址（支持多个，逗号分隔）
   endpoints: http://117.72.67.186
+#  endpoints: http://115.190.217.215
   # etcd key 前缀
   prefix: /dsp/config
   # 连接超时时间（秒）

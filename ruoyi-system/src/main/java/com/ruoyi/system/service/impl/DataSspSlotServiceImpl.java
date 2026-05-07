@@ -86,6 +86,12 @@ public class DataSspSlotServiceImpl implements IDataSspSlotService
 
         // 计算填充率、请求丢失率、展现率、点击率、eCPM（只计算，不存数据库）
         // 对于分成模式，自动计算并更新预算流水和利润收入
+        //ecpm：千次曝光收益
+        //ecpm=收益/曝光数*1000
+
+//        媒体ecpm：下游媒体的千次曝光收益
+//            媒体ecpm=成本/曝光数*1000
+
         if (list != null && !list.isEmpty())
         {
             for (DataSspSlot data : list)

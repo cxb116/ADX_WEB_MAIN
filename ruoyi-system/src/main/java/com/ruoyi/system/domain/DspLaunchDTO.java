@@ -70,6 +70,8 @@ public class DspLaunchDTO
 
     private Integer sspPayType;
 
+    private Integer dspPayTypeRatio;
+
     public Long getId() {
         return id;
     }
@@ -236,5 +238,14 @@ public class DspLaunchDTO
 
     public void setSspPayType(Integer sspPayType) {
         this.sspPayType = sspPayType;
+    }
+
+
+    public Integer getDspPayTypeRatio() {
+        return dspPayTypeRatio;
+    }
+
+    public void setDspPayTypeRatio(Integer dspPayTypeRatio) {
+        this.dspPayTypeRatio = dspPayTypeRatio;
     }
 }

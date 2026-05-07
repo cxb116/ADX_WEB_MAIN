@@ -1,5 +1,6 @@
 package com.ruoyi.system.domain;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -58,7 +59,7 @@ public class DspIncome extends BaseEntity
 
 
     @Excel(name = "结算比例")
-    private String proportion;
+    private Integer proportion;
 
     @Excel(name = "媒体公司")
     private String mediaName;
@@ -98,7 +99,7 @@ public class DspIncome extends BaseEntity
         this.income = income;
     }
 
-    public Long getIncome() 
+    public Long getIncome()
     {
         return income;
     }
@@ -180,11 +181,13 @@ public class DspIncome extends BaseEntity
         this.mediaName = mediaName;
     }
 
-    public String getProportion() {
+    public Integer getProportion() {
         return proportion;
     }
 
-    public void setProportion(String proportion) {
+    public void setProportion(Integer proportion) {
         this.proportion = proportion;
     }
+
+
 }
